@@ -66,7 +66,7 @@ sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-
 
 #-----------------------------------------------------------------
 
-#### Тонкая настройка ####
+#### Настройка ####
 
 # Установим более низкий уровень использования файла подкачки:
 echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
