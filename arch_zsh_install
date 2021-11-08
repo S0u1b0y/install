@@ -33,7 +33,7 @@ plugins=(git docker sudo extract zsh-syntax-highlighting zsh-completions zsh-aut
 source ~/.zshrc
 p10k configure #{Y,Y,Y,Y - 3,1,2 - 1,1,1 - 2,3,4,4 - 1,2,1 - Y,1,Y}
 
-# Настроим тему:
+# Настроим тему (необязательно):
 cp ~/.p10k.zsh ~/.p10k.zsh.bak
 echo -e '
 ############ POWERLEVEL THEME SETTINGS ##############
@@ -94,7 +94,7 @@ plugins=(git docker sudo extract zsh-syntax-highlighting zsh-completions zsh-aut
 source ~/.zshrc
 p10k configure #{Y,Y,Y,Y - 3,1,2 - 1,1,1 - 2,3,4,4 - 1,2,1 - Y,1,Y}
 
-# Настроим тему:
+# Настроим тему (необязательно):
 cp ~/.p10k.zsh ~/.p10k.zsh.bak
 echo -e '
 ############ POWERLEVEL THEME SETTINGS ##############
