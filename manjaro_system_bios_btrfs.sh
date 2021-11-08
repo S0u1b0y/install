@@ -5,6 +5,10 @@ user=soulboy          # Имя пользователя
 hostname=main         # Имя компьютера
 swapfile=8192         # Размер файла подкачки
 
+## Настроим параметры запуска системы на btrfs:
+# Меняем udev на systemd и fsck на keymap.
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /etc/mkinitcpio.conf
+
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
 sed -i 's/#Color/Color/g' /etc/pacman.conf
@@ -109,34 +113,37 @@ pacman --noconfirm -S ntp
 # Включаем загрузку при старте системы
 systemctl enable ntpd.service
 
-## Настроим параметры запуска системы на btrfs:
-# Меняем udev на systemd и fsck на keymap.
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /etc/mkinitcpio.conf
-
 ## SSH:
 # Устанавливаем ssh
 pacman --noconfirm -S openssh
 # Включаем загрузку при старте системы
 systemctl enable sshd.service
 
-## Установим драйвера на звук и видео:
+## Установим драйвера на звук:
 # pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
 # pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
 # gst-plugin-pipewire - Плагин для GStreamer,
-# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia,
-# gwe - утилита для разгона и мониторинга видеокарт nVidia,
-# xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
-# xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel.
-pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
+pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
 
-## Установим некоторые утилиты:
-# git - Работа с GitHub и Gitlab,
-# curl wget - Консольные загрузчики,
+## Установим драйвера на видео:
+# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia,
+# gwe - утилита для разгона и мониторинга видеокарт nVidia (опционально),
+# xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
+# xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel,
+# xf86-video-vesa, virtualbox-guest-utils - Драйвера для VirtualBox.
+pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
+
+## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
 # p7zip unrar unace lrzip - Работа с архивами,
 # cifs-utils - Поддержка подключения к Samba,
 # davfs2 - Поддержка WebDAV (например для Yandex Disk),
 # gvfs gvfs-smb gvfs-nfs - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
+
+## Установим некоторые утилиты:
+# git - Работа с GitHub и Gitlab,
+# curl wget - Консольные загрузчики,
 # mc - Консольный файловый менеджер Midnight Comander,
 # htop - Мониторинг параметров системы из консоли,
 # neofetch - Информация о системе в консоли.
-pacman --noconfirm -S git curl wget p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils mc htop neofetch yay
+pacman --noconfirm -S git curl wget mc htop neofetch yay
