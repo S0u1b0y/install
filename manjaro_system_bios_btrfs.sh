@@ -3,9 +3,6 @@
 # Переменные:
 user=soulboy          # Имя пользователя
 hostname=main         # Имя компьютера
-netface=enp3s0        # Имя сетевого интерфейса
-ipaddr=192.168.0.10   # IP-адрес компьютера
-gateway=192.168.0.100 # Сетевой шлюз
 swapfile=8192         # Размер файла подкачки
 
 ## Настроим Pacman:
@@ -37,7 +34,7 @@ locale-gen
 echo "$hostname" > /etc/hostname
 echo "127.0.0.1    localhost" > /etc/hosts
 echo "::1          localhost" >> /etc/hosts
-echo "$ipaddr virtual.localdomain virtual" >> /etc/hosts
+echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
 
 ## Введем пароль root:
 echo '>>>> Enter root password <<<<'
@@ -100,18 +97,11 @@ sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
 # Включаем загрузку при старте системы
 systemctl enable systemd-swap.service
 
-## Настроим сеть (StaticIP - 192.168.0.50, Gateway - 192.168.0.100):
+## Настроим сеть:
 # Устанавливаем демон (службу) dhcpcd
 pacman --noconfirm -S dhcpcd
 # Включаем загрузку при старте системы
 systemctl enable dhcpcd.service
-# Делаем резервную копию файла настроек, на всякий случай
-cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-# Прописываем в файл конфигурации параметры настройки сети
-echo -e "interface $netface" > /etc/dhcpcd.conf
-echo -e "static ip_address=$ipaddr/24" >> /etc/dhcpcd.conf
-echo -e "static routers=$gateway" >> /etc/dhcpcd.conf
-echo -e "static domain_name_servers=$gateway" >> /etc/dhcpcd.conf
 
 ## Включим синхронизацию времени:
 # Устанавливаем демон (службу) ntp
