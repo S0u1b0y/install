@@ -37,9 +37,9 @@ LC_ALL=C xdg-user-dirs-update --force
 sudo pacman --noconfirm -S xdg-user-dirs
 xdg-user-dirs-update --force
 
-# Ananicy - Распределяет ресурсы между задачами и управляет приоритетами приложений,
-# Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы,
-# Шрифты, иконки и курсоры:
+# Ananicy - Распределяет ресурсы между задачами и управляет приоритетами приложений (строка 1),
+# Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы (строка 2),
+# Шрифты, иконки и курсоры (строка 3):
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
 yay --noconfirm -S nohang && sudo systemctl enable --now nohang
 yay --noconfirm -S qogir-icon-theme nerd-fonts-hack
