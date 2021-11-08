@@ -59,8 +59,8 @@ grub-install --target=i386-pc /dev/sda
 # Убираем загрузочное меню Grub, меняя GRUB_TIMEOUT с пяти секунд на ноль
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
 # Чтобы избежать ошибки ...
-sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
-sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
+#sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
+#sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
 # Генерируем файл конфигурации grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
