@@ -76,5 +76,5 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
 #-----------------------------------------------------------------
 
-exit
 echo '>>>> Reboot your computer <<<<'
+exit
