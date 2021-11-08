@@ -3,23 +3,17 @@
 
 #### Установка Manjaro XFCE ####
 
-# Перейдем в учётную запись рута:
-sudo su
-
 # Запускаем разметку, форматирование диска и установку базовой системы:
-manjaro_base_bios_btrfs.sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_bios_btrfs.sh)"
 
 # Чрутимся:
 manjaro-chroot /mnt
 
-# Переподключаем шару:
-
-
 # Запускаем установку и настройку основной системы:
-manjaro_system_bios_btrfs.sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_bios_btrfs.sh)"
 
 # Запускаем установку XFCE:
-manjaro_install_xfce.sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_install_xfce.sh)"
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
 # ВНИМАНИЕ!!! При первом запуске LXDM обязательно внизу слева, выбрать сессию "Сеанс Xfce", иначе при автологине будет вылетать ошибка.
