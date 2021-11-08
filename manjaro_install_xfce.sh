@@ -55,7 +55,7 @@ sudo pacman --noconfirm -S firefox firefox-i18n-ru cherrytree
 sudo pacman --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
-# No_Beep (Отключение, раздражающего звука, pc-спикера):
+# Отключение, раздражающего звука, pc-спикера:
 echo 'blacklist  pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
 
 # Оформление Manjaro:
