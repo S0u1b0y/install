@@ -16,6 +16,8 @@
 # menulibre - Редактор меню.
 sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-weather-plugin menulibre
 sudo systemctl enable lxdm.service
+
+# Удалим xfce4-terminal, т. к. вместо него установим tilix.
 sudo pacman --noconfirm -Rs xfce4-terminal
 
 # tilix - Тайлинговый эмулятор терминала,
