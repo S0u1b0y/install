@@ -16,7 +16,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_install_xfce.sh)"
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
-# ВНИМАНИЕ!!! При первом запуске LXDM обязательно внизу слева, выбрать сессию "Сеанс Xfce", иначе при автологине будет вылетать ошибка.
 reboot
 
 #-----------------------------------------------------------------
