@@ -5,21 +5,23 @@
 
 ## Минимальная установка:
 # xfce4 - Минимальная установка XFCE,
-# tilix - Тайлинговый эмулятор терминала,
-# xed - Простой текстовый редактор X-Apps,
 # pavucontrol - Панель управления звуком Pulseaudio,
-# galculator - Калькулятор,
 # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
+# xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-weather-plugin - Плагин погоды,
 # blueman - Поддержка Bluetooth,
 # menulibre - Редактор меню,
-# gnome-system-monitor - Мониторинг системы,
 # lxdm - Загрузчик,
 # xorg-server - Иксы.
-sudo pacman --noconfirm -S xfce4 tilix xed pavucontrol galculator xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-weather-plugin menulibre gnome-system-monitor lxdm xorg-server
+sudo pacman --noconfirm -S xfce4 pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-weather-plugin menulibre lxdm xorg-server
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rs xfce4-terminal
+
+# tilix - Тайлинговый эмулятор терминала,
+# xed - Простой текстовый редактор X-Apps,
+# galculator - Калькулятор,
+sudo pacman --noconfirm -S tilix xed galculator
 
 ## Программы Manjaro:
 sudo pacman --noconfirm -S manjaro-settings-manager manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin
@@ -35,6 +37,9 @@ sudo pacman --noconfirm -S file-roller thunar-archive-plugin
 ## Управление дисками:
 sudo pacman --noconfirm -S gnome-disk-utility
 
+## Мониторинг системы:
+sudo pacman --noconfirm -S gnome-system-monitor
+ 
 # firefox, firefox-i18n-ru - Браузер Firefox с русификацией,
 # cherrytree - Программа для систематизации и ведения заметок,
 sudo pacman --noconfirm -S firefox firefox-i18n-ru cherrytree
