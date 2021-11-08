@@ -3,19 +3,20 @@
 ### XFCE ###
 # Доп. информация о приложениях Manjaro XFCE - https://gitlab.manjaro.org/profiles-and-settings/iso-profiles/-/blob/master/manjaro/xfce/Packages-Desktop
 
-## Минимальная установка:
 # xorg-server - Иксы,
-# xfce4 - Минимальная установка XFCE,
+# xfce4 - XFCE,
 # lxdm - Загрузчик,
 # pavucontrol - Панель управления звуком Pulseaudio,
+# menulibre - Редактор меню.
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol menulibre
+sudo systemctl enable lxdm.service
+
 # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
+# xfce4-whiskermenu-plugin - Современное меню,
 # xfce4-weather-plugin - Плагин погоды,
-# blueman - Поддержка Bluetooth,
-# menulibre - Редактор меню.
-sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-weather-plugin menulibre
-sudo systemctl enable lxdm.service
+sudo pacman --noconfirm -S xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin
 
 # Удалим xfce4-terminal, т. к. вместо него установим tilix.
 sudo pacman --noconfirm -Rs xfce4-terminal
@@ -25,24 +26,24 @@ sudo pacman --noconfirm -Rs xfce4-terminal
 # galculator - Калькулятор,
 sudo pacman --noconfirm -S tilix xed galculator
 
-## Программы Manjaro:
+# Программы Manjaro:
 sudo pacman --noconfirm -S manjaro-settings-manager manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin
 
-## Просмотрщики:
-# Фото - xviewer, xviewer-plugins,
-# Текст - xreader.
+# Просмотрщики:
+# xviewer xviewer-plugins - фото,
+# xreader - документы.
 sudo pacman --noconfirm -S xviewer xviewer-plugins xreader
 
-## Работа с архивами:
+# Работа с архивами:
 sudo pacman --noconfirm -S file-roller thunar-archive-plugin
 
-## Управление дисками:
+# Управление дисками:
 sudo pacman --noconfirm -S gnome-disk-utility
 
-## Мониторинг системы:
+# Мониторинг системы:
 sudo pacman --noconfirm -S gnome-system-monitor
  
-# firefox, firefox-i18n-ru - Браузер Firefox с русификацией,
+# firefox firefox-i18n-ru - Браузер Firefox с русификацией,
 # cherrytree - Программа для систематизации и ведения заметок,
 sudo pacman --noconfirm -S firefox firefox-i18n-ru cherrytree
 
@@ -67,13 +68,14 @@ sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-
 
 #### Тонкая настройка ####
 
-# Установим более низкий уровень использования файла подкачки
+# Установим более низкий уровень использования файла подкачки:
 echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
-# Уменьшение времени ожидания "зависших" приложений с 90 до 10 секунд
+# Уменьшение времени ожидания "зависших" приложений с 90 до 10 секунд:
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
-# Задать максимальный размер systemd-журнала
+# Зададим максимальный размер systemd-журнала:
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
 #-----------------------------------------------------------------
 
+exit
 echo '>>>> Reboot your computer <<<<'
