@@ -127,7 +127,7 @@ systemctl enable sshd.service
 # gwe - утилита для разгона и мониторинга видеокарт nVidia,
 # xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
 # xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel.
-pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire nvidia nvidia-utils lib32-nvidia-utils nvidia-settings gwe
+pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
 
 ## Установим некоторые утилиты:
 # git - Работа с GitHub и Gitlab,
