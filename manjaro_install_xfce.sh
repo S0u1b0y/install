@@ -23,8 +23,8 @@ sudo pacman --noconfirm -Rs xfce4-terminal
 
 # tilix - Тайлинговый эмулятор терминала,
 # xed - Простой текстовый редактор X-Apps,
-# galculator - Калькулятор,
-sudo pacman --noconfirm -S tilix xed galculator
+# gnome-calculator - Калькулятор,
+sudo pacman --noconfirm -S tilix xed gnome-calculator
 
 # Программы Manjaro:
 sudo pacman --noconfirm -S manjaro-settings-manager manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin
