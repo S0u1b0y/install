@@ -8,6 +8,10 @@ ipaddr=192.168.0.50   # IP-адрес компьютера
 gateway=192.168.0.100 # Сетевой шлюз
 swapfile=2048         # Размер файла подкачки (2048Mb)
 
+## Настроим параметры запуска системы на btrfs:
+# Меняем udev на systemd и fsck на keymap.
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /etc/mkinitcpio.conf
+
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
 sed -i 's/#Color/Color/g' /etc/pacman.conf
@@ -118,10 +122,6 @@ echo -e "static domain_name_servers=$gateway" >> /etc/dhcpcd.conf
 pacman --noconfirm -S ntp
 # Включаем загрузку при старте системы
 systemctl enable ntpd.service
-
-## Настроим параметры запуска системы на btrfs:
-# Меняем udev на systemd и fsck на keymap.
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /etc/mkinitcpio.conf
 
 ## SSH:
 # Устанавливаем ssh
