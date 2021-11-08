@@ -41,5 +41,4 @@ basestrap /mnt base base-devel linux514 linux514-headers nano intel-ucode btrfs-
 fstabgen -U /mnt > /mnt/etc/fstab
 
 # Проверяем fstab:
-# Если вдруг, по какой-то причине, не сгенерировалось по UUID, то командой blkid смотрим UUID диска и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
 cat /mnt/etc/fstab
