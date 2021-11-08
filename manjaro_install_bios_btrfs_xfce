@@ -123,21 +123,3 @@ alias згз="sudo pacman -Syu"
 #Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.zshrc
 source ~/.zshrc
-# Алиасы:
-echo -e '
-#### Aliases ####
-
-#Переопеделение Pacman для установки и удаления без подтверждения:
-alias pacmans="sudo pacman --noconfirm"
-
-#Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
-alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
-alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
-
-#Быстрое обновление (pup - Pacman UPdate)
-alias pup="sudo pacman -Syu"
-alias згз="sudo pacman -Syu"
-
-#Пинг делает только 5 запросов.
-alias ping="ping -c 5"' >> ~/.zshrc
-source ~/.zshrc
