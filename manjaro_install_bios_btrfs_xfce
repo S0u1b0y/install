@@ -25,13 +25,6 @@ reboot
 # Автозагрузка LXDM:
 sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
 
-## Tilix ##
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' >> ~/.zshrc
-source ~/.zshrc
-
 # Создаем каталоги пользователя в домашней папке на английском языке:
 sudo pacman --noconfirm -S xdg-user-dirs
 LC_ALL=C xdg-user-dirs-update --force
@@ -95,6 +88,13 @@ POWERLEVEL9K_HOST_LOCAL_FOREGROUND=black
 ############ END OF POWERLEVEL THEME SETTINGS ##############' >> ~/.p10k.zsh
 sed -i 's/# os identifier/# os identifier\n    user\t\t    # username\n    host\t\t    # hostname/' ~/.p10k.zsh
 source ~/.p10k.zsh
+
+## Tilix ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.zshrc
+source ~/.zshrc
 
 # Алиасы:
 echo -e '
