@@ -42,9 +42,8 @@ sudo pacman --noconfirm -S gnome-disk-utility
 # Мониторинг системы:
 sudo pacman --noconfirm -S gnome-system-monitor
  
-# firefox firefox-i18n-ru - Браузер Firefox с русификацией,
-# cherrytree - Программа для систематизации и ведения заметок,
-sudo pacman --noconfirm -S firefox firefox-i18n-ru cherrytree
+# firefox firefox-i18n-ru - Браузер Firefox с русификацией
+sudo pacman --noconfirm -S firefox firefox-i18n-ru
 
 #-----------------------------------------------------------------
 
