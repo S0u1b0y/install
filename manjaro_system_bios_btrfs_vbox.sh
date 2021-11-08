@@ -80,12 +80,12 @@ chattr +C ./swapfile
 btrfs property set ./swapfile compression none
 # Создаём файл нужного размера
 dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
-# Разрешаем доступ к файлу подкачки только его владельцу root-у
+# Разрешаем доступ к файлу подкачки только root-у
 chmod 600 ./swapfile
 # Инициализируем файл подкачки и включаем его
 mkswap ./swapfile
 swapon ./swapfile
-# Прописываем в файл fstab, автомонтирование файла подкачки при загрузке системы
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
 echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' >> /etc/fstab
 
 ## Установим и настроим Zswap:
@@ -129,21 +129,31 @@ pacman --noconfirm -S openssh
 # Включаем загрузку при старте системы
 systemctl enable sshd.service
 
-## Установим драйвера на звук и видео:
+## Установим драйвера на звук:
 # pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
-# pipewire-alsa, pipewire-pulse, pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
+# pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
 # gst-plugin-pipewire - Плагин для GStreamer,
+pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
+
+## Установим драйвера на видео:
+# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia,
+# gwe - утилита для разгона и мониторинга видеокарт nVidia (опционально),
+# xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
+# xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel.
 # xf86-video-vesa, virtualbox-guest-utils - Драйвера для VirtualBox.
-pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire xf86-video-vesa virtualbox-guest-utils
+pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+
+## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
+# p7zip unrar unace lrzip - Работа с архивами,
+# cifs-utils - Поддержка подключения к Samba,
+# davfs2 - Поддержка WebDAV (например для Yandex Disk),
+# gvfs gvfs-smb gvfs-nfs - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
 
 ## Установим некоторые утилиты:
 # git - Работа с GitHub и Gitlab,
-# curl, wget - Консольные загрузчики,
-# p7zip, unrar, unace, lrzip - Работа с архивами,
-# cifs-utils - Поддержка подключения к Samba,
-# davfs2 - Поддержка WebDAV (например для Yandex Disk),
-# gvfs, gvfs-smb, gvfs-nfs - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+# curl wget - Консольные загрузчики,
 # mc - Консольный файловый менеджер Midnight Comander,
 # htop - Мониторинг параметров системы из консоли,
 # neofetch - Информация о системе в консоли.
-pacman --noconfirm -S git curl wget p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils mc htop neofetch yay
+pacman --noconfirm -S git curl wget mc htop neofetch yay
