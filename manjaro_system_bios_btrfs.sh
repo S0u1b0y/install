@@ -41,7 +41,7 @@ echo '>>>> Enter root password <<<<'
 passwd
 
 ## Добавляем пользователя и задаем ему пароль:
-# Пропишем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel
+# Пропиcываем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel
 # И установим zsh в качестве командной оболочки по умолчанию (/bin/zsh).
 useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/zsh $user
 echo ">>>> Enter $user password <<<<"
