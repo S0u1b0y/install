@@ -104,7 +104,7 @@ if [[ $TILIX_ID ]]; then
 fi' >> ~/.zshrc
 source ~/.zshrc
 
-# Алиасы:
+## Алиасы ##
 echo -e '
 #### Aliases ####
 
