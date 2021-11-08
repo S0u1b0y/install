@@ -26,6 +26,9 @@ sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
 # Создаем каталоги пользователя в домашней папке на английском языке:
 sudo pacman --noconfirm -S xdg-user-dirs
 LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs
+xdg-user-dirs-update --force
 
 # Ananicy - Распределяет ресурсы между задачами и управляет приоритетами приложений,
 # Nohang - Следит за потреблением озу, выгружая ненужные процессы,
