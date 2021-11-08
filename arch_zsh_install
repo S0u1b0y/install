@@ -137,13 +137,3 @@ alias згз="sudo pacman -Syu"
 #Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.zshrc
 source ~/.zshrc
-
-# ***
-
-# Полезные команды:
-
-# Применить изменения в ~/.zshrc:
-source ~/.zshrc
-
-# Изменить настройки темы Powerlevel10k:
-p10k configure
