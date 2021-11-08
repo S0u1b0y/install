@@ -7,7 +7,7 @@ sudo su
 # Запускаем разметку, форматирование диска и установку базовой системы:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_bios_btrfs.sh)"
 # Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
-# то командой blkid смотрим UUID диска и прописываем его в fstab вместо /dev/sdaX - nano /mnt/etc/fstab.
+# то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
 
 # Чрутимся:
 manjaro-chroot /mnt
