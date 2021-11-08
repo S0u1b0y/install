@@ -11,7 +11,7 @@ manjaro-chroot /mnt
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_bios_btrfs_vbox.sh)"
 
 # Запускаем установку XFCE:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_install_xfce_vbox.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_install_xfce.sh)"
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
 reboot
