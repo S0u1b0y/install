@@ -7,7 +7,7 @@
 sudo su
 
 # Подключаем шару:
-mkdir -m=777 /mnt/vbox && mount -t cifs //router/files/shared/OS/Linux/Arch/Virtualbox/ /mnt/vbox -o rw,async,_netdev,iocharset=utf8,vers=1.0,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,x-systemd.automount,username=soulboy,password=c7iQPZ2vc && mount -a && cd /mnt/vbox && chmod -x *.sh && ls --color
+
 
 #-----------------------------------------------------------------
 #-----------------------------------------------------------------
@@ -21,7 +21,7 @@ manjaro_base_bios_btrfs.sh
 manjaro-chroot /mnt
 
 # Переподключаем шару:
-mkdir -m=777 /vbox && mount -t cifs //192.168.0.100/files/shared/OS/Linux/Arch/Virtualbox/ /vbox -o rw,async,_netdev,iocharset=utf8,vers=1.0,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,x-systemd.automount,username=soulboy,password=c7iQPZ2vc && mount -a && cd /vbox && chmod -x *.sh && ls --color
+
 
 # Запускаем установку и настройку основной системы:
 manjaro_system_bios_btrfs.sh
