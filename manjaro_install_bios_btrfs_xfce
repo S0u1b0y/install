@@ -1,6 +1,9 @@
 
 #### Установка Manjaro XFCE ####
 
+# Перейдем в учётную запись рута:
+sudo su
+
 # Запускаем разметку, форматирование диска и установку базовой системы:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_bios_btrfs.sh)"
 
