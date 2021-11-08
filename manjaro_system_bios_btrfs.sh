@@ -77,7 +77,7 @@ chattr +C ./swapfile
 btrfs property set ./swapfile compression none
 # Создаём файл нужного размера
 dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
-# Разрешаем доступ к файлу подкачки только его владельцу root-у
+# Разрешаем доступ к файлу подкачки только root-у
 chmod 600 ./swapfile
 # Инициализируем файл подкачки и включаем его
 mkswap ./swapfile
