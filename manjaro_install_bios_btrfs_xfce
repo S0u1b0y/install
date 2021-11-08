@@ -38,7 +38,7 @@ sudo pacman --noconfirm -S xdg-user-dirs
 xdg-user-dirs-update --force
 
 # Ananicy - Распределяет ресурсы между задачами и управляет приоритетами приложений,
-# Nohang - Следит за потреблением озу, выгружая ненужные процессы,
+# Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы,
 # Шрифты, иконки и курсоры:
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
 yay --noconfirm -S nohang && sudo systemctl enable --now nohang
