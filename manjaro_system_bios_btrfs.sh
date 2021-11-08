@@ -82,7 +82,7 @@ chmod 600 ./swapfile
 # Инициализируем файл подкачки и включаем его
 mkswap ./swapfile
 swapon ./swapfile
-# Прописываем в файл fstab, автомонтирование файла подкачки при загрузке системы
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
 echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' >> /etc/fstab
 
 ## Установим и настроим Zswap:
