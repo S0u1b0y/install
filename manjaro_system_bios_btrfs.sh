@@ -123,8 +123,8 @@ systemctl enable sshd.service
 # pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
 # pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
 # gst-plugin-pipewire - Плагин для GStreamer,
-# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia
-# gwe - утилита для разгона и мониторинга видеокарт nVidia
+# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia,
+# gwe - утилита для разгона и мониторинга видеокарт nVidia,
 # xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
 # xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel,
 # xf86-video-vesa virtualbox-guest-utils - Драйвера для VirtualBox.
