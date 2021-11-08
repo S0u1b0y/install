@@ -29,9 +29,8 @@ sudo pacman --noconfirm -S tilix xed galculator
 # Программы Manjaro:
 sudo pacman --noconfirm -S manjaro-settings-manager manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin
 
-# Просмотрщики:
-# xviewer xviewer-plugins - фото,
-# xreader - документы.
+# xviewer xviewer-plugins - Просмотр фото,
+# xreader - Просмотр документов.
 sudo pacman --noconfirm -S xviewer xviewer-plugins xreader
 
 # Работа с архивами:
