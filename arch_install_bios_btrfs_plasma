@@ -13,9 +13,9 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 manjaro-chroot /mnt
 
 # Запускаем установку и настройку основной системы:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_btrfs.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
 # Тоже самое для VirtualBox:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_btrfs_vbox.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
 
 # Запускаем установку Plasma:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_install_plasma.sh)"
