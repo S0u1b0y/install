@@ -45,7 +45,7 @@ set 1 boot on
 mkfs.btrfs -f /dev/sda1
 # Примонтируем раздел sda1 в /mnt:
 mount /dev/sda1 /mnt
-# Создаем два подтома Btrfs @root и @home:
+# Создаем два подтома @root и @home:
 btrfs subvolume create /mnt/@root
 btrfs subvolume create /mnt/@home
 # Отмонтируем раздел sda1:
