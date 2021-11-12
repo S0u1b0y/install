@@ -1,0 +1,143 @@
+
+#### Установка Arch XFCE ####
+
+# Перейдем в учётную запись рута:
+sudo su
+
+# Запускаем разметку, форматирование диска и установку базовой системы:
+# Btrfs
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
+# Ext4
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
+# Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
+# то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
+
+# Чрутимся:
+manjaro-chroot /mnt
+
+# Запускаем установку и настройку основной системы:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
+# Тоже самое для VirtualBox:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
+
+# Запускаем установку XFCE:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_install_xfce.sh)"
+
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+
+## После перезагрузки ##
+
+# Автозагрузка LXDM:
+sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs
+LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs
+xdg-user-dirs-update --force
+
+# Установим менеджер aur-пакетов yay:
+cd /tmp
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -sric
+cd
+
+#-----------------------------------------------------------------
+
+#### Настройки ####
+
+# Настройку Zsh см. в файле https://github.com/S0u1b0y/install/blob/Instructions/arch_zsh_install
+
+## Tilix ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.zshrc
+source ~/.zshrc
+
+# Установим более низкий уровень использования файла подкачки
+# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
+# Зададим максимальный размер systemd-журнала
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
+sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+
+#-----------------------------------------------------------------
+
+## Оформление ##
+
+# Оформление QT5 в стиле GTK:
+sudo pacman --noconfirm -S qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
+#-----------------------------------------------------------------
+
+## Программы ##
+
+# Дополнительный софт:
+yay --noconfirm -S pamac-aur menulibre
+
+# Шрифты, иконки и курсоры:
+yay --noconfirm -S qogir-icon-theme nerd-fonts-hack
+
+# Ananicy - Управляет приоритетами приложений (строка 1),
+# Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы (строка 2),
+yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
+yay --noconfirm -S nohang && sudo systemctl enable --now nohang
+
+# Bluetooth:
+sudo pacman --noconfirm -S blueman
+sudo systemctl enable --now bluetooth
+
+# Если нужна поддержка принтера, то ставим:
+pacman --noconfirm -S cups cups-pdf system-config-printer
+sudo systemctl enable --now cups.service
+
+# Браузер Firefox:
+yay --noconfirm -S firefox firefox-i18n-ru
+# Браузер Chrome:
+yay --noconfirm -S google-chrome
+
+# Java:
+sudo pacman --noconfirm -S jdk-openjdk
+
+# Code OSS:
+yay -S code
+
+# Yandex Disk:
+yay --noconfirm -S yandex-disk && yandex-disk setup
+
+# VirtualBox стандартное ядро:
+yay -S virtualbox virtualbox-host-modules-arch virtualbox-ext-vnc
+# VirtualBox LTS-ядро:
+yay -S virtualbox virtualbox-host-dkms virtualbox-ext-vnc
+
+# KVM:
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo systemctl enable --now libvirtd dnsmasq
+sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
+sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo systemctl restart libvirtd.service
+
+#-----------------------------------------------------------------
+
+## Игры ##
+
+# Steam:
+sudo pacman --noconfirm -S steam
+
+# PortProton (https://portwine-linux.ru/port-proton-linux):
+sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
+wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97" && sh PortProton-97
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
+
+# Minecraft:
+yay -S multimc jre8-openjdk
+sudo archlinux-java set java-17-openjdk
+java -version
