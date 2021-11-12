@@ -60,6 +60,7 @@ mount /dev/sda1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,spa
 # Ставим систему со стандартным ядром:
 # base, base-devel - Базовая система,
 # linux linux-headers - Ядро,
+# linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор,
 # intel-ucode - Поддержка процессора Intel,
 # btrfs-progs - Утилиты для btrfs,
@@ -90,8 +91,7 @@ swapon ./swapfile
 # Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
 echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' >> /mnt/etc/fstab
 
-## Настроим параметры запуска системы на btrfs:
-# Меняем udev на systemd и fsck на keymap.
+## Настроим параметры запуска системы на btrfs (Меняем udev на systemd и fsck на keymap):
 sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
 
 # Проверяем fstab:
