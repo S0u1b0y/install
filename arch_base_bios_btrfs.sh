@@ -64,7 +64,7 @@ mount /dev/sda1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,spa
 # intel-ucode - Поддержка процессора Intel,
 # btrfs-progs - Утилиты для btrfs,
 # zsh - "Продвинутая" командная оболочка zsh.
-basestrap /mnt base base-devel linux linux-headers nano intel-ucode btrfs-progs zsh
+basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode btrfs-progs zsh
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
