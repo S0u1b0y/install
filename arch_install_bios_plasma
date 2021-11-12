@@ -1,0 +1,146 @@
+
+#### Установка Arch Plasma ####
+
+# Перейдем в учётную запись рута:
+sudo su
+
+# Запускаем разметку, форматирование диска и установку базовой системы:
+# Btrfs
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
+# Ext4
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
+# Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
+# то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
+
+# Чрутимся:
+manjaro-chroot /mnt
+
+# Запускаем установку и настройку основной системы:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
+# Тоже самое для VirtualBox:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
+
+# Запускаем установку Plasma:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_install_plasma.sh)"
+
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+
+## После перезагрузки ##
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs
+LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs
+xdg-user-dirs-update --force
+
+# Установим менеджер aur-пакетов yay:
+cd /tmp
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg --noconfirm -sric
+cd
+
+#-----------------------------------------------------------------
+
+## Оформление ##
+
+# Шрифты:
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
+
+#-----------------------------------------------------------------
+
+#### Настройки ####
+
+# Настройку Zsh см. в файле https://github.com/S0u1b0y/install/blob/Instructions/arch_zsh_install
+
+# Установим более низкий уровень использования файла подкачки
+# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
+# Зададим максимальный размер systemd-журнала
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
+sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+
+#-----------------------------------------------------------------
+
+## Программы ##
+
+# Дополнительный софт:
+yay -S menulibre pamac-aur pamac-tray-icon-plasma
+
+# Шрифты, иконки и курсоры:
+yay -S qogir-icon-theme nerd-fonts-hack
+
+# Ananicy - Управляет приоритетами приложений:
+yay -S ananicy && sudo systemctl enable --now ananicy
+# Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы:
+yay -S nohang && sudo systemctl enable --now nohang
+
+# Bluetooth (опционально):
+sudo pacman --noconfirm -S bluedevil
+sudo systemctl enable --now bluetooth
+
+# Управление сетевыми соединениями (опционально):
+sudo pacman --noconfirm -S networkmanager plasma-nm
+sudo systemctl enable --now NetworkManager
+sudo pacman --noconfirm -S networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc
+
+# Брандмауэр (Firewall) и модуль управления для Plasma (опционально):
+sudo pacman --noconfirm -S ufw plasma-firewall
+sudo systemctl enable --now ufw.service
+
+# Если нужна поддержка принтера, то ставим:
+sudo pacman --noconfirm -S cups cups-pdf print-manager
+sudo systemctl enable --now cups.service
+
+# Браузер Firefox:
+sudo pacman --noconfirm -S firefox firefox-i18n-ru
+
+# Браузер Chrome:
+yay -S google-chrome
+
+# Torrent:
+sudo pacman --noconfirm -S qbittorrent
+
+# Java:
+sudo pacman --noconfirm -S jdk-openjdk
+
+# Code OSS (Visual Studio Code):
+yay -S code
+
+# Yandex Disk:
+yay -S yandex-disk && yandex-disk setup
+
+# VirtualBox стандартное ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-host-modules-arch virtualbox-ext-vnc
+# VirtualBox LTS-ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-host-dkms virtualbox-ext-vnc
+
+# KVM:
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo systemctl enable --now libvirtd dnsmasq
+sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
+sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo systemctl restart libvirtd.service
+
+#-----------------------------------------------------------------
+
+## Игры ##
+
+# Steam:
+sudo pacman --noconfirm -S steam
+
+# PortProton (https://portwine-linux.ru/port-proton-linux):
+sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
+wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97" && sh PortProton-97
+
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
+
+# Minecraft:
+yay -S multimc jre8-openjdk
+sudo archlinux-java set java-17-openjdk
+java -version
