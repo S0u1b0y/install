@@ -109,6 +109,9 @@ echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 # Шрифты:
 sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
 
+# Иконки:
+sudo pacman --noconfirm -S papirus-icon-theme
+
 #-----------------------------------------------------------------
 
 ## Программы ##
