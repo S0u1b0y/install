@@ -5,20 +5,16 @@ sudo su
 
 #-----------------------------------------------------------------
 
-## UEFI ##
-# Запускаем разметку, форматирование диска и установку базовой системы,
-# Btrfs:
+# Разметка, форматирование диска и установка базовой системы (запускаем только один из четырёх скриптов),
+
+# UEFI - Btrfs:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_btrfs.sh)"
-# Ext4:
+# UEFI - Ext4:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_ext4.sh)"
 
-# ***
-
-## BIOS (Legacy) ##
-# Запускаем разметку, форматирование диска и установку базовой системы,
-# Btrfs:
+# BIOS (Legacy) - Btrfs:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
-# Ext4:
+# BIOS (Legacy) - Ext4:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
 
 #-----------------------------------------------------------------
@@ -31,25 +27,21 @@ manjaro-chroot /mnt
 
 #-----------------------------------------------------------------
 
-## Реальный компьютер ##
-# Запускаем установку и настройку основной системы,
-# UEFI:
+# Установка и настройка основной системы (запускаем только один из четырёх скриптов),
+
+# Реальный компьютер - UEFI:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi.sh)"
-# BIOS (Legacy):
+# Реальный компьютер - BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
 
-# ***
-
-## Виртуальный компьютер ##
-# Запускаем установку и настройку основной системы,
-# UEFI:
+# Виртуальный компьютер - UEFI:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi_vbox.sh)"
-# BIOS (Legacy):
+# Виртуальный компьютер - BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
 
 #-----------------------------------------------------------------
 
-# Запускаем установку Plasma:
+# Установка KDE Plasma:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_plasma.sh)"
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
@@ -60,18 +52,12 @@ reboot
 ## После перезагрузки ##
 
 # Создаем каталоги пользователя в домашней папке на английском языке:
-sudo pacman --noconfirm -S xdg-user-dirs
-LC_ALL=C xdg-user-dirs-update --force
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # То же самое, но на русском языке:
-sudo pacman --noconfirm -S xdg-user-dirs
-xdg-user-dirs-update --force
+sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 
 # Установим менеджер aur-пакетов yay:
-cd /tmp
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg --noconfirm -sric
-cd
+cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg --noconfirm -sric && cd
 
 #-----------------------------------------------------------------
 
