@@ -3,9 +3,10 @@
 # Перейдем в учётную запись рута:
 sudo su
 
-# ***
+#-----------------------------------------------------------------
 
 ## UEFI ##
+
 # Запускаем разметку, форматирование диска и установку базовой системы,
 # Btrfs:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_btrfs.sh)"
@@ -15,13 +16,14 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # ***
 
 ## BIOS (Legacy) ##
+
 # Запускаем разметку, форматирование диска и установку базовой системы,
 # Btrfs:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
 # Ext4:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
 
-# ***
+#-----------------------------------------------------------------
 
 # Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
 # то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
@@ -29,9 +31,10 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # Чрутимся:
 manjaro-chroot /mnt
 
-# ***
+#-----------------------------------------------------------------
 
 ## Реальный компьютер ##
+
 # Запускаем установку и настройку основной системы,
 # UEFI:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi.sh)"
@@ -41,18 +44,17 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # ***
 
 ## Виртуальный компьютер ##
+
 # Запускаем установку и настройку основной системы,
 # UEFI:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi_vbox.sh)"
 # BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
 
-# ***
+#-----------------------------------------------------------------
 
 # Запускаем установку XFCE:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_xfce.sh)"
-
-# ***
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
 reboot
@@ -105,9 +107,6 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 # Оформление QT5 в стиле GTK:
 sudo pacman --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
-
-# Шрифты:
-sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
 
 # Иконки:
 sudo pacman --noconfirm -S papirus-icon-theme
