@@ -130,3 +130,6 @@ pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gv
 # htop - Мониторинг параметров системы из консоли,
 # neofetch - Информация о системе в консоли.
 pacman --noconfirm -S git curl wget mc htop neofetch
+
+# Шрифты:
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
