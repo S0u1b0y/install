@@ -37,21 +37,24 @@ Server = http://mirrors.powernet.com.ru/archlinux/$repo/os/$arch
 Server = http://archlinux.zepto.cloud/$repo/os/$arch' | tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
-# Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
-parted -s /dev/sda -- mktable msdos \
-    mkpart primary ext4 1M 43G \
-    mkpart primary ext4 43G 100% \
-    set 1 boot on
-fdisk -l /dev/sda
-# Форматируем разделы в ext4 с метками Root и Home соответственно:
+# Создаем три раздела Root(40Gb-sda1), Home(Остальное-sda2) и EFI(300Mb-sda3):
+parted -s /dev/sda -- mktable gpt \
+    mkpart Root ext4 1M 40G \
+    mkpart Home ext4 40G -300M \
+    mkpart EFI fat32 -300M 100% \
+set 3 esp on
+# Форматируем разделы sda1 и sda2 в ext4, а раздел sda3 в fat32:
 mkfs.ext4 -L Root /dev/sda1
 mkfs.ext4 -L Home /dev/sda2
+mkfs.fat -F32 /dev/sda3
 # Примонтируем раздел sda1 в /mnt:
 mount /dev/sda1 /mnt
-# Создаем каталог /mnt/home:
-mkdir -p /mnt/home
-# Примонтируем раздел sda2 в /mnt/home,
+# Создаем каталоги /mnt/home и /mnt/boot/efi:
+mkdir -p /mnt/{home,boot/efi}
+# Примонтируем раздел sda2 в /mnt/home:
 mount /dev/sda2 /mnt/home
+# Примонтируем раздел sda3 в /mnt/boot/efi:
+mount /dev/sda3 /mnt/boot/efi
 
 # Ставим систему со стандартным ядром:
 # base, base-devel - Базовая система,
@@ -61,7 +64,7 @@ mount /dev/sda2 /mnt/home
 # intel-ucode - Поддержка процессора Intel,
 # btrfs-progs - Утилиты для btrfs,
 # zsh - "Продвинутая" командная оболочка zsh.
-basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode btrfs-progs zsh
+basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode zsh
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
