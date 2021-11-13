@@ -3,7 +3,7 @@
 # Перейдем в учётную запись рута:
 sudo su
 
-# ***
+#-----------------------------------------------------------------
 
 ## UEFI ##
 # Запускаем разметку, форматирование диска и установку базовой системы,
@@ -21,7 +21,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # Ext4:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
 
-# ***
+#-----------------------------------------------------------------
 
 # Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
 # то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
@@ -29,7 +29,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # Чрутимся:
 manjaro-chroot /mnt
 
-# ***
+#-----------------------------------------------------------------
 
 ## Реальный компьютер ##
 # Запускаем установку и настройку основной системы,
@@ -47,7 +47,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 # BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
 
-# ***
+#-----------------------------------------------------------------
 
 # Запускаем установку Plasma:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_plasma.sh)"
@@ -85,13 +85,6 @@ cd
 echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
-
-#-----------------------------------------------------------------
-
-## Оформление ##
-
-# Шрифты:
-sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
 
 #-----------------------------------------------------------------
 
