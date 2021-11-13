@@ -57,11 +57,8 @@ mount /dev/sda2 /mnt/home
 # base, base-devel - Базовая система,
 # linux linux-headers - Ядро,
 # linux-firmware - Драйвера,
-# nano - Простой консольный текстовый редактор,
-# intel-ucode - Поддержка процессора Intel,
-# btrfs-progs - Утилиты для btrfs,
-# zsh - "Продвинутая" командная оболочка zsh.
-basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode zsh
+# nano - Простой консольный текстовый редактор.
+basestrap /mnt base base-devel linux linux-headers linux-firmware nano
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
