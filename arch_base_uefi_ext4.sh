@@ -61,10 +61,8 @@ mount /dev/sda3 /mnt/boot/efi
 # linux linux-headers - Ядро,
 # linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор,
-# intel-ucode - Поддержка процессора Intel,
-# btrfs-progs - Утилиты для btrfs,
-# zsh - "Продвинутая" командная оболочка zsh.
-basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode zsh
+# intel-ucode - Поддержка процессора Intel.
+basestrap /mnt base base-devel linux linux-headers linux-firmware nano
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
