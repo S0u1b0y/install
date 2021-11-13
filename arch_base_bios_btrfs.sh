@@ -62,9 +62,8 @@ mount /dev/sda1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,spa
 # linux linux-headers - Ядро,
 # linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор,
-# intel-ucode - Поддержка процессора Intel,
 # btrfs-progs - Утилиты для btrfs.
-basestrap /mnt base base-devel linux linux-headers linux-firmware nano intel-ucode btrfs-progs
+basestrap /mnt base base-devel linux linux-headers linux-firmware nano btrfs-progs
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
