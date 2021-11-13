@@ -91,9 +91,9 @@ if [[ $TILIX_ID ]]; then
 fi' >> ~/.zshrc
 source ~/.zshrc
 
-# Установим более низкий уровень использования файла подкачки
-# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
-# Зададим максимальный размер systemd-журнала
+# Установим более низкий уровень использования файла подкачки (строка 1),
+# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
+# Зададим максимальный размер systemd-журнала (строка 3).
 echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
