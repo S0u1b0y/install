@@ -162,7 +162,7 @@ yay -S virtualbox virtualbox-host-modules-arch virtualbox-ext-vnc
 # VirtualBox LTS-ядро:
 yay -S virtualbox virtualbox-host-dkms virtualbox-ext-vnc
 
-# KVM:
+# KVM (Qemu):
 sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
 sudo systemctl enable --now libvirtd dnsmasq
 sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
