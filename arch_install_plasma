@@ -20,7 +20,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 
 #-----------------------------------------------------------------
 
-# Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
+# Если вдруг, по какой-то причине, fstab не сгенерировался по UUID,
 # то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
 
 # Чрутимся:
