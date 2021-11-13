@@ -53,6 +53,12 @@ reboot
 
 ## После перезагрузки ##
 
+# Для процессоров Intel ставим:
+sudo pacman --noconfirm -S intel-ucode
+
+# Для процессоров AMD ставим:
+sudo pacman --noconfirm -S amd-ucode
+
 # Автозагрузка LXDM:
 sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
 
