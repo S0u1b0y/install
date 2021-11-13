@@ -1,27 +1,58 @@
-
 #### Установка Arch XFCE ####
 
 # Перейдем в учётную запись рута:
 sudo su
 
-# Запускаем разметку, форматирование диска и установку базовой системы:
-# Btrfs
+# ***
+
+## UEFI ##
+# Запускаем разметку, форматирование диска и установку базовой системы,
+# Btrfs:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_btrfs.sh)"
+# Ext4:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_ext4.sh)"
+
+# ***
+
+## BIOS (Legacy) ##
+# Запускаем разметку, форматирование диска и установку базовой системы,
+# Btrfs:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
-# Ext4
+# Ext4:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
+
+# ***
+
 # Если вдруг, по какой-то причине, fstab не сгенерировалось по UUID,
 # то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
 
 # Чрутимся:
 manjaro-chroot /mnt
 
-# Запускаем установку и настройку основной системы:
+# ***
+
+## Реальный компьютер ##
+# Запускаем установку и настройку основной системы,
+# UEFI:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi.sh)"
+# BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
-# Тоже самое для VirtualBox:
+
+# ***
+
+## Виртуальный компьютер ##
+# Запускаем установку и настройку основной системы,
+# UEFI:
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi_vbox.sh)"
+# BIOS (Legacy):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
 
+# ***
+
 # Запускаем установку XFCE:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_install_xfce.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_xfce.sh)"
+
+# ***
 
 # Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
 reboot
@@ -51,7 +82,7 @@ cd
 
 #### Настройки ####
 
-# Настройку Zsh см. в файле https://github.com/S0u1b0y/install/blob/Instructions/arch_zsh_install
+# Настройку Zsh см. в файле https://github.com/S0u1b0y/install/blob/Instructions/arch_zsh
 
 ## Tilix ##
 echo -e '\n#Для терминала Tilix
@@ -74,6 +105,9 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 # Оформление QT5 в стиле GTK:
 sudo pacman --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
+# Шрифты:
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
 
 #-----------------------------------------------------------------
 
@@ -100,8 +134,12 @@ sudo systemctl enable --now cups.service
 
 # Браузер Firefox:
 yay --noconfirm -S firefox firefox-i18n-ru
+
 # Браузер Chrome:
 yay --noconfirm -S google-chrome
+
+# Torrent:
+sudo pacman --noconfirm -S qbittorrent
 
 # Java:
 sudo pacman --noconfirm -S jdk-openjdk
@@ -111,6 +149,10 @@ yay -S code
 
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
+
+#-----------------------------------------------------------------
+
+## Виртуализация ##
 
 # VirtualBox стандартное ядро:
 yay -S virtualbox virtualbox-host-modules-arch virtualbox-ext-vnc
@@ -135,6 +177,7 @@ sudo pacman --noconfirm -S steam
 # PortProton (https://portwine-linux.ru/port-proton-linux):
 sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
 wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97" && sh PortProton-97
+
 # Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
 # Minecraft:
