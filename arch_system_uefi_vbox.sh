@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Переменные:
-user=user             # Имя пользователя
-hostname=virtual      # Имя компьютера
-netface=enp0s3        # Имя сетевого интерфейса
-ipaddr=192.168.0.50   # IP-адрес компьютера
-gateway=192.168.0.100 # Сетевой шлюз
+user=user               # Имя пользователя
+hostname=virtual        # Имя компьютера
+timezone=Europe/Moscow  # Часовой пояс
+netface=enp0s3          # Имя сетевого интерфейса (можно узнать командой - ip a)
+ipaddr=192.168.0.50     # Статический IP-адрес компьютера
+gateway=192.168.0.100   # Сетевой шлюз он же роутер
 
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
@@ -18,8 +19,8 @@ echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 pacman -Syy
 
 ## Установим часовой пояс и время:
-# Устанавливаем часовой пояс, в данном случае это Europe/Moscow.
-ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+# Устанавливаем часовой пояс.
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 # Устанавливаем время по UTC.
 hwclock --systohc --utc
 
@@ -45,9 +46,8 @@ echo '>>>> Enter root password <<<<'
 passwd
 
 ## Добавляем пользователя и задаем ему пароль:
-# Пропишем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel
-# И установим для него zsh в качестве командной оболочки по умолчанию (/bin/zsh).
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/zsh $user
+# Пропишем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel.
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $user
 echo ">>>> Enter $user password <<<<"
 passwd $user
 
@@ -107,14 +107,6 @@ systemctl enable sshd.service
 # pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
 # gst-plugin-pipewire - Плагин для GStreamer,
 pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
-
-## Установим драйвера на видео:
-# nvidia nvidia-utils lib32-nvidia-utils nvidia-settings - Драйвера для nVidia,
-# gwe - утилита для разгона и мониторинга видеокарт nVidia (опционально),
-# xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon - Драйвера для AMD,
-# xf86-video-intel vulkan-intel lib32-vulkan-intel - Драйвера для Intel.
-# xf86-video-vesa, virtualbox-guest-utils - Драйвера для VirtualBox.
-pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 
 ## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
 # p7zip unrar unace lrzip - Работа с архивами,
