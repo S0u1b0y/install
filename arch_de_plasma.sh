@@ -38,8 +38,3 @@ sudo pacman --noconfirm -S audacious mpv
 
 # Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
 sudo pacman --noconfirm -S plasma5-applets-weather-widget qt5-xmlpatterns
-
-#-----------------------------------------------------------------
-
-echo '>>>> Reboot your computer <<<<'
-exit
