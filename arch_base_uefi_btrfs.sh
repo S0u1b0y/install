@@ -72,29 +72,5 @@ basestrap /mnt base base-devel linux linux-headers linux-firmware nano btrfs-pro
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
 fstabgen -U /mnt > /mnt/etc/fstab
 
-## Создадим файл подкачки (swapfile):
-# Создаем подтом Btrfs: @swap
-btrfs subvolume create /mnt/@swap
-# Переходим в @swap
-cd /mnt/@swap
-# Создаём пустой файл подкачки
-truncate -s 0 ./swapfile
-# Отключаем копирование при записи для файла подкачки
-chattr +C ./swapfile
-# Отключаем сжатие файла подкачки
-btrfs property set ./swapfile compression none
-# Создаём файл нужного размера
-dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
-# Разрешаем доступ к файлу подкачки только root-у
-chmod 600 ./swapfile
-# Инициализируем файл подкачки и включаем его
-mkswap ./swapfile
-swapon ./swapfile
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
-echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' >> /mnt/etc/fstab
-
-## Настроим параметры запуска системы на btrfs (Меняем udev на systemd и fsck на keymap):
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
-
 # Проверяем fstab:
 cat /mnt/etc/fstab
