@@ -41,9 +41,6 @@ sudo pacman --noconfirm -S gnome-system-monitor
 
 ## Настройка ##
 
-# No_Beep (Отключение, раздражающего звука, pc-спикера):
-echo 'blacklist  pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
-
 #-----------------------------------------------------------------
 
 echo '>>>> Reboot your computer <<<<'
