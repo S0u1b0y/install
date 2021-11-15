@@ -29,11 +29,3 @@ sudo pacman --noconfirm -S gnome-disk-utility
 
 # Мониторинг системы:
 sudo pacman --noconfirm -S gnome-system-monitor
-
-#-----------------------------------------------------------------
-
-## Настройка ##
-
-#-----------------------------------------------------------------
-
-echo '>>>> Reboot your computer <<<<'
