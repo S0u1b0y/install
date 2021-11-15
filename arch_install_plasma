@@ -81,7 +81,7 @@ pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
 # VirtualBox:
 pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 
-# Мониторинг и разгон для nVidia карт Green With Envy:
+# Мониторинг и разгон для nVidia карт Green With Envy (опционально):
 yay --noconfirm -S gwe
 
 ## Для ноутбука:
