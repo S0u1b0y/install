@@ -51,27 +51,51 @@ reboot
 
 #-----------------------------------------------------------------
 
-## После перезагрузки ##
-
-# Для процессоров Intel ставим:
-sudo pacman --noconfirm -S intel-ucode
-
-# Для процессоров AMD ставим:
-sudo pacman --noconfirm -S amd-ucode
+#### После перезагрузки ####
 
 # Создаем каталоги пользователя в домашней папке на английском языке:
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # То же самое, но на русском языке:
 sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 
-# Установим менеджер aur-пакетов yay:
-cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg --noconfirm -sric && cd
+# Установим менеджер пакетов yay:
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
 #-----------------------------------------------------------------
 
-#### Настройки ####
+## Драйвера ##
 
-# Настройку Zsh см. в файле https://github.com/S0u1b0y/install/blob/Instructions/arch_zsh
+## Микрокод:
+# Intel:
+sudo pacman --noconfirm -S intel-ucode
+# AMD:
+sudo pacman --noconfirm -S amd-ucode
+
+## Видео:
+# AMD:
+pacman --noconfirm -S xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon
+# Intel:
+pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
+# nVidia:
+pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
+# VirtualBox:
+pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
+
+## Для ноутбука:
+# Драйвер тачпада:
+pacman --noconfirm -S xf86-input-synaptics
+# Управление гибридной графикой Optimus Manager:
+yay -S optimus-manager optimus-manager-qt
+sudo systemctl enable --now optimus-manager
+
+#-----------------------------------------------------------------
+
+## Настройки ##
+
+# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_zsh
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -82,18 +106,23 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
 #-----------------------------------------------------------------
 
-## Программы ##
-
-# Дополнительный софт:
-yay -S menulibre pamac-aur pamac-tray-icon-plasma
+## Оформление ##
 
 # Шрифты, иконки и курсоры:
-yay -S qogir-icon-theme nerd-fonts-hack
+yay --noconfirm -S qogir-icon-theme
+
+#-----------------------------------------------------------------
+
+## Программы ##
+
+# Pamac:
+yay --noconfirm -S pamac-aur pamac-tray-icon-plasma
 
 # Ananicy - Управляет приоритетами приложений:
-yay -S ananicy && sudo systemctl enable --now ananicy
+yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
+
 # Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы:
-yay -S nohang && sudo systemctl enable --now nohang
+yay --noconfirm -S nohang && sudo systemctl enable --now nohang
 
 # Bluetooth (опционально):
 sudo pacman --noconfirm -S bluedevil
@@ -102,6 +131,7 @@ sudo systemctl enable --now bluetooth
 # Управление сетевыми соединениями (опционально):
 sudo pacman --noconfirm -S networkmanager plasma-nm
 sudo systemctl enable --now NetworkManager
+# Плагины NetworkManager для разных типов соединений (опционально):
 sudo pacman --noconfirm -S networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc
 
 # Брандмауэр (Firewall) и модуль управления для Plasma (опционально):
@@ -116,7 +146,7 @@ sudo systemctl enable --now cups.service
 sudo pacman --noconfirm -S firefox firefox-i18n-ru
 
 # Браузер Chrome:
-yay -S google-chrome
+yay --noconfirm -S google-chrome
 
 # Torrent:
 sudo pacman --noconfirm -S qbittorrent
@@ -124,28 +154,18 @@ sudo pacman --noconfirm -S qbittorrent
 # Java:
 sudo pacman --noconfirm -S jdk-openjdk
 
-# Code OSS (Visual Studio Code):
+# Code OSS (free Visual Studio Code):
 yay -S code
+# Мои настройки (опционально):
+editor.wordWrap - On
+editor.fontSize - 12
+editor.dragAndDrop - false
+
+# Работа с видео:
+yay -S mediainfo mkvtoolnix-gui
 
 # Yandex Disk:
 yay -S yandex-disk && yandex-disk setup
-
-#-----------------------------------------------------------------
-
-## Виртуализация ##
-
-# VirtualBox стандартное ядро:
-sudo pacman --noconfirm -S virtualbox virtualbox-host-modules-arch virtualbox-ext-vnc
-# VirtualBox LTS-ядро:
-sudo pacman --noconfirm -S virtualbox virtualbox-host-dkms virtualbox-ext-vnc
-
-# KVM (Qemu):
-sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
-sudo systemctl enable --now libvirtd dnsmasq
-sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
-sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
-sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
-sudo systemctl restart libvirtd.service
 
 #-----------------------------------------------------------------
 
@@ -156,7 +176,8 @@ sudo pacman --noconfirm -S steam
 
 # PortProton (https://portwine-linux.ru/port-proton-linux):
 sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
-wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97" && sh PortProton-97
+wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
+sh PortProton-97
 
 # Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
@@ -164,3 +185,72 @@ wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_sc
 yay -S multimc jre8-openjdk
 sudo archlinux-java set java-17-openjdk
 java -version
+
+#-----------------------------------------------------------------
+
+## Подкачка (опционально) ##
+
+## Файл подкачки на Btrfs:
+# Создаем подтом @swap (строка 1)
+# Переходим в @swap (строка 2)
+# Создаём пустой файл подкачки (строка 3)
+# Отключаем копирование при записи для файла подкачки (строка 4)
+# Отключаем сжатие файла подкачки (строка 5)
+# Создаём файл нужного размера (строка 6)
+# Разрешаем доступ к файлу подкачки только root-у (строка 7)
+# Инициализируем файл подкачки и включаем его (строки 8-9)
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 10)
+sudo btrfs subvolume create /@swap
+cd /@swap
+sudo truncate -s 0 ./swapfile
+sudo chattr +C ./swapfile
+sudo btrfs property set ./swapfile compression none
+sudo dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
+sudo chmod 600 ./swapfile
+sudo mkswap ./swapfile
+sudo swapon ./swapfile
+echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+sudo mount -a
+
+## Файл подкачки на Ext4:
+# Переходим в mnt установленной системы (строка 1)
+# Создаём файл нужного размера (строка 2)
+# Разрешаем доступ к файлу подкачки только root-у (строка 3)
+# Инициализируем файл подкачки и включаем его (строки 4-5)
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 6)
+cd /mnt
+dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
+chmod 600 ./swapfile
+mkswap ./swapfile
+swapon ./swapfile
+echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+sudo mount -a
+
+## Zswap:
+# Устанавливаем (строка 1)
+# Раскоментируем параметры в файле конфигурации (строка 2)
+# Включим использование (строка 3)
+# Отведем для zswap, вместо четверти, половину оперативной памяти (строка 4)
+# Включаем загрузку при старте системы (строка 5)
+sudo pacman --noconfirm -S systemd-swap
+sudo sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sudo sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sudo sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
+sudo systemctl enable --now systemd-swap.service
+
+#-----------------------------------------------------------------
+
+## Виртуализация (опционально) ##
+
+# VirtualBox стандартное ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules-arch
+# VirtualBox LTS-ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
+
+# KVM (Qemu):
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo systemctl enable --now libvirtd dnsmasq
+sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
+sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo systemctl restart libvirtd.service
