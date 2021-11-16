@@ -1,4 +1,7 @@
-#### Установка Arch Plasma ####
+#### Установка Arch Plasma из Manjaro ####
+
+# Проверяем режим EFI (Если выдаст ошибку, то у Вас BIOS, если выведет список, то у Вас UEFI)
+efivar -l
 
 # Перейдем в учётную запись рута:
 sudo su
@@ -43,23 +46,49 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 
 #-----------------------------------------------------------------
 
-# Установка KDE Plasma:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_plasma.sh)"
+### Персонализация ###
 
-# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
-reboot
+## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash user
+echo '>>>> Enter user password <<<<'
+passwd user
+
+## Установим имя компьютера в сети (virtual - поменять на своё):
+echo "virtual" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
+
+## Установим часовой пояс и время (Europe/Moscow - поменять на своё):
+# Устанавливаем часовой пояс и время по UTC.
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+hwclock --systohc --utc
 
 #-----------------------------------------------------------------
 
-#### После перезагрузки ####
+## Установка KDE Plasma ##
 
-# Создаем каталоги пользователя в домашней папке на английском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# То же самое, но на русском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
-
-# Установим менеджер пакетов yay:
-cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+# Минимальная установка:
+# sddm, sddm-kcm - Загрузчик и настройщик загрузчика,
+# plasma-desktop - Минимальная установка Plasma,
+# kscreen - Утилита управления мониторами,
+# powerdevil - Утилита управления питанием,
+# plasma-pa - Апплет управления звуком,
+# kinfocenter - Информация о системе,
+# plasma-systemmonitor - Системный монитор,
+# kinit - Ускорение запуска приложений KDE,
+# kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
+# konsole - Эмулятор терминала,
+# kwrite - Простой текстовый редактор,
+# kcalc - Калькулятор,
+# dolphin dolphin-plugins - Файловый менеджер,
+# plasma-browser-integration - Интеграция Plasma и популярных браузеров,
+# gwenview, kimageformats, qt5-imageformats - Просмотрщик фото,
+# okular, poppler-data - Просмотрщик текста,
+# foliate - Читалка книг,
+# ark - Работа с архивами,
+sudo pacman --noconfirm -S sddm sddm-kcm plasma-desktop kscreen powerdevil plasma-pa kinfocenter plasma-systemmonitor kinit kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins plasma-browser-integration gwenview kimageformats qt5-imageformats okular poppler-data foliate ark
+sudo systemctl enable sddm.service
 
 #-----------------------------------------------------------------
 
@@ -81,15 +110,30 @@ pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
 # VirtualBox:
 pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 
-# Мониторинг и разгон для nVidia карт Green With Envy (опционально):
-yay --noconfirm -S gwe
-
 ## Для ноутбука:
 # Драйвер тачпада:
 pacman --noconfirm -S xf86-input-synaptics
 # Управление гибридной графикой Optimus Manager:
 yay -S optimus-manager optimus-manager-qt
 sudo systemctl enable --now optimus-manager
+
+#-----------------------------------------------------------------
+
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+#### После перезагрузки ####
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
+
+# Установим менеджер пакетов yay:
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
 #-----------------------------------------------------------------
 
@@ -110,6 +154,9 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
 # Шрифты, иконки и курсоры:
 yay --noconfirm -S qogir-icon-theme
+
+# Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
+sudo pacman --noconfirm -S plasma5-applets-weather-widget qt5-xmlpatterns
 
 #-----------------------------------------------------------------
 
@@ -142,11 +189,20 @@ sudo systemctl enable --now ufw.service
 sudo pacman --noconfirm -S cups cups-pdf print-manager
 sudo systemctl enable --now cups.service
 
-# Браузер Firefox:
+# Браузеры:
+# Firefox
 sudo pacman --noconfirm -S firefox firefox-i18n-ru
-
-# Браузер Chrome:
+# LibreWolf
+yay --noconfirm -S librewolf
+# Chrome:
 yay --noconfirm -S google-chrome
+# Chromium
+sudo pacman --noconfirm -S chromium
+
+# Мультимедиа:
+# audacious - Аудиоплеер,
+# mpv - Видеоплеер.
+sudo pacman --noconfirm -S audacious mpv
 
 # Torrent:
 sudo pacman --noconfirm -S qbittorrent
@@ -166,6 +222,9 @@ yay -S mediainfo mkvtoolnix-gui
 
 # Yandex Disk:
 yay -S yandex-disk && yandex-disk setup
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
