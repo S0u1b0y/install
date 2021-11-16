@@ -6,7 +6,7 @@ echo -e '## Russia
 Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
 Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' | \
 tee /etc/pacman.d/mirrorlist
-pacman -Syy
+pacman --noconfirm -Syy
 
 # Создаём один раздел на весь диск:
 parted -s /dev/sda mktable msdos \
@@ -16,7 +16,7 @@ set 1 boot on
 mkfs.btrfs -f /dev/sda1
 # Примонтируем раздел sda1 в /mnt:
 mount /dev/sda1 /mnt
-# Создаем два подтома Btrfs @root и @home:
+# Создаем два подтома @root и @home:
 btrfs subvolume create /mnt/@root
 btrfs subvolume create /mnt/@home
 # Отмонтируем раздел sda1:
@@ -30,15 +30,17 @@ mount /dev/sda1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,spa
 
 # Ставим систему со стандартным ядром:
 # base, base-devel - Базовая система,
-# linux514 linux514-headers - Ядро v5.14,
+# linux515 linux515-headers - Ядро,
+# linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор,
-# intel-ucode - Поддержка процессора Intel,
-# btrfs-progs - Утилиты для btrfs,
-# zsh - "Продвинутая" командная оболочка zsh.
-basestrap /mnt base base-devel linux514 linux514-headers nano intel-ucode btrfs-progs zsh
+# btrfs-progs - Утилиты для btrfs.
+basestrap /mnt base base-devel linux515 linux515-headers nano btrfs-progs
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
-fstabgen -U /mnt > /mnt/etc/fstab
+fstabgen -U /mnt >> /mnt/etc/fstab
+
+## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
 
 # Проверяем fstab:
 cat /mnt/etc/fstab
