@@ -1,4 +1,7 @@
-#### Установка Arch XFCE ####
+#### Установка Arch XFCE из Manjaro ####
+
+# Проверяем режим EFI (Если выдаст ошибку, то у Вас BIOS, если выведет список, то у Вас UEFI)
+efivar -l
 
 # Перейдем в учётную запись рута:
 sudo su
@@ -43,26 +46,50 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 
 #-----------------------------------------------------------------
 
-# Установка XFCE:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_xfce.sh)"
+### Персонализация ###
 
-# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
-reboot
+## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash user
+echo '>>>> Enter user password <<<<'
+passwd user
+
+## Установим имя компьютера в сети (virtual - поменять на своё):
+echo "virtual" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
+
+## Установим часовой пояс и время (Europe/Moscow - поменять на своё):
+# Устанавливаем часовой пояс и время по UTC.
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+hwclock --systohc --utc
 
 #-----------------------------------------------------------------
 
-#### После перезагрузки ####
+## Установка XFCE ##
 
-# Автозагрузка LXDM:
-sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
-
-# Создаем каталоги пользователя в домашней папке на английском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# То же самое, но на русском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
-
-# Установим менеджер пакетов yay:
-cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+# xorg-server - Иксы,
+# xfce4 - XFCE,
+# lxdm - Загрузчик,
+# pavucontrol - Панель управления звуком Pulseaudio,
+# xfce4-xkb-plugin - Плагин раскладки клавиатуры,
+# xfce4-pulseaudio-plugin - Плагин управления звуком,
+# xfce4-clipman-plugin - Плагин расширенного буфера обмена,
+# xfce4-whiskermenu-plugin - Современное меню,
+# xfce4-weather-plugin - Плагин погоды,
+# tilix - Тайлинговый эмулятор терминала,
+# gedit - Простой текстовый редактор,
+# gnome-calculator - Калькулятор,
+# eog - Просмотр фото,
+# evince - Просмотр документов,
+# foliate - Читалка книг,
+# file-roller thunar-archive-plugin - Работа с архивами,
+# gnome-disk-utility - Управление дисками,
+# gnome-system-monitor - Мониторинг системы,
+# Удалим xfce4-terminal, т. к. вместо него установили tilix.
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+sudo systemctl enable lxdm.service
+sudo pacman --noconfirm -Rns xfce4-terminal
 
 #-----------------------------------------------------------------
 
@@ -84,9 +111,6 @@ pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
 # VirtualBox:
 pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 
-# Мониторинг и разгон для nVidia карт Green With Envy (опционально):
-yay --noconfirm -S gwe
-
 ## Для ноутбука:
 # Драйвер тачпада:
 pacman --noconfirm -S xf86-input-synaptics
@@ -96,16 +120,37 @@ sudo systemctl enable optimus-manager
 
 #-----------------------------------------------------------------
 
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+#### После перезагрузки ####
+
+# Автозагрузка LXDM (user - поменять на своё):
+sudo sed -i 's/# autologin=dgod/autologin=user/' /etc/lxdm/lxdm.conf
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
+
+# Установим менеджер пакетов yay:
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
+#-----------------------------------------------------------------
+
 ## Настройки ##
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_zsh
 
-## Tilix ##
+## Tilix для Bash ##
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' >> ~/.zshrc
-source ~/.zshrc
+fi' >> ~/.bashrc
+source ~/.bashrc
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -123,7 +168,7 @@ yay --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 # Шрифты, иконки и курсоры:
-yay --noconfirm -S papirus-icon-theme qogir-icon-theme
+yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme
 
 #-----------------------------------------------------------------
 
@@ -138,11 +183,15 @@ yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
 # Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы:
 yay --noconfirm -S nohang && sudo systemctl enable --now nohang
 
-# Браузер Firefox:
-yay --noconfirm -S firefox firefox-i18n-ru
-
-# Браузер Chrome:
+# Браузеры:
+# Firefox
+sudo pacman --noconfirm -S firefox firefox-i18n-ru
+# LibreWolf
+yay --noconfirm -S librewolf
+# Chrome:
 yay --noconfirm -S google-chrome
+# Chromium
+sudo pacman --noconfirm -S chromium
 
 # Bluetooth:
 sudo pacman --noconfirm -S blueman
@@ -170,6 +219,9 @@ yay -S mediainfo mkvtoolnix-gui
 
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
