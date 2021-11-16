@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Переменные:
-user=soulboy            # Имя пользователя
-hostname=main           # Имя компьютера
-timezone=Europe/Moscow  # Часовой пояс
-
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
 sed -i 's/#Color/Color/g' /etc/pacman.conf
@@ -14,12 +9,6 @@ sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
 echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 # Принудительно обновляем репозитории.
 pacman -Syy
-
-## Установим часовой пояс и время:
-# Устанавливаем часовой пояс.
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-# Устанавливаем время по UTC.
-hwclock --systohc --utc
 
 ## Локализуем систему и консоль:
 # Раскоментируем локали en_US и ru_RU в файле locale.gen
@@ -32,21 +21,9 @@ echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 # И генерируем локали
 locale-gen
 
-## Установим имя компьютера в сети:
-echo "$hostname" > /etc/hostname
-echo "127.0.0.1    localhost" > /etc/hosts
-echo "::1          localhost" >> /etc/hosts
-echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
-
 ## Введем пароль root:
 echo '>>>> Enter root password <<<<'
 passwd
-
-## Добавляем пользователя и задаем ему пароль:
-# Пропиcываем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel.
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $user
-echo ">>>> Enter $user password <<<<"
-passwd $user
 
 ## Установим GRUB:
 # Устанавливаем grub в систему
