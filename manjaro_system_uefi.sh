@@ -41,18 +41,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 pacman --noconfirm -S sudo
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 
-## Установим и настроим Zswap:
-# Устанавливаем
-pacman --noconfirm -S systemd-swap
-# Раскоментируем параметры в файле конфигурации
-sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
-# Включим использование
-sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
-# Отведем для zswap, вместо четверти, половину оперативной памяти
-sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
-# Включаем загрузку при старте системы
-systemctl enable systemd-swap.service
-
 ## Настроим сеть:
 # Устанавливаем демон (службу) dhcpcd
 pacman --noconfirm -S dhcpcd
