@@ -1,9 +1,6 @@
 #!/bin/bash
 
 # Переменные:
-user=user               # Имя пользователя
-hostname=virtual        # Имя компьютера
-timezone=Europe/Moscow  # Часовой пояс
 netface=enp0s3          # Имя сетевого интерфейса (можно узнать командой - ip a)
 ipaddr=192.168.0.50     # Статический IP-адрес компьютера
 gateway=192.168.0.100   # Сетевой шлюз он же роутер
@@ -18,12 +15,6 @@ echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 # Принудительно обновляем репозитории.
 pacman -Syy
 
-## Установим часовой пояс и время:
-# Устанавливаем часовой пояс.
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-# Устанавливаем время по UTC.
-hwclock --systohc --utc
-
 ## Локализуем систему и консоль:
 # Раскоментируем локали en_US и ru_RU в файле locale.gen
 sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
@@ -35,21 +26,9 @@ echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 # И генерируем локали
 locale-gen
 
-## Установим имя компьютера в сети:
-echo "$hostname" > /etc/hostname
-echo "127.0.0.1    localhost" > /etc/hosts
-echo "::1          localhost" >> /etc/hosts
-echo "$ipaddr virtual.localdomain virtual" >> /etc/hosts
-
 ## Введем пароль root:
 echo '>>>> Enter root password <<<<'
 passwd
-
-## Добавляем пользователя и задаем ему пароль:
-# Пропишем пользователя в группы: video,audio,games,lp,optical,power,storage,wheel.
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $user
-echo ">>>> Enter $user password <<<<"
-passwd $user
 
 ## Установим GRUB:
 # Устанавливаем grub в систему
