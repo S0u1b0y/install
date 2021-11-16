@@ -1,4 +1,7 @@
-#### Установка Arch XFCE ####
+#### Установка Arch Gnome из Manjaro ####
+
+# Проверяем режим EFI (Если выдаст ошибку, то у Вас BIOS, если выведет список, то у Вас UEFI)
+efivar -l
 
 # Перейдем в учётную запись рута:
 sudo su
@@ -43,26 +46,60 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructio
 
 #-----------------------------------------------------------------
 
-# Установка XFCE:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_de_gnome.sh)"
+### Персонализация ###
 
-# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
-reboot
+## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash user
+echo '>>>> Enter user password <<<<'
+passwd user
+
+## Установим имя компьютера в сети (virtual - поменять на своё):
+echo "virtual" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
+
+## Установим часовой пояс и время (Europe/Moscow - поменять на своё):
+# Устанавливаем часовой пояс и время по UTC.
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+hwclock --systohc --utc
 
 #-----------------------------------------------------------------
 
-#### После перезагрузки ####
+## Установка Gnome ##
 
-# Автозагрузка GDM:
-sudo sed -i 's/\[daemon\]/\[daemon\]\nAutomaticLoginEnable=true\nAutomaticLogin=${USER}/' /etc/gdm/custom.conf
+# gnome-shell-performance - Минимальная установка Gnome,
+# gdm - Загрузчик,
+# gnome-control-center - Панель настроек Gnome,
+# gnome-tweak-tool - Дополнительные настройки Gnome,
+# tilix - Тайлинговый эмулятор терминала,
+# gedit - Простой текстовый редактор,
+# nautilus - Файловый менеджер,
+# eog - Просмотр фото,
+# evince - Просмотр документов,
+# foliate - Читалка книг,
+# file-roller - Работа с архивами,
+# gnome-calculator - Калькулятор.
+# gnome-disk-utility - Управление дисками,
+# gnome-system-monitor - Мониторинг системы,
+# Удаление cheese - Приложение для веб-камеры.
+sudo pacman --noconfirm -S gnome-shell-performance gdm gnome-control-center gnome-tweak-tool tilix gedit nautilus eog evince foliate file-roller gnome-calculator gnome-disk-utility gnome-system-monitor
+sudo systemctl enable gdm.service
+sudo pacman --noconfirm -R cheese
 
-# Создаем каталоги пользователя в домашней папке на английском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# То же самое, но на русском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
-
-# Установим менеджер пакетов yay:
-cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+# Расширения Gnome (Temporary outdated):
+yay --noconfirm -S gnome-shell-extensions \
+    gnome-shell-extension-appindicator \
+    gnome-shell-extension-gnome-ui-tune-git \
+    gnome-shell-extension-vertical-overview-git \
+    gnome-shell-extension-dash-to-dock \
+    gnome-shell-extension-dash-to-panel \
+    gnome-shell-extension-desktop-icons-ng \
+    gnome-shell-extension-material-shell \
+    gnome-shell-extension-pop-shell-bin \
+    gnome-shell-extension-unite \
+    gnome-shell-extension-gamemode-git \
+gnome-shell-extension-gsconnect
 
 #-----------------------------------------------------------------
 
@@ -84,15 +121,33 @@ pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
 # VirtualBox:
 pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 
-# Мониторинг и разгон для nVidia карт Green With Envy (опционально):
-yay --noconfirm -S gwe
-
 ## Для ноутбука:
 # Драйвер тачпада:
 pacman --noconfirm -S xf86-input-synaptics
 # Управление гибридной графикой Optimus Manager:
-yay -S optimus-manager optimus-manager-qt
+yay -S optimus-manager
 sudo systemctl enable optimus-manager
+
+#-----------------------------------------------------------------
+
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+#### После перезагрузки ####
+
+# Автозагрузка GDM (user - поменять на своё):
+sudo sed -i 's/\[daemon\]/\[daemon\]\nAutomaticLoginEnable=true\nAutomaticLogin=user/' /etc/gdm/custom.conf
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+# То же самое, но на русском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
+
+# Установим менеджер пакетов yay:
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
 #-----------------------------------------------------------------
 
@@ -100,12 +155,12 @@ sudo systemctl enable optimus-manager
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_zsh
 
-## Tilix ##
+## Tilix для Bash ##
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' >> ~/.zshrc
-source ~/.zshrc
+fi' >> ~/.bashrc
+source ~/.bashrc
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -138,11 +193,15 @@ yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
 # Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы:
 yay --noconfirm -S nohang && sudo systemctl enable --now nohang
 
-# Браузер Firefox:
-yay --noconfirm -S firefox firefox-i18n-ru
-
-# Браузер Chrome:
+# Браузеры:
+# Firefox
+sudo pacman --noconfirm -S firefox firefox-i18n-ru
+# LibreWolf
+yay --noconfirm -S librewolf
+# Chrome:
 yay --noconfirm -S google-chrome
+# Chromium
+sudo pacman --noconfirm -S chromium
 
 # Bluetooth:
 sudo pacman --noconfirm -S blueman
@@ -170,6 +229,9 @@ yay -S mediainfo mkvtoolnix-gui
 
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
+
+# Мониторинг и разгон для nVidia карт Green With Envy (опционально):
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
