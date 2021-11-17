@@ -19,14 +19,16 @@ chmod u+x arch*
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
 # Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела, 3й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела,
+# 3й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
 sh arch-base-btrfs /dev/sda 300M linux
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
 # Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела, 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела,
+# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
 sh arch-base-ext4 /dev/sda 40G 300M linux
 
 #-----------------------------------------------------------------
@@ -107,7 +109,9 @@ sudo systemctl enable optimus-manager
 # gnome-disk-utility - Управление дисками,
 # gnome-system-monitor - Мониторинг системы,
 # Удалим xfce4-terminal, т. к. вместо него установили tilix.
-sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
+    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator \
+    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rns xfce4-terminal
 
@@ -228,7 +232,9 @@ sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextrac
 wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
 sh PortProton-97
 
-# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки,
+# выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов",
+# жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
 # Minecraft:
 yay -S multimc jre8-openjdk
