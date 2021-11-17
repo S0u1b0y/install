@@ -39,6 +39,10 @@ if [ -d /sys/firmware/efi ]; then
     mount $disk\2 /mnt/home
     # Примонтируем раздел sda3 в /mnt/boot/efi:
     mount $disk\3 /mnt/boot/efi
+    # Устанавливаем grub в систему
+    basestrap /mnt grub efibootmgr
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
 else
     ## Если BIOS:
     # Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
@@ -55,6 +59,10 @@ else
     mkdir -p /mnt/home
     # Примонтируем раздел sda2 в /mnt/home,
     mount $disk\2 /mnt/home
+    # Устанавливаем grub в систему
+    basestrap /mnt grub
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
 # Ставим систему со стандартным ядром:
