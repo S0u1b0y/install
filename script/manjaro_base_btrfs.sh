@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Параметры установки, если нужно меняйте на свои (G - Гигабайт, M - Мегабайт):
+# Приём входных данных для дальнейшей установки:
 # disk     - Установочный диск
-# bootpart - Размер boot-раздела (минус означает раздел в конце диска)
+# bootpart - Размер boot-раздела
 # kernel   - Версия ядра
 disk=$1
 bootpart=$2
@@ -17,6 +17,8 @@ tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
 # Определяем UEFI или BIOS на компьютере:
+# Отмонтируем примонтированные диски
+umount -R /mnt
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Создаем два раздела Root(Остальное-sda1) и EFI(300Mb-sda2),
@@ -81,7 +83,7 @@ fi
 basestrap /mnt base base-devel $kernel $kernel\-headers nano btrfs-progs
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
-fstabgen -U /mnt >> /mnt/etc/fstab
+fstabgen -U /mnt > /mnt/etc/fstab
 
 ## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
 sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
