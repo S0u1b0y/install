@@ -17,6 +17,7 @@ echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
 
 ## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
 useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
+echo ">>>> Enter $username password <<<<"
 passwd $username
 
 ## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
@@ -93,6 +94,14 @@ systemctl enable ntpd.service
 pacman --noconfirm -S openssh
 # Включаем загрузку при старте системы
 systemctl enable sshd.service
+
+## Микрокод:
+# GenuineIntel - Intel, AuthenticAMD - AMD
+if [ $(lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
+    pacman --noconfirm -S intel-ucode
+else
+    pacman --noconfirm -S amd-ucode
+fi
 
 ## Установим драйвера на звук:
 # pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
