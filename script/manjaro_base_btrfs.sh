@@ -5,7 +5,7 @@
 # bootpart - Размер boot-раздела (минус означает раздел в конце диска)
 # kernel   - Версия ядра (linux510 - LTS-ядро, linux515 - Новая версия)
 disk=/dev/sda
-bootpart=-300M
+bootpart=300M
 kernel=linux515
 
 # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
@@ -21,8 +21,8 @@ if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Создаем два раздела Root(Остальное-sda1) и EFI(300Mb-sda2),
     parted -s $disk -- mktable gpt \
-        mkpart Root btrfs 1M $bootpart \
-        mkpart EFI fat32 $bootpart 100% \
+        mkpart Root btrfs 1M \-$bootpart \
+        mkpart EFI fat32 \-$bootpart 100% \
     set 2 esp on
     # Форматируем раздел sda1 в Btrfs, а раздел sda2 в fat32:
     mkfs.btrfs -f $disk\1
