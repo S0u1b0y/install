@@ -12,8 +12,7 @@ kernel=$3
 sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
 echo -e '## Russia
 Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
-Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' | \
-tee /etc/pacman.d/mirrorlist
+Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' | tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
 # Если примонтированы диски, то отмонтируем их:
