@@ -2,13 +2,9 @@
 
 # Параметры установки, если нужно меняйте на свои:
 # disk     - Установочный диск
-# rootpart - Размер root-раздела (G - Гигабайт, M - Мегабайт)
-# bootpart - Размер boot-раздела (G - Гигабайт, M - Мегабайт)
-# kernel   - Версия ядра (linux510 - LTS-ядро, linux515 - Новая версия)
-# disk=/dev/sda
-# rootpart=40G
-# bootpart=300M
-# kernel=linux515
+# rootpart - Размер root-раздела
+# bootpart - Размер boot-раздела
+# kernel   - Версия ядра
 disk=$1
 rootpart=$2
 bootpart=$3
@@ -50,7 +46,7 @@ if [ -d /sys/firmware/efi ]; then
 else
     ## Если BIOS:
     # Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
-    parted -s $disk -- mktable msdos \
+    parted -s $disk mktable msdos \
         mkpart primary ext4 1M $rootpart \
         mkpart primary ext4 $rootpart 100% \
     set 1 boot on
