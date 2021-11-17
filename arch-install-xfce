@@ -4,9 +4,9 @@
 sudo su
 
 # Скачаем необходимые скрипты и дадим им право на запуск:
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_btrfs"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_ext4"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_system"
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 chmod u+x arch*
 
 #-----------------------------------------------------------------
