@@ -5,10 +5,14 @@
 # rootpart - Размер root-раздела (G - Гигабайт, M - Мегабайт)
 # bootpart - Размер boot-раздела (G - Гигабайт, M - Мегабайт)
 # kernel   - Версия ядра (linux510 - LTS-ядро, linux515 - Новая версия)
-disk=/dev/sda
-rootpart=40G
-bootpart=300M
-kernel=linux515
+# disk=/dev/sda
+# rootpart=40G
+# bootpart=300M
+# kernel=linux515
+disk=$1
+rootpart=$2
+bootpart=$3
+kernel=$4
 
 # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
 sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
