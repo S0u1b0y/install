@@ -12,14 +12,14 @@ sudo su
 # Внимание!!! Запускаем только один из четырёх скриптов,
 
 # UEFI - Btrfs:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_btrfs.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_uefi_btrfs.sh)"
 # UEFI - Ext4:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_uefi_ext4.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_uefi_ext4.sh)"
 
 # BIOS (Legacy) - Btrfs:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_btrfs.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_bios_btrfs.sh)"
 # BIOS (Legacy) - Ext4:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_base_bios_ext4.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_base_bios_ext4.sh)"
 
 #-----------------------------------------------------------------
 
@@ -35,14 +35,14 @@ manjaro-chroot /mnt
 # Внимание!!! Запускаем только один из четырёх скриптов,
 
 # Реальный компьютер - UEFI:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_system_uefi.sh)"
 # Реальный компьютер - BIOS (Legacy):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_system_bios.sh)"
 
 # Виртуальный компьютер - UEFI:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_uefi_vbox.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_system_uefi_vbox.sh)"
 # Виртуальный компьютер - BIOS (Legacy):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch_system_bios_vbox.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch_system_bios_vbox.sh)"
 
 #-----------------------------------------------------------------
 
