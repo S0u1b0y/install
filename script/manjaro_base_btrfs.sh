@@ -42,6 +42,10 @@ if [ -d /sys/firmware/efi ]; then
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
     # Примонтируем раздел sda2 в /mnt/boot/efi:
     mount $disk\2 /mnt/boot/efi
+    # Устанавливаем grub в систему
+    basestrap /mnt grub efibootmgr
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
 else
     ## Если BIOS:
     # Создаём один раздел на весь диск:
@@ -63,6 +67,10 @@ else
     mkdir /mnt/home
     # Примонтируем подтом @home в /mnt/home с доп. параметрами:
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+    # Устанавливаем grub в систему
+    basestrap /mnt grub
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
 # Ставим систему со стандартным ядром:
