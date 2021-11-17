@@ -1,5 +1,12 @@
 #### Установка Arch XFCE ####
 
+### Подготовка ###
+
+# Скачать образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
+# Или скачать образ EndeavourOS - https://endeavouros.com/latest-release/
+# Записать образ на флешку, например програмой Ventoy - https://github.com/ventoy/Ventoy/releases.
+# Загрузится с записанного образа.
+
 # Перейдем в учётную запись рута:
 sudo su
 
