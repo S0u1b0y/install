@@ -1,5 +1,30 @@
 #!/bin/bash
 
+#-----------------------------------------------------------------
+
+### Персонализация ###
+
+# Определение переменных с персональными данными для дальнейшей установки, поменяйте на свои:
+username=user
+hostname=virt
+timezone=Europe/Moscow
+
+## Пропишем имя компьютера в сети (virtual - поменять на своё):
+echo "$hostname" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
+
+## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
+passwd $username
+
+## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+hwclock --systohc --utc
+
+#-----------------------------------------------------------------
+
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
 sed -i 's/#Color/Color/g' /etc/pacman.conf
