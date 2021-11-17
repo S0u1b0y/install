@@ -3,11 +3,11 @@
 # Параметры установки, если нужно меняйте на свои:
 # disk     - Установочный диск
 # rootpart - Размер root-раздела (G - Гигабайт, M - Мегабайт)
-# bootpart - Размер boot-раздела (минус означает разметку с конца диска)
+# bootpart - Размер boot-раздела (G - Гигабайт, M - Мегабайт)
 # kernel   - Версия ядра (linux510 - LTS-ядро, linux515 - Новая версия)
 disk=/dev/sda
 rootpart=40G
-bootpart=-300M
+bootpart=300M
 kernel=linux515
 
 # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
@@ -24,8 +24,8 @@ if [ -d /sys/firmware/efi ]; then
     # Создаем три раздела Root(40Gb-sda1), Home(Остальное-sda2) и EFI(300Mb-sda3):
     parted -s $disk -- mktable gpt \
         mkpart Root ext4 1M $rootpart \
-        mkpart Home ext4 $rootpart $bootpart \
-        mkpart EFI fat32 $bootpart 100% \
+        mkpart Home ext4 $rootpart \-$bootpart \
+        mkpart EFI fat32 \-$bootpart 100% \
     set 3 esp on
     # Форматируем разделы sda1 и sda2 в ext4, а раздел sda3 в fat32:
     mkfs.ext4 -L Root $disk\1
