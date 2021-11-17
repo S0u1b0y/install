@@ -95,7 +95,7 @@ pacman --noconfirm -S openssh
 # Включаем загрузку при старте системы
 systemctl enable sshd.service
 
-## Микрокод:
+## Микрокод процессора:
 # GenuineIntel - Intel, AuthenticAMD - AMD
 if [ $(lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
     pacman --noconfirm -S intel-ucode
