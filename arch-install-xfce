@@ -35,13 +35,10 @@ sh arch-base-ext4 /dev/sda 40G 300M linux
 # то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
 
 # Чрутимся:
-if [ $(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"') = ManjaroLinux ]; then
-    # Если ставим из Manjaro
-    manjaro-chroot /mnt
-else
-    # Если ставим из Arch
-    arch-chroot /mnt
-fi
+# Если ставим из Manjaro
+manjaro-chroot /mnt
+# Если ставим из Arch
+arch-chroot /mnt
 
 #-----------------------------------------------------------------
 
