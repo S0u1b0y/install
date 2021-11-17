@@ -2,6 +2,10 @@
 
 ### Подготовка ###
 
+# Скачать образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
+# Записать образ на флешку, например програмой Ventoy - https://github.com/ventoy/Ventoy/releases.
+# Загрузится с записанного образа.
+
 # Перейдем в учётную запись рута:
 sudo su
 
