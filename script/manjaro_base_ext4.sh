@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Параметры установки, если нужно меняйте на свои:
+# Приём входных данных для дальнейшей установки:
 # disk     - Установочный диск
 # rootpart - Размер root-раздела
 # bootpart - Размер boot-раздела
@@ -19,6 +19,8 @@ tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
 # Определяем UEFI или BIOS на компьютере:
+# Если примонтированы диски, то отмонтируем их
+umount -R /mnt
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Создаем три раздела Root(40Gb-sda1), Home(Остальное-sda2) и EFI(300Mb-sda3):
@@ -72,7 +74,7 @@ fi
 basestrap /mnt base base-devel $kernel $kernel\-headers nano
 
 # Генерируем fstab (Ключ -U генерирует список разделов по UUID):
-fstabgen -U /mnt >> /mnt/etc/fstab
+fstabgen -U /mnt > /mnt/etc/fstab
 
 ## Настроим параметры запуска системы на ext4 (Меняем udev на systemd):
 sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
