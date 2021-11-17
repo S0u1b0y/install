@@ -1,77 +1,72 @@
-#### Установка Arch Plasma из Manjaro ####
+#### Установка Manjaro KDE Plasma ####
 
-# Проверяем режим EFI (Если выдаст ошибку, то у Вас BIOS, если выведет список, то у Вас UEFI)
-efivar -l
+### Подготовка ###
 
 # Перейдем в учётную запись рута:
 sudo su
 
-#-----------------------------------------------------------------
-
-# Разметка, форматирование диска и установка базовой системы на диск /dev/sda.
-# Внимание!!! Запускаем только один из четырёх скриптов,
-
-# UEFI - Btrfs (Скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - Boot):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_uefi_btrfs.sh)"
-# UEFI - Ext4 (Скрипт создаёт три раздела: /dev/sda1 - Root, /dev/sda2 - Home и /dev/sda3 - Boot):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_uefi_ext4.sh)"
-
-# BIOS - Btrfs (Скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_bios_btrfs.sh)"
-# BIOS - Ext4 (Скрипт создаёт два раздела /dev/sda1 - Root и /dev/sda2 - Home):
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_base_bios_ext4.sh)"
+# Скачаем необходимые скрипты и дадим им право на запуск:
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-btrfs"
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-ext4"
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-system"
+chmod u+x manjaro*
 
 #-----------------------------------------------------------------
 
-# Если вдруг, по какой-то причине, fstab не сгенерировал по UUID,
-# то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
+### Установка ###
+# Разметка, форматирование диска и установка базовой системы.
+# Внимание!!! Запускаем только один из двух скриптов, в зависимости от устанавливаемой файловой системы:
+
+## Btrfs ##
+# Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
+# Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
+# Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
+# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела,
+# 3й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
+sh manjaro-base-btrfs /dev/sda 300M linux515
+
+## Ext4 ##
+# Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
+# Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
+# Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
+# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела,
+# 4й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
+sh manjaro-base-ext4 /dev/sda 40G 300M linux515
+
+#-----------------------------------------------------------------
+
+# Если вдруг, по какой-то причине, fstab не сгенерировался по UUID,
+# то командой blkid смотрим UUID диска /dev/sdX и прописываем его в fstab вместо /dev/sdaX - nano /mnt/etc/fstab.
 
 # Чрутимся:
 manjaro-chroot /mnt
 
 #-----------------------------------------------------------------
 
-# Установка и настройка основной системы
-# Внимание!!! Запускаем только один из четырёх скриптов,
-
-# Реальный компьютер - UEFI:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_uefi.sh)"
-# Реальный компьютер - BIOS:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_bios.sh)"
-
-# Виртуальный компьютер - UEFI:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_uefi_vbox.sh)"
-# Виртуальный компьютер - BIOS:
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/S0u1b0y/install/Instructions/manjaro_system_bios_vbox.sh)"
+# Установка основной системы:
+# Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
+sh manjaro-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
 
-### Персонализация ###
+## Статический IP (Опционально) ##
 
-## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash user
-echo '>>>> Enter user password <<<<'
-passwd user
-
-## Пропишем имя компьютера в сети (virtual - поменять на своё):
-echo "virtual" > /etc/hostname
-echo "127.0.0.1    localhost" > /etc/hosts
-echo "::1          localhost" >> /etc/hosts
-echo "127.0.1.1    virtual.localdomain virtual" >> /etc/hosts
-
-## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
-ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
-hwclock --systohc --utc
+# Данные (netface, ipaddr, gateway) поменяйте на свои (строки 1-3),
+# Имя сетевого интерфейса (переменная netface) можно узнать можно командой - ip a
+# Делаем резервную копию файла настроек, на всякий случай (строка 4),
+# Прописываем, в файл конфигурации, параметры настройки сети (строки 5-8),
+netface=enp0s3
+ipaddr=192.168.0.50
+gateway=192.168.0.100
+cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
+echo -e "interface $netface" > /etc/dhcpcd.conf
+echo -e "static ip_address=$ipaddr/24" >> /etc/dhcpcd.conf
+echo -e "static routers=$gateway" >> /etc/dhcpcd.conf
+echo -e "static domain_name_servers=$gateway" >> /etc/dhcpcd.conf
 
 #-----------------------------------------------------------------
 
 ## Драйвера ##
-
-## Микрокод:
-# Intel:
-sudo pacman --noconfirm -S intel-ucode
-# AMD:
-sudo pacman --noconfirm -S amd-ucode
 
 ## Видео:
 # AMD:
@@ -93,6 +88,8 @@ sudo systemctl enable --now optimus-manager
 #-----------------------------------------------------------------
 
 ## Установка KDE Plasma ##
+# Доп. информация о приложениях ванильного Plasma - https://apps.kde.org/ru/
+# Доп. информация о приложениях Manjaro Plasma - https://gitlab.manjaro.org/profiles-and-settings/iso-profiles/-/blob/master/manjaro/kde/Packages-Desktop
 
 # Минимальная установка:
 # sddm, sddm-kcm - Загрузчик и настройщик загрузчика,
@@ -114,11 +111,17 @@ sudo systemctl enable --now optimus-manager
 # foliate - Читалка книг,
 # ark - Работа с архивами,
 # gnome-disk-utility - Управление дисками.
-sudo pacman --noconfirm -S sddm sddm-kcm plasma-desktop kscreen powerdevil plasma-pa kinfocenter plasma-systemmonitor kinit kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins plasma-browser-integration gwenview kimageformats qt5-imageformats okular poppler-data foliate ark gnome-disk-utility
+sudo pacman --noconfirm -S sddm sddm-kcm plasma-desktop kscreen powerdevil plasma-pa kinfocenter \
+    plasma-systemmonitor kinit kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins \
+    plasma-browser-integration gwenview kimageformats qt5-imageformats okular poppler-data foliate ark \
+    gnome-disk-utility
 sudo systemctl enable sddm.service
 
 # Программы и оформление Manjaro:
-sudo pacman --noconfirm -S manjaro-settings-manager manjaro-settings-manager-kcm manjaro-kde-settings manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin pamac-tray-icon-plasma plasma5-themes-breath2 plasma5-themes-breath2 sddm-breath2-theme breath2-wallpaper illyria-wallpaper
+sudo pacman --noconfirm -S manjaro-settings-manager manjaro-settings-manager-kcm manjaro-kde-settings \
+    manjaro-browser-settings manjaro-hotfixes pamac-gtk pamac-snap-plugin pamac-flatpak-plugin \
+    pamac-tray-icon-plasma plasma5-themes-breath2 plasma5-themes-breath2 sddm-breath2-theme \
+    breath2-wallpaper illyria-wallpaper
 
 #-----------------------------------------------------------------
 
@@ -235,7 +238,9 @@ sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextrac
 wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
 sh PortProton-97
 
-# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки, выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов", жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки,
+# выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов",
+# жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
 # Minecraft:
 yay -S multimc jre8-openjdk
