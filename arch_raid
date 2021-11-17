@@ -1,0 +1,72 @@
+## Создание програмного рейда Mdadm ##
+
+# Примеры создания рейда, на Ext4 и Btrfs и др. файловых системах с помощью утилиты mdadm,
+#	обратите внимание, что создается он ДО разбивки диска, в отличии от рейда Btrfs.
+# Внимание!!! впоследствии необходимо обращатся к рейду через /dev/mda, вместо /dev/sda,
+#	заменив обозначение диска и разделов во всех последующих командах.
+
+# Raid0 на 2х дисках:
+mdadm --create --verbose /dev/mda --level=0 --raid-devices=2 /dev/sda /dev/sdb
+
+# Raid1 на 2х дисках:
+mdadm --create --verbose /dev/mda --level=1 --raid-devices=2 /dev/sda /dev/sdb
+
+# Raid5 на 3х дисках:
+mdadm --create --verbose /dev/mda --level=5 --raid-devices=3 /dev/sda /dev/sdb /dev/sdc
+
+# Raid10 на 4х дисках:
+mdadm --create --verbose /dev/mda --level=10 --raid-devices=4 /dev/sda /dev/sdb /dev/sdc dev/sdd
+
+# ***
+
+# Если создавали рейд утилитой mdadm, то обязательно ставим, иначе не загрузится система:
+basestrap /mnt mdadm
+
+#-----------------------------------------------------------------
+
+## Создание програмного рейда Btrfs ##
+
+# На Btrfs можно создать рейд и "силами" самой файловой системы без использования утилиты mdadm.
+# Примеры создания рейда на Btrfs (перед созданием можно синхронизировать диски командой - sync).
+# Внимание!!! Впоследствии обращаться к рейду можно через любые входящие в него разделы /dev/sda1, /dev/sdb1, /dev/sdс1, /dev/sdd1.
+# Обратите внимание, что создается он ПОСЛЕ разбивки, входящих в него, дисков на разделы.
+# Загрузчик устанавливаем по очереди на каждый диск — участник массива. Это позволит загрузить систему в случае выхода из строя любого из них.
+
+# Raid0 на 2х дисках с меткой ArchRaid:
+parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+mkfs.btrfs -f -L ArchRaid -d raid0 /dev/sda1 /dev/sdb1
+# Загрузчик:
+grub-install --target=i386-pc /dev/sda /dev/sdb
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Raid1 на 2х дисках с меткой ArchRaid:
+parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+mkfs.btrfs -f -L ArchRaid -d raid1 /dev/sda1 /dev/sdb1
+# Загрузчик:
+grub-install --target=i386-pc /dev/sda /dev/sdb
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Raid5 на 3х дисках с меткой ArchRaid:
+parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdc mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+mkfs.btrfs -f -L ArchRaid -d raid5 /dev/sda1 /dev/sdb1 /dev/sdc1
+# Загрузчик:
+grub-install --target=i386-pc /dev/sda /dev/sdb /dev/sdc
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Raid10 на 4х дисках с меткой ArchRaid:
+parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdc mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+parted -s /dev/sdd mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
+mkfs.btrfs -f -L ArchRaid -d raid10 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1
+# Загрузчик:
+grub-install --target=i386-pc /dev/sda /dev/sdb /dev/sdc /dev/sdd
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
