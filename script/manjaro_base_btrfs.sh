@@ -3,10 +3,10 @@
 # Параметры установки, если нужно меняйте на свои (G - Гигабайт, M - Мегабайт):
 # disk     - Установочный диск
 # bootpart - Размер boot-раздела (минус означает раздел в конце диска)
-# kernel   - Версия ядра (linux510 - LTS-ядро, linux515 - Новая версия)
-disk=/dev/sda
-bootpart=300M
-kernel=linux515
+# kernel   - Версия ядра
+disk=$1
+bootpart=$2
+kernel=$3
 
 # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
 sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
