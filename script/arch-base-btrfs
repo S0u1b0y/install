@@ -108,6 +108,7 @@ fi
 # linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор,
 # btrfs-progs - Утилиты для btrfs.
+# Определяем из какого дистрибутива идет установка:
 if [ $(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"') = ManjaroLinux ]; then
     # Если ставим из Manjaro:
     basestrap /mnt base base-devel $kernel $kernel\-headers linux-firmware nano btrfs-progs
