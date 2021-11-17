@@ -50,7 +50,7 @@ if [ -d /sys/firmware/efi ]; then
 else
     ## Если BIOS:
     # Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
-    parted -s $disk -- mktable msdos \
+    parted -s $disk mktable msdos \
         mkpart primary ext4 1M $rootpart \
         mkpart primary ext4 $rootpart 100% \
     set 1 boot on
