@@ -19,8 +19,8 @@ mdadm --create --verbose /dev/mda --level=10 --raid-devices=4 /dev/sda /dev/sdb 
 
 # ***
 
-# Если создавали рейд утилитой mdadm, то обязательно ставим, иначе не загрузится система:
-basestrap /mnt mdadm
+# Если создавали рейд утилитой mdadm, то обязательно ставим до перезагрузки, иначе не загрузится система:
+pacman --noconfirm -S mdadm
 
 #-----------------------------------------------------------------
 
@@ -36,29 +36,17 @@ basestrap /mnt mdadm
 parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 mkfs.btrfs -f -L ArchRaid -d raid0 /dev/sda1 /dev/sdb1
-# Загрузчик:
-grub-install --target=i386-pc /dev/sda /dev/sdb
-sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
 
 # Raid1 на 2х дисках с меткой ArchRaid:
 parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 mkfs.btrfs -f -L ArchRaid -d raid1 /dev/sda1 /dev/sdb1
-# Загрузчик:
-grub-install --target=i386-pc /dev/sda /dev/sdb
-sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
 
 # Raid5 на 3х дисках с меткой ArchRaid:
 parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdc mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 mkfs.btrfs -f -L ArchRaid -d raid5 /dev/sda1 /dev/sdb1 /dev/sdc1
-# Загрузчик:
-grub-install --target=i386-pc /dev/sda /dev/sdb /dev/sdc
-sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
 
 # Raid10 на 4х дисках с меткой ArchRaid:
 parted -s /dev/sda mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
@@ -66,7 +54,15 @@ parted -s /dev/sdb mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdc mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 parted -s /dev/sdd mktable msdos mkpart primary btrfs 1M 100% set 1 boot on
 mkfs.btrfs -f -L ArchRaid -d raid10 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1
-# Загрузчик:
-grub-install --target=i386-pc /dev/sda /dev/sdb /dev/sdc /dev/sdd
+
+# Установка загрузчика:
+# Определяем UEFI или BIOS на компьютере:
+if [ -d /sys/firmware/efi ]; then
+    ## Если UEFI:
+    grub-install --target=x86_64-efi --bootloader-id=grub --efi-directory=/boot/efi
+else
+    ## Если BIOS:
+    grub-install --target=i386-pc /dev/sda /dev/sdb
+fi
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
