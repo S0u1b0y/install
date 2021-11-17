@@ -1,9 +1,11 @@
-## Zsh ##
+## ZSH ##
 # https://wiki.archlinux.org/title/zsh
 
-# ZSH и шрифты для неё:
-yay --noconfirm -S zsh ttf-meslo-nerd-font-powerlevel10k nerd-fonts-ubuntu-mono nerd-fonts-hack
+# ZSH и шрифт для неё:
+yay --noconfirm -S zsh ttf-meslo-nerd-font-powerlevel10k #nerd-fonts-ubuntu-mono nerd-fonts-hack
 
+# Идём в домашнюю папку:
+cd
 # Меняем командную оболочку на ZSH:
 chsh -s $(which zsh) ${USER}
 
@@ -118,17 +120,33 @@ source ~/.p10k.zsh
 echo -e '
 #### Aliases ####
 
-#Переопеделение Pacman для установки и удаления без подтверждения:
+# Переопеделение Pacman для установки и удаления без подтверждения:
 alias spacman="sudo pacman --noconfirm"
 
-#Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
 alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
 alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
 
-#Быстрое обновление (pup - Pacman UPdate)
+# Быстрое обновление (pup - Pacman UPdate)
 alias pup="sudo pacman -Syu"
 alias згз="sudo pacman -Syu"
 
-#Пинг делает только 5 запросов.
+# Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.zshrc
 source ~/.zshrc
+
+# ***
+
+## Tilix ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.zshrc
+source ~/.zshrc
+
+# ***
+
+# Интеграция темы Powerlevel10k со встроенным терминалом Code OSS:
+# {Меню} Файл -> Настроки -> Параметры -> Ввести в поиске:
+terminal.integrated.fontFamily - MesloLGS NF
+terminal.integrated.fontSize - 12
