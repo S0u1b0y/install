@@ -34,6 +34,15 @@ sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
 # Принудительно обновляем репозитории.
 pacman -Syy
 
+## Настроим GRUB:
+# Убираем загрузочное меню Grub, меняя GRUB_TIMEOUT с пяти секунд на ноль
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+# Что бы небыло ошибки (error: sparse file not allowed):
+sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
+sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
+# Генерируем файл конфигурации grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
 ## Локализуем систему и консоль:
 # Раскоментируем локали en_US и ru_RU в файле locale.gen
 sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
@@ -48,29 +57,6 @@ locale-gen
 ## Введем пароль root:
 echo '>>>> Enter root password <<<<'
 passwd
-
-## Установим GRUB:
-# Определяем UEFI или BIOS на компьютере:
-if [ -d /sys/firmware/efi ]; then
-    ## Если UEFI:
-    # Устанавливаем grub в систему
-    pacman --noconfirm -S grub efibootmgr
-    # Устанавливаем grub на диск /dev/sda
-    grub-install --target=x86_64-efi --bootloader-id=grub --efi-directory=/boot/efi
-else
-    ## Если BIOS:
-    # Устанавливаем grub в систему
-    pacman --noconfirm -S grub
-    # Устанавливаем grub на диск /dev/sda
-    grub-install --target=i386-pc /dev/sda
-fi
-# Убираем загрузочное меню Grub, меняя GRUB_TIMEOUT с пяти секунд на ноль
-sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-# Что бы небыло ошибки (error: sparse file not allowed):
-sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
-sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
-# Генерируем файл конфигурации grub
-grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Настроим sudo:
 # Убираем коментарий с группы %wheel.
@@ -97,7 +83,7 @@ systemctl enable sshd.service
 
 ## Микрокод процессора:
 # GenuineIntel - Intel, AuthenticAMD - AMD
-if [ $(lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
+if [ $(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
     pacman --noconfirm -S intel-ucode
 else
     pacman --noconfirm -S amd-ucode
