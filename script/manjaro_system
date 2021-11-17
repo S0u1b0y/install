@@ -1,34 +1,12 @@
 #!/bin/bash
 
-#-----------------------------------------------------------------
-
-### Персонализация ###
-
-# Определение переменных с персональными данными для дальнейшей установки, поменяйте на свои:
-username=user
-hostname=virt
-timezone=Europe/Moscow
-
-## Пропишем имя компьютера в сети (virtual - поменять на своё):
-echo "$hostname" > /etc/hostname
-echo "127.0.0.1    localhost" > /etc/hosts
-echo "::1          localhost" >> /etc/hosts
-echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
-
-## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
-echo ">>>> Enter $username password <<<<"
-passwd $username
-
-## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-hwclock --systohc --utc
-
-#-----------------------------------------------------------------
-
-## Введем пароль root:
-echo '>>>> Enter root password <<<<'
-passwd
+# Приём входных данных для дальнейшей установки:
+# username - Имя пользователя
+# hostname - Имя компьтера в сети
+# timezone - Часовой пояс
+username=$1
+hostname=$2
+timezone=$3
 
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
@@ -58,10 +36,29 @@ echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 # И генерируем локали
 locale-gen
 
+## Пропишем имя компьютера в сети (virtual - поменять на своё):
+echo "$hostname" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
+
+## Введем пароль root:
+echo '>>>> Enter root password <<<<'
+passwd
+
+## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
+echo ">>>> Enter $username password <<<<"
+passwd $username
+
 ## Настроим sudo:
 # Убираем коментарий с группы %wheel.
 pacman --noconfirm -S sudo
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
+
+## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+hwclock --systohc --utc
 
 ## Настроим сеть:
 # Устанавливаем демон (службу) dhcpcd
