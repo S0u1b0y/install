@@ -17,7 +17,7 @@ tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
 # Определяем UEFI или BIOS на компьютере:
-# Отмонтируем примонтированные диски
+# Если примонтированы диски, то отмонтируем их
 umount -R /mnt
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
