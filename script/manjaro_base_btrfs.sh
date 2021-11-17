@@ -16,9 +16,10 @@ Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' | \
 tee /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
-# Определяем UEFI или BIOS на компьютере:
-# Если примонтированы диски, то отмонтируем их
+# Если примонтированы диски, то отмонтируем их:
 umount -R /mnt
+
+# Определяем UEFI или BIOS на компьютере:
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Создаем два раздела Root(Остальное-sda1) и EFI(300Mb-sda2),
