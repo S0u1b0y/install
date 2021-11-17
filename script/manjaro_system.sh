@@ -24,15 +24,25 @@ echo '>>>> Enter root password <<<<'
 passwd
 
 ## Установим GRUB:
-# Устанавливаем grub в систему
-pacman --noconfirm -S grub
-# Устанавливаем grub на диск /dev/sda
-grub-install --target=i386-pc /dev/sda
+# Определяем UEFI или BIOS на компьютере:
+if [ -d /sys/firmware/efi ]; then
+    ## Если UEFI:
+    # Устанавливаем grub в систему
+    pacman --noconfirm -S grub efibootmgr
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=x86_64-efi --bootloader-id=grub --efi-directory=/boot/efi
+else
+    ## Если BIOS:
+    # Устанавливаем grub в систему
+    pacman --noconfirm -S grub
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=i386-pc /dev/sda
+fi
 # Убираем загрузочное меню Grub, меняя GRUB_TIMEOUT с пяти секунд на ноль
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
 # Что бы небыло ошибки (error: sparse file not allowed):
-#sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
-#sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
+sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
+sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
 # Генерируем файл конфигурации grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
