@@ -26,6 +26,10 @@ hwclock --systohc --utc
 
 #-----------------------------------------------------------------
 
+## Введем пароль root:
+echo '>>>> Enter root password <<<<'
+passwd
+
 ## Настроим Pacman:
 # Включаем "цветной" режим, раскоментируя параметр "Color",
 sed -i 's/#Color/Color/g' /etc/pacman.conf
@@ -53,10 +57,6 @@ echo 'LANG=ru_RU.UTF-8' > /etc/locale.conf
 echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 # И генерируем локали
 locale-gen
-
-## Введем пароль root:
-echo '>>>> Enter root password <<<<'
-passwd
 
 ## Настроим sudo:
 # Убираем коментарий с группы %wheel.
