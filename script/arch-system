@@ -78,7 +78,7 @@ pacman --noconfirm -S openssh
 systemctl enable sshd.service
 
 ## Микрокод процессора:
-# GenuineIntel - Intel, AuthenticAMD - AMD
+# Определяем установленный процессор (GenuineIntel - Intel, AuthenticAMD - AMD):
 if [ $(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
     pacman --noconfirm -S intel-ucode
 else
