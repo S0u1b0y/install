@@ -69,7 +69,7 @@ else
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
     # Устанавливаем grub в систему
     basestrap /mnt grub
-    # Устанавливаем grub на диск /dev/sda
+    # Устанавливаем grub на диск
     grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
