@@ -10,12 +10,6 @@
 # Перейдем в учётную запись рута:
 sudo su
 
-# Скачаем необходимые скрипты и дадим им право на запуск:
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
-chmod u+x arch*
-
 #-----------------------------------------------------------------
 
 ### Установка ###
@@ -26,17 +20,26 @@ chmod u+x arch*
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
 # Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела,
-# 3й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
-sh arch-base-btrfs /dev/sda 300M linux
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер boot/efi-раздела,
+# 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+sh arch-base-btrfs /dev/sda 300M 8192 linux
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
 # Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела,
-# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
-sh arch-base-ext4 /dev/sda 40G 300M linux
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер boot/efi-раздела,
+# 3й - размер boot/efi-раздела,
+# 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
 
 #-----------------------------------------------------------------
 
@@ -53,6 +56,7 @@ arch-chroot /mnt
 
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
@@ -253,45 +257,7 @@ java -version
 
 #-----------------------------------------------------------------
 
-## Подкачка (опционально) ##
-
-## Файл подкачки на Btrfs:
-# Создаем подтом @swap (строка 1)
-# Переходим в @swap (строка 2)
-# Создаём пустой файл подкачки (строка 3)
-# Отключаем копирование при записи для файла подкачки (строка 4)
-# Отключаем сжатие файла подкачки (строка 5)
-# Создаём файл нужного размера (строка 6)
-# Разрешаем доступ к файлу подкачки только root-у (строка 7)
-# Инициализируем файл подкачки и включаем его (строки 8-9)
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 10)
-sudo btrfs subvolume create /@swap
-cd /@swap
-sudo truncate -s 0 ./swapfile
-sudo chattr +C ./swapfile
-sudo btrfs property set ./swapfile compression none
-sudo dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
-sudo chmod 600 ./swapfile
-sudo mkswap ./swapfile
-sudo swapon ./swapfile
-echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-sudo mount -a
-
-## Файл подкачки на Ext4:
-# Переходим в mnt установленной системы (строка 1)
-# Создаём файл нужного размера (строка 2)
-# Разрешаем доступ к файлу подкачки только root-у (строка 3)
-# Инициализируем файл подкачки и включаем его (строки 4-5)
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 6)
-cd /mnt
-dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
-chmod 600 ./swapfile
-mkswap ./swapfile
-swapon ./swapfile
-echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-sudo mount -a
-
-## Zswap:
+## Zswap (опционально):
 # Устанавливаем (строка 1)
 # Раскоментируем параметры в файле конфигурации (строка 2)
 # Включим использование (строка 3)
