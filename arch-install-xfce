@@ -2,12 +2,12 @@
 
 ### Подготовка ###
 
-# Скачать образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
-# Или скачать образ EndeavourOS - https://endeavouros.com/latest-release/
-# Записать образ на флешку, например програмой Ventoy - https://github.com/ventoy/Ventoy/releases.
-# Загрузится с записанного образа.
-
-# Перейдем в учётную запись рута:
+# Скачиваем образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
+# Или скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
+# Записываем образ на флешку, например програмой Ventoy - https://github.com/ventoy/Ventoy/releases
+# Загружаемся с записанного образа,
+# Запускаем эмулятор терминала.
+# Переходим в учётную запись рута:
 sudo su
 
 #-----------------------------------------------------------------
@@ -18,8 +18,8 @@ sudo su
 
 ## Btrfs ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт два раздела: основной с двумя подтомами @root и @home и boot/efi
-# Для BIOS скрипт создаёт один основной раздел с двумя подтомами @root и @home
+# Для UEFI скрипт создаёт два раздела: основной с тремя подтомами @root, @home, @snapshot и boot/efi
+# Для BIOS скрипт создаёт один основной раздел с тремя подтомами @root, @home и @snapshot
 # Передаваемые скрипту параметры:
 # 1й - имя диска,
 # 2й - размер boot/efi-раздела,
@@ -43,21 +43,34 @@ sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
 
 #-----------------------------------------------------------------
 
-# Если вдруг, по какой-то причине, fstab не сгенерировался по UUID,
-# то командой blkid смотрим UUID диска /dev/sda и прописываем его в fstab вместо /dev/sda1 - nano /mnt/etc/fstab.
-
-# Чрутимся:
+## Чрутимся:
 # Если ставим из Manjaro
 manjaro-chroot /mnt
-# Если ставим из Arch
+# Если ставим из Endeavour или Arch
 arch-chroot /mnt
 
 #-----------------------------------------------------------------
 
-# Установка основной системы:
+## Установка основной системы ##
+
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
 cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
+
+#-----------------------------------------------------------------
+
+## Zswap - подкачка в оперативной памяти (Опционально) ##
+
+# Устанавливаем (строка 1)
+# Раскоментируем параметры в файле конфигурации (строка 2)
+# Включим использование (строка 3)
+# Отведем для zswap, вместо четверти, половину оперативной памяти (строка 4)
+# Включаем загрузку при старте системы (строка 5)
+pacman --noconfirm -S systemd-swap
+sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
+systemctl enable systemd-swap
 
 #-----------------------------------------------------------------
 
@@ -82,6 +95,7 @@ static domain_name_servers=$gateway" > /etc/dhcpcd.conf
 
 # Драйвер тачпада:
 pacman --noconfirm -S xf86-input-synaptics
+
 # Управление гибридной графикой Optimus Manager:
 yay -S optimus-manager optimus-manager-qt
 sudo systemctl enable optimus-manager
@@ -101,17 +115,13 @@ sudo systemctl enable optimus-manager
 # xfce4-weather-plugin - Плагин погоды,
 # tilix - Тайлинговый эмулятор терминала,
 # gedit - Простой текстовый редактор,
-# gnome-calculator - Калькулятор,
-# eog - Просмотр фото,
-# evince - Просмотр документов,
-# foliate - Читалка книг,
 # file-roller thunar-archive-plugin - Работа с архивами,
 # gnome-disk-utility - Управление дисками,
 # gnome-system-monitor - Мониторинг системы,
 # Удалим xfce4-terminal, т. к. вместо него установили tilix.
 sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
-    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator \
-    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit file-roller \
+    thunar-archive-plugin gnome-disk-utility gnome-system-monitor
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rns xfce4-terminal
 
@@ -136,8 +146,17 @@ sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 # Установим менеджер пакетов yay:
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
-# Дополнительный софт:
+# Дополнительные утилиты:
+# pamac-aur - GUI для управления пакетами,
+# menulibre - Настройка главного меню,
 yay --noconfirm -S pamac-aur menulibre
+
+# Дополнительные программы (Опционально):
+# foliate - Читалка книг,
+# gnome-calculator - Калькулятор,
+# eog - Просмотр фото,
+# evince - Просмотр документов.
+yay --noconfirm -S foliate gnome-calculator eog evince
 
 # Шрифты, иконки и курсоры:
 yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k
@@ -150,7 +169,7 @@ echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 ### Настройки ###
 
-# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
+# Установку и настройку ZSH см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -159,14 +178,18 @@ echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
-## Tilix для Bash ##
+# ***
+
+## Bash ##
+
+# Tilix #
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
 fi' >> ~/.bashrc
 source ~/.bashrc
 
-## Алиасы ##
+# Алиасы #
 echo -e '
 #### Aliases ####
 
@@ -184,6 +207,21 @@ alias згз="sudo pacman -Syu"
 # Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.bashrc
 source ~/.bashrc
+
+# ***
+
+## GRUB (Опционально) ##
+
+# Если есть ещё установленные системы, то устанавливаем дополнительно
+sudo pacman --noconfirm -S os-prober
+# И перегенерируем файл конфигурации grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Если нет других установленных систем, то убираем загрузочное меню Grub,
+# меняя GRUB_TIMEOUT с пяти секунд на ноль.
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+# И перегенерируем файл конфигурации grub
+grub-mkconfig -o /boot/grub/grub.cfg
 
 #-----------------------------------------------------------------
 
@@ -217,7 +255,7 @@ sudo systemctl enable --now cups.service
 sudo pacman --noconfirm -S qbittorrent
 
 # Java:
-sudo pacman --noconfirm -S jdk-openjdk
+sudo pacman --noconfirm -S jre-openjdk
 
 # Code OSS (free Visual Studio Code):
 yay -S code
@@ -258,20 +296,6 @@ java -version
 
 #-----------------------------------------------------------------
 
-## Zswap (опционально):
-# Устанавливаем (строка 1)
-# Раскоментируем параметры в файле конфигурации (строка 2)
-# Включим использование (строка 3)
-# Отведем для zswap, вместо четверти, половину оперативной памяти (строка 4)
-# Включаем загрузку при старте системы (строка 5)
-sudo pacman --noconfirm -S systemd-swap
-sudo sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
-sudo sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
-sudo sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
-sudo systemctl enable --now systemd-swap.service
-
-#-----------------------------------------------------------------
-
 ## Виртуализация (опционально) ##
 
 # VirtualBox стандартное ядро:
@@ -286,3 +310,43 @@ sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
 sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
 sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
 sudo systemctl restart libvirtd.service
+
+#-----------------------------------------------------------------
+
+#### Замена ядер ####
+
+# Обычное на LTS:
+# Сносим старое ядро
+sudo pacman --noconfirm -R linux linux-headers
+# Ставим новое ядро
+sudo pacman --noconfirm -S linux-lts linux-lts-headers
+# Переконфигурируем Grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+# Перезагружаемся
+sudo reboot
+
+# LTS на обычное:
+sudo pacman --noconfirm -R linux-lts linux-lts-headers
+sudo pacman --noconfirm -S linux linux-headers
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
+
+# ***
+
+## VirtualBox ##
+
+# Обычное на LTS:
+# Сносим vbox утилиты и старое ядро
+sudo pacman --noconfirm -R virtualbox-guest-utils linux linux-headers
+# Ставим новое ядро и vbox утилиты
+sudo pacman --noconfirm -S linux-lts linux-lts-headers virtualbox-guest-utils
+# Переконфигурируем Grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+# Перезагружаемся
+sudo reboot
+
+# LTS на обычное:
+sudo pacman --noconfirm -R virtualbox-guest-utils linux-lts linux-lts-headers
+sudo pacman --noconfirm -S linux linux-headers virtualbox-guest-utils
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
