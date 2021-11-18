@@ -139,6 +139,13 @@ cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && make
 # Дополнительный софт:
 yay --noconfirm -S pamac-aur menulibre
 
+# Шрифты, иконки и курсоры:
+yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k
+
+# Оформление QT5 в стиле GTK:
+yay --noconfirm -S qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
 #-----------------------------------------------------------------
 
 ### Настройки ###
@@ -177,17 +184,6 @@ alias згз="sudo pacman -Syu"
 # Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.bashrc
 source ~/.bashrc
-
-#-----------------------------------------------------------------
-
-## Оформление ##
-
-# Шрифты, иконки и курсоры:
-yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme
-
-# Оформление QT5 в стиле GTK:
-yay --noconfirm -S qt5ct qt6-base adwaita-qt
-echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 #-----------------------------------------------------------------
 
