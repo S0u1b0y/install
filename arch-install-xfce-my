@@ -1,0 +1,228 @@
+#### Установка Arch XFCE ####
+
+### Подготовка ###
+
+# Скачиваем образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
+# Или скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
+# Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
+# Переходим в учётную запись рута:
+sudo su
+
+#-----------------------------------------------------------------
+
+### Установка ###
+# Разметка, форматирование диска и установка базовой системы.
+
+## Btrfs ##
+# VirtualBox
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+sh arch-base-btrfs /dev/sda 300M 2048 linux
+# Main
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+sh arch-base-btrfs /dev/sda 300M 8192 linux
+
+# ***
+
+## Ext4 ##
+# VirtualBox
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+sh arch-base-ext4 /dev/sda 40G 300M 2048 linux
+# Main
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
+
+#-----------------------------------------------------------------
+
+## Чрутимся:
+# Manjaro
+manjaro-chroot /mnt
+# Arch
+arch-chroot /mnt
+
+#-----------------------------------------------------------------
+
+## Установка основной системы ##
+
+# VirtualBox
+cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+sh arch-system user virt Europe/Moscow
+# Main
+cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+sh arch-system soulboy main Europe/Moscow
+
+#-----------------------------------------------------------------
+
+## Zswap ##
+pacman --noconfirm -S systemd-swap
+sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
+systemctl enable systemd-swap
+
+#-----------------------------------------------------------------
+
+## Статический IP для VirualBox ##
+netface=enp0s3
+ipaddr=192.168.0.50
+gateway=192.168.0.100
+cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
+echo -e "interface $netface
+static ip_address=$ipaddr/24
+static routers=$gateway
+static domain_name_servers=$gateway" > /etc/dhcpcd.conf
+
+#-----------------------------------------------------------------
+
+## Установка XFCE ##
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
+    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator \
+    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+sudo systemctl enable lxdm.service
+sudo pacman --noconfirm -Rns xfce4-terminal
+
+#-----------------------------------------------------------------
+
+# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+reboot
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+#### После перезагрузки ####
+
+echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
+# Дополнительный софт:
+yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
+#-----------------------------------------------------------------
+
+## Настройки ##
+
+# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
+
+# Установим более низкий уровень использования файла подкачки (строка 1),
+# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
+# Зададим максимальный размер systemd-журнала (строка 3).
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
+sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+
+## Bash ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi
+
+#### Aliases ####
+
+# Переопеделение Pacman для установки и удаления без подтверждения:
+alias spac="sudo pacman --noconfirm"
+
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+
+# Быстрое обновление (pup - Pacman UPdate)
+alias pup="sudo pacman -Syu"
+alias згз="sudo pacman -Syu"
+
+# Пинг делает только 5 запросов.
+alias ping="ping -c 5"' >> ~/.bashrc
+source ~/.bashrc
+
+#-----------------------------------------------------------------
+
+## Программы для VirualBox ##
+
+yay --noconfirm -S ananicy nohang firefox firefox-i18n-ru
+sudo systemctl enable --now ananicy nohang
+
+#-----------------------------------------------------------------
+
+## Программы для Main ##
+
+yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui gwe
+sudo systemctl enable --now ananicy nohang
+
+# Браузеры:
+yay --noconfirm -S firefox firefox-i18n-ru librewolf chromium
+
+# Code OSS (free Visual Studio Code):
+yay -S code
+# Мои настройки:
+editor.wordWrap - On
+editor.fontSize - 12
+editor.dragAndDrop - false
+
+# Yandex Disk:
+yay --noconfirm -S yandex-disk && yandex-disk setup
+
+#-----------------------------------------------------------------
+
+## Игры ##
+
+# Steam:
+sudo pacman --noconfirm -S steam
+
+# PortProton (https://portwine-linux.ru/port-proton-linux):
+sudo pacman -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
+wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
+sh PortProton-97
+
+# Minecraft:
+yay -S multimc jre8-openjdk
+sudo archlinux-java set java-17-openjdk
+java -version
+
+#-----------------------------------------------------------------
+
+## Виртуализация ##
+
+# VirtualBox стандартное ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules-arch
+# VirtualBox LTS-ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
+
+# KVM (Qemu):
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo systemctl enable --now libvirtd dnsmasq
+sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
+sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo systemctl restart libvirtd.service
+
+#-----------------------------------------------------------------
+
+#### Замена ядер ####
+
+# Обычное на LTS:
+sudo pacman --noconfirm -R linux linux-headers
+sudo pacman --noconfirm -S linux-lts linux-lts-headers
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
+
+# LTS на обычное:
+sudo pacman --noconfirm -R linux-lts linux-lts-headers
+sudo pacman --noconfirm -S linux linux-headers
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
+
+# ***
+
+## VirtualBox ##
+
+# Обычное на LTS:
+sudo pacman --noconfirm -R virtualbox-guest-utils linux linux-headers
+sudo pacman --noconfirm -S linux-lts linux-lts-headers virtualbox-guest-utils
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
+
+# LTS на обычное:
+sudo pacman --noconfirm -R virtualbox-guest-utils linux-lts linux-lts-headers
+sudo pacman --noconfirm -S linux linux-headers virtualbox-guest-utils
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo reboot
