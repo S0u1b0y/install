@@ -26,7 +26,6 @@ sudo su
 # 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
 # 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
-chmod u+x arch-base-btrfs
 sh arch-base-btrfs /dev/sda 300M 8192 linux
 
 ## Ext4 ##
@@ -40,7 +39,6 @@ sh arch-base-btrfs /dev/sda 300M 8192 linux
 # 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
 # 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
-chmod u+x arch-base-ext4
 sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
 
 #-----------------------------------------------------------------
@@ -59,7 +57,6 @@ arch-chroot /mnt
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
-chmod u+x arch-system
 sh arch-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
