@@ -4,10 +4,12 @@
 # disk     - Установочный диск
 # rootpart - Размер root-раздела
 # bootpart - Размер boot-раздела
+# swapfile - Размер файла подкачки
 # kernel   - Версия ядра
 disk=$1
 rootpart=$2
 bootpart=$3
+swapfile=$3
 kernel=$4
 
 # Пропишем в конфиги Pacman'а репозитории Archlinux и русские зеркала:
@@ -114,6 +116,24 @@ fi
 
 ## Настроим параметры запуска системы на btrfs (Меняем udev на systemd):
 sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
+
+## Swapfile ##
+# Если параметр swapfile не 0, то создаём файл подкачки:
+if [ $swapfile != 0 ]; then
+    # Переходим в mnt установленной системы
+    cd /mnt/mnt
+    # Создаём файл нужного размера
+    dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+    # Разрешаем доступ к файлу подкачки только root-у
+    chmod 600 ./swapfile
+    # Инициализируем файл подкачки и включаем его
+    mkswap ./swapfile
+    swapon ./swapfile
+    # Прописываем в fstab, автомонтирование файла подкачки при загрузке системы 
+    echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    # Проверяем
+    swapon -s
+fi
 
 # Проверяем fstab:
 cat /mnt/etc/fstab
