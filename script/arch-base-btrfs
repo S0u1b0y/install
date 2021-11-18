@@ -147,7 +147,7 @@ if [ $swapfile != 0 ]; then
     sudo mkswap ./swapfile
     sudo swapon ./swapfile
     # Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
-    echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
     # Проверяем
     swapon -s
 fi
