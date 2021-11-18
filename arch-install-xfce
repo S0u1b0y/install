@@ -138,6 +138,9 @@ reboot
 # Автозагрузка LXDM:
 echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
 
+# No_Beep (Отключение, раздражающего звука, pc-спикера):
+echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
+
 # Создаем каталоги пользователя в домашней папке на английском языке:
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # То же самое, но на русском языке:
@@ -226,6 +229,10 @@ grub-mkconfig -o /boot/grub/grub.cfg
 #-----------------------------------------------------------------
 
 ## Программы ##
+
+## Plank ##
+# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
+sudo pacman --noconfirm -S plank
 
 # Ananicy - Управляет приоритетами приложений:
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
