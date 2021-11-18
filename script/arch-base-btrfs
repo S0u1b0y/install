@@ -122,6 +122,25 @@ else
     genfstab -U /mnt > /mnt/etc/fstab
 fi
 
+## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
+
+## Grub ##
+# Определяем UEFI или BIOS на компьютере:
+if [ -d /sys/firmware/efi ]; then
+    ## Если UEFI:
+    # Устанавливаем grub в систему
+    basestrap /mnt grub grub-btrfs efibootmgr
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
+else
+    ## Если BIOS:
+    # Устанавливаем grub в систему
+    basestrap /mnt grub grub-btrfs
+    # Устанавливаем grub на диск
+    grub-install --target=i386-pc --root-directory=/mnt $disk
+fi
+
 ## Swapfile ##
 # Если параметр swapfile не 0, то создаём файл подкачки:
 if [ $swapfile != 0 ]; then
@@ -147,9 +166,6 @@ if [ $swapfile != 0 ]; then
     # Проверяем
     swapon -s
 fi
-
-## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
 
 # Проверяем fstab:
 cat /mnt/etc/fstab
