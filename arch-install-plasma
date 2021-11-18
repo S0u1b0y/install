@@ -135,6 +135,12 @@ cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && make
 # Дополнительный софт:
 yay --noconfirm -S pamac-aur pamac-tray-icon-plasma
 
+# Шрифты, иконки и курсоры:
+yay --noconfirm -S qogir-icon-theme
+
+# Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
+sudo pacman --noconfirm -S plasma5-applets-weather-widget qt5-xmlpatterns
+
 #-----------------------------------------------------------------
 
 ### Настройки ###
@@ -166,16 +172,6 @@ alias згз="sudo pacman -Syu"
 # Пинг делает только 5 запросов.
 alias ping="ping -c 5"' >> ~/.bashrc
 source ~/.bashrc
-
-#-----------------------------------------------------------------
-
-## Оформление ##
-
-# Шрифты, иконки и курсоры:
-yay --noconfirm -S qogir-icon-theme
-
-# Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
-sudo pacman --noconfirm -S plasma5-applets-weather-widget qt5-xmlpatterns
 
 #-----------------------------------------------------------------
 
