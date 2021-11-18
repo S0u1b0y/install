@@ -1,4 +1,4 @@
-#### Установка Arch Plasma ####
+#### Установка Arch XFCE ####
 
 ### Подготовка ###
 
@@ -18,8 +18,8 @@ sudo su
 
 ## Btrfs ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
-# Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
+# Для UEFI скрипт создаёт два раздела: основной с двумя подтомами @root и @home и boot/efi
+# Для BIOS скрипт создаёт один основной раздел с двумя подтомами @root и @home
 # Передаваемые скрипту параметры:
 # 1й - имя диска,
 # 2й - размер boot/efi-раздела,
@@ -30,8 +30,8 @@ sh arch-base-btrfs /dev/sda 300M 8192 linux
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
-# Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
+# Для UEFI скрипт создаёт три раздела: root, home и boot/efi
+# Для BIOS скрипт создаёт два раздела: root, home
 # Передаваемые скрипту параметры:
 # 1й - имя диска,
 # 2й - размер root-раздела (для раздела home - всё остальное пространство),
@@ -56,7 +56,7 @@ arch-chroot /mnt
 
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
@@ -71,10 +71,10 @@ netface=enp0s3
 ipaddr=192.168.0.50
 gateway=192.168.0.100
 cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e "interface $netface" > /etc/dhcpcd.conf
-echo -e "static ip_address=$ipaddr/24" >> /etc/dhcpcd.conf
-echo -e "static routers=$gateway" >> /etc/dhcpcd.conf
-echo -e "static domain_name_servers=$gateway" >> /etc/dhcpcd.conf
+echo -e "interface $netface
+static ip_address=$ipaddr/24
+static routers=$gateway
+static domain_name_servers=$gateway" > /etc/dhcpcd.conf
 
 #-----------------------------------------------------------------
 
@@ -88,31 +88,32 @@ sudo systemctl enable optimus-manager
 
 #-----------------------------------------------------------------
 
-## Установка KDE Plasma ##
+## Установка XFCE ##
 
-# Минимальная установка:
-# sddm, sddm-kcm - Загрузчик и настройщик загрузчика,
-# plasma-desktop - Минимальная установка Plasma,
-# kscreen - Утилита управления мониторами,
-# powerdevil - Утилита управления питанием,
-# plasma-pa - Апплет управления звуком,
-# kinfocenter - Информация о системе,
-# plasma-systemmonitor - Системный монитор,
-# kinit - Ускорение запуска приложений KDE,
-# kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
-# konsole - Эмулятор терминала,
-# kwrite - Простой текстовый редактор,
-# kcalc - Калькулятор,
-# dolphin dolphin-plugins - Файловый менеджер,
-# plasma-browser-integration - Интеграция Plasma и популярных браузеров,
-# gwenview, kimageformats, qt5-imageformats - Просмотр фото,
-# okular, poppler-data - Просмотр документов,
+# xorg-server - Иксы,
+# xfce4 - XFCE,
+# lxdm - Загрузчик,
+# pavucontrol - Панель управления звуком Pulseaudio,
+# xfce4-xkb-plugin - Плагин раскладки клавиатуры,
+# xfce4-pulseaudio-plugin - Плагин управления звуком,
+# xfce4-clipman-plugin - Плагин расширенного буфера обмена,
+# xfce4-whiskermenu-plugin - Современное меню,
+# xfce4-weather-plugin - Плагин погоды,
+# tilix - Тайлинговый эмулятор терминала,
+# gedit - Простой текстовый редактор,
+# gnome-calculator - Калькулятор,
+# eog - Просмотр фото,
+# evince - Просмотр документов,
 # foliate - Читалка книг,
-# ark - Работа с архивами,
-sudo pacman --noconfirm -S sddm sddm-kcm plasma-desktop kscreen powerdevil plasma-pa kinfocenter \
-    plasma-systemmonitor kinit kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins \
-    plasma-browser-integration gwenview kimageformats qt5-imageformats okular poppler-data foliate ark
-sudo systemctl enable sddm.service
+# file-roller thunar-archive-plugin - Работа с архивами,
+# gnome-disk-utility - Управление дисками,
+# gnome-system-monitor - Мониторинг системы,
+# Удалим xfce4-terminal, т. к. вместо него установили tilix.
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
+    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator \
+    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+sudo systemctl enable lxdm.service
+sudo pacman --noconfirm -Rns xfce4-terminal
 
 #-----------------------------------------------------------------
 
@@ -124,6 +125,9 @@ reboot
 
 #### После перезагрузки ####
 
+# Автозагрузка LXDM:
+echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
+
 # Создаем каталоги пользователя в домашней папке на английском языке:
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # То же самое, но на русском языке:
@@ -132,9 +136,12 @@ sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 # Установим менеджер пакетов yay:
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
+# Дополнительный софт:
+yay --noconfirm -S pamac-aur menulibre
+
 #-----------------------------------------------------------------
 
-## Настройки ##
+### Настройки ###
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
 
@@ -145,46 +152,52 @@ echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
+## Tilix для Bash ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.bashrc
+source ~/.bashrc
+
+## Алиасы ##
+echo -e '
+#### Aliases ####
+
+# Переопеделение Pacman для установки и удаления без подтверждения:
+alias spac="sudo pacman --noconfirm"
+
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+
+# Быстрое обновление (pup - Pacman UPdate)
+alias pup="sudo pacman -Syu"
+alias згз="sudo pacman -Syu"
+
+# Пинг делает только 5 запросов.
+alias ping="ping -c 5"' >> ~/.bashrc
+source ~/.bashrc
+
 #-----------------------------------------------------------------
 
 ## Оформление ##
 
-# Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
-sudo pacman --noconfirm -S plasma5-applets-weather-widget qt5-xmlpatterns
-
 # Шрифты, иконки и курсоры:
-yay --noconfirm -S qogir-icon-theme
+yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme
+
+# Оформление QT5 в стиле GTK:
+yay --noconfirm -S qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 #-----------------------------------------------------------------
 
 ## Программы ##
-
-# Pamac:
-yay --noconfirm -S pamac-aur pamac-tray-icon-plasma
 
 # Ananicy - Управляет приоритетами приложений:
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
 
 # Nohang - Следит за потреблением озу, выгружая неиспользуемые процессы:
 yay --noconfirm -S nohang && sudo systemctl enable --now nohang
-
-# Bluetooth (опционально):
-sudo pacman --noconfirm -S bluedevil
-sudo systemctl enable --now bluetooth
-
-# Управление сетевыми соединениями (опционально):
-sudo pacman --noconfirm -S networkmanager plasma-nm
-sudo systemctl enable --now NetworkManager
-# Плагины NetworkManager для разных типов соединений (опционально):
-sudo pacman --noconfirm -S networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc
-
-# Брандмауэр (Firewall) и модуль управления для Plasma (опционально):
-sudo pacman --noconfirm -S ufw plasma-firewall
-sudo systemctl enable --now ufw.service
-
-# Если нужна поддержка принтера, то ставим:
-sudo pacman --noconfirm -S cups cups-pdf print-manager
-sudo systemctl enable --now cups.service
 
 # Браузеры:
 # Firefox
@@ -196,10 +209,13 @@ yay --noconfirm -S google-chrome
 # Chromium
 sudo pacman --noconfirm -S chromium
 
-# Мультимедиа:
-# audacious - Аудиоплеер,
-# mpv - Видеоплеер.
-sudo pacman --noconfirm -S audacious mpv
+# Bluetooth (опционально):
+sudo pacman --noconfirm -S blueman
+sudo systemctl enable --now bluetooth
+
+# Если нужна поддержка принтера, то ставим:
+pacman --noconfirm -S cups cups-pdf system-config-printer
+sudo systemctl enable --now cups.service
 
 # Torrent:
 sudo pacman --noconfirm -S qbittorrent
@@ -218,7 +234,7 @@ editor.dragAndDrop - false
 yay -S mediainfo mkvtoolnix-gui
 
 # Yandex Disk:
-yay -S yandex-disk && yandex-disk setup
+yay --noconfirm -S yandex-disk && yandex-disk setup
 
 # Мониторинг и разгон для nVidia карт Green With Envy:
 yay --noconfirm -S gwe
