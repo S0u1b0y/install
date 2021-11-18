@@ -28,7 +28,7 @@ Include = /etc/pacman.d/mirrorlist
 [community]
 Include = /etc/pacman.d/mirrorlist
 [multilib]
-Include = /etc/pacman.d/mirrorlist' | tee /etc/pacman.conf
+Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
 echo -e '## Russia
 Server = http://mirror.yandex.ru/archlinux/$repo/os/$arch
 Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
@@ -41,7 +41,7 @@ Server = https://mirror.surf/archlinux/$repo/os/$arch
 Server = http://mirror.nw-sys.ru/archlinux/$repo/os/$arch
 Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
 Server = http://mirrors.powernet.com.ru/archlinux/$repo/os/$arch
-Server = http://archlinux.zepto.cloud/$repo/os/$arch' | tee /etc/pacman.d/mirrorlist
+Server = http://archlinux.zepto.cloud/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy
 
 # Если примонтированы диски, то отмонтируем их
@@ -60,17 +60,20 @@ if [ -d /sys/firmware/efi ]; then
     mkfs.fat -F32 $disk\2
     # Примонтируем раздел sda1 в /mnt:
     mount $disk\1 /mnt
-    # Создаем два подтома @root и @home:
+    # Создаем три подтома @root, @home и @snapshot:
     btrfs subvolume create /mnt/@root
     btrfs subvolume create /mnt/@home
+    btrfs subvolume create /mnt/@snapshot
     # Отмонтируем раздел sda1:
     umount $disk\1
     # И примонтируем уже подтом @root в /mnt с доп. параметрам:
     mount $disk\1 /mnt -o subvol=@root,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
-    # Создаем каталоги /mnt/home и /mnt/boot/efi,
-    mkdir -p /mnt/{home,boot/efi}
+    # Создаем каталоги /mnt/home, /mnt/.snaphot и /mnt/boot/efi,
+    mkdir -p /mnt/{home,.snaphot,boot/efi}
     # Примонтируем подтом @home в /mnt/home с доп. параметрами:
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+    # Примонтируем подтом @snaphot в /mnt/.snaphot с доп. параметрами:
+    mount $disk\1 /mnt/.snaphot -o subvol=@snaphot,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
     # Примонтируем раздел sda2 в /mnt/boot/efi:
     mount $disk\2 /mnt/boot/efi
 else
@@ -83,17 +86,20 @@ else
     mkfs.btrfs -f $disk\1
     # Примонтируем раздел sda1 в /mnt:
     mount $disk\1 /mnt
-    # Создаем два подтома @root и @home:
+    # Создаем три подтома @root, @home и @snapshot:
     btrfs subvolume create /mnt/@root
     btrfs subvolume create /mnt/@home
+    btrfs subvolume create /mnt/@snapshot
     # Отмонтируем раздел sda1:
     umount $disk\1
     # И примонтируем уже подтом @root в /mnt с доп. параметрам:
     mount $disk\1 /mnt -o subvol=@root,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
-    # Создаем каталог /mnt/home:
-    mkdir /mnt/home
+    # Создаем каталоги /mnt/home и /mnt/.snaphot:
+    mkdir -p /mnt/{home,.snaphot}
     # Примонтируем подтом @home в /mnt/home с доп. параметрами:
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+    # Примонтируем подтом @snaphot в /mnt/.snaphot с доп. параметрами:
+    mount $disk\1 /mnt/.snaphot -o subvol=@snaphot,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
 fi
 
 # Ставим базовую систему:
@@ -114,25 +120,6 @@ else
     pacstrap /mnt base base-devel $kernel $kernel\-headers linux-firmware nano wget btrfs-progs
     # Генерируем fstab по UUID:
     genfstab -U /mnt > /mnt/etc/fstab
-fi
-
-## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
-
-## Grub ##
-# Определяем UEFI или BIOS на компьютере:
-if [ -d /sys/firmware/efi ]; then
-    ## Если UEFI:
-    # Устанавливаем grub в систему
-    basestrap /mnt grub efibootmgr
-    # Устанавливаем grub на диск /dev/sda
-    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
-else
-    ## Если BIOS:
-    # Устанавливаем grub в систему
-    basestrap /mnt grub
-    # Устанавливаем grub на диск
-    grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
 ## Swapfile ##
@@ -160,6 +147,9 @@ if [ $swapfile != 0 ]; then
     # Проверяем
     swapon -s
 fi
+
+## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
 
 # Проверяем fstab:
 cat /mnt/etc/fstab
