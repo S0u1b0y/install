@@ -1,7 +1,7 @@
 ## ZSH ##
 # https://wiki.archlinux.org/title/zsh
 
-# ZSH и шрифт для неё:
+# Установим ZSH и шрифт для неё:
 yay --noconfirm -S zsh ttf-meslo-nerd-font-powerlevel10k #nerd-fonts-ubuntu-mono nerd-fonts-hack
 
 # Идём в домашнюю папку:
