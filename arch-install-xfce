@@ -18,8 +18,8 @@ sudo su
 
 ## Btrfs ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
-# Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
+# Для UEFI скрипт создаёт два раздела: основной с двумя подтомами @root и @home и boot/efi
+# Для BIOS скрипт создаёт один основной раздел с двумя подтомами @root и @home
 # Передаваемые скрипту параметры:
 # 1й - имя диска,
 # 2й - размер boot/efi-раздела,
@@ -30,8 +30,8 @@ sh arch-base-btrfs /dev/sda 300M 8192 linux
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
-# Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
+# Для UEFI скрипт создаёт три раздела: root, home и boot/efi
+# Для BIOS скрипт создаёт два раздела: root, home
 # Передаваемые скрипту параметры:
 # 1й - имя диска,
 # 2й - размер root-раздела (для раздела home - всё остальное пространство),
@@ -56,7 +56,7 @@ arch-chroot /mnt
 
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
@@ -136,18 +136,14 @@ sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 # Установим менеджер пакетов yay:
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
+# Дополнительный софт:
+yay --noconfirm -S pamac-aur menulibre
+
 #-----------------------------------------------------------------
 
-## Настройки ##
+### Настройки ###
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
-
-## Tilix для Bash ##
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' >> ~/.bashrc
-source ~/.bashrc
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -156,23 +152,46 @@ echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
+## Tilix для Bash ##
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.bashrc
+source ~/.bashrc
+
+## Алиасы ##
+echo -e '
+#### Aliases ####
+
+# Переопеделение Pacman для установки и удаления без подтверждения:
+alias spac="sudo pacman --noconfirm"
+
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+
+# Быстрое обновление (pup - Pacman UPdate)
+alias pup="sudo pacman -Syu"
+alias згз="sudo pacman -Syu"
+
+# Пинг делает только 5 запросов.
+alias ping="ping -c 5"' >> ~/.bashrc
+source ~/.bashrc
+
 #-----------------------------------------------------------------
 
 ## Оформление ##
+
+# Шрифты, иконки и курсоры:
+yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme
 
 # Оформление QT5 в стиле GTK:
 yay --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
-# Шрифты, иконки и курсоры:
-yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme
-
 #-----------------------------------------------------------------
 
 ## Программы ##
-
-# Дополнительный софт:
-yay --noconfirm -S pamac-aur menulibre
 
 # Ananicy - Управляет приоритетами приложений:
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
