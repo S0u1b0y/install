@@ -76,7 +76,7 @@ static domain_name_servers=$gateway" > /etc/dhcpcd.conf
 ## Установка XFCE ##
 sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
     xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit gnome-calculator \
-    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor
+    eog evince foliate file-roller thunar-archive-plugin gnome-disk-utility gnome-system-monitor plank
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rns xfce4-terminal
 
