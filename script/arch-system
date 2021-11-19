@@ -98,10 +98,10 @@ elif [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
 fi
 
 ## Микрокод процессора:
-# Определяем установленный процессор (GenuineIntel - Intel, AuthenticAMD - AMD)
-if [ $(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
+# Определяем установленный процессор
+if   [ $(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+') = GenuineIntel ]; then
     pacman --noconfirm -S intel-ucode
-else
+elif [ $(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+') = AuthenticAMD ]; then
     pacman --noconfirm -S amd-ucode
 fi
 
