@@ -5,6 +5,7 @@
 # Скачиваем образ Manjaro Minimal - https://manjaro.org/downloads/official/xfce/
 # Или скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
+
 # Переходим в учётную запись рута:
 sudo su
 
@@ -62,21 +63,18 @@ systemctl enable systemd-swap
 #-----------------------------------------------------------------
 
 ## Статический IP для VirualBox ##
-netface=enp0s3
-ipaddr=192.168.0.50
-gateway=192.168.0.100
 cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e "interface $netface
-static ip_address=$ipaddr/24
-static routers=$gateway
-static domain_name_servers=$gateway" > /etc/dhcpcd.conf
+echo -e "interface enp0s3
+static ip_address=192.168.0.50/24
+static routers=192.168.0.100
+static domain_name_servers=192.168.0.100" > /etc/dhcpcd.conf
 
 #-----------------------------------------------------------------
 
 ## Установка XFCE ##
-sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xfce4-xkb-plugin xfce4-pulseaudio-plugin \
-    xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin tilix gedit file-roller \
-    thunar-archive-plugin gnome-disk-utility gnome-system-monitor plank
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol tilix gnome-disk-utility \
+    thunar-archive-plugin xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin \
+    xfce4-whiskermenu-plugin xfce4-weather-plugin
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rns xfce4-terminal
 
@@ -90,26 +88,9 @@ reboot
 
 #### После перезагрузки ####
 
-echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
-echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
-echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
-sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
-sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
-sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
-
-# Дополнительный софт:
-yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
-echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
-
-#-----------------------------------------------------------------
-
 ## Настройки ##
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
-
-## Plank ##
-# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
 
 ## Bash ##
 echo -e '\n#Для терминала Tilix
@@ -134,25 +115,40 @@ alias згз="sudo pacman -Syu"
 alias ping="ping -c 5"' >> ~/.bashrc
 source ~/.bashrc
 
+# Убираем меню grub
+sudo sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
+echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
+sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
+yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
 #-----------------------------------------------------------------
 
 ## Программы для VirualBox ##
 
-yay --noconfirm -S ananicy nohang firefox firefox-i18n-ru
+yay --noconfirm -S ananicy nohang librewolf-bin
 sudo systemctl enable --now ananicy nohang
+autoremove
 
 #-----------------------------------------------------------------
 
 ## Программы для Main ##
 
 # Дополнительный софт (Опционально):
-yay --noconfirm -S gnome-calculator eog evince foliate pamac-aur menulibre
-
-yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui gwe
+yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate
+yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui cherrytree
 sudo systemctl enable --now ananicy nohang
 
 # Браузеры:
-yay --noconfirm -S firefox firefox-i18n-ru librewolf chromium
+yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
 # Code OSS (free Visual Studio Code):
 yay -S code
@@ -161,8 +157,18 @@ editor.wordWrap - On
 editor.fontSize - 12
 editor.dragAndDrop - false
 
+# Plank:
+# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
+sudo pacman --noconfirm -S plank
+
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
+
+# gnome-system-monitor - Мониторинг системы.
+yay --noconfirm -S gnome-system-monitor
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
@@ -177,9 +183,9 @@ wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_sc
 sh PortProton-97
 
 # Minecraft:
-yay -S multimc jre8-openjdk
+yay --noconfirm -S multimc5 jre8-openjdk
 sudo archlinux-java set java-17-openjdk
-java -version
+archlinux-java status
 
 #-----------------------------------------------------------------
 
