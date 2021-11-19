@@ -89,7 +89,7 @@ else
 fi
 
 # Ставим базовую систему:
-# base, base-devel - Базовая система,
+# base, base-devel - Базовая система и пакеты для компиляции,
 # $kernel $kernel\-headers - Ядро (см. переменную kernel),
 # linux-firmware - Драйвера,
 # nano - Простой консольный текстовый редактор.
@@ -97,14 +97,20 @@ fi
 # Определяем из какого дистрибутива идет установка:
 if [ $(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"') = ManjaroLinux ]; then
     # Если ставим из Manjaro:
-    basestrap /mnt base base-devel $kernel $kernel\-headers linux-firmware nano wget
+    basestrap /mnt base base-devel $kernel $kernel\-headers nano wget
     # Генерируем fstab по UUID:
     fstabgen -U /mnt > /mnt/etc/fstab
 else
     # Если ставим из Arch:
-    pacstrap /mnt base base-devel $kernel $kernel\-headers linux-firmware nano wget
+    pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget
     # Генерируем fstab по UUID:
     genfstab -U /mnt > /mnt/etc/fstab
+fi
+
+# Определяем по видеокарте виртуальную машину
+# И если компьютер не виртуальный, то ставим пакет драйверов, на виртуальном он не нужен.
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') != *' VMware '* ]]; then
+    basestrap /mnt linux-firmware
 fi
 
 ## Настроим параметры запуска системы на btrfs (Меняем udev на systemd):
