@@ -15,9 +15,11 @@ sudo su
 # Разметка, форматирование диска и установка базовой системы.
 
 ## Btrfs ##
+
 # VirtualBox
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
 sh arch-base-btrfs /dev/sda 300M 2048 linux
+
 # Main
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
 sh arch-base-btrfs /dev/sda 300M 8192 linux
@@ -25,9 +27,11 @@ sh arch-base-btrfs /dev/sda 300M 8192 linux
 # ***
 
 ## Ext4 ##
+
 # VirtualBox
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
 sh arch-base-ext4 /dev/sda 40G 300M 2048 linux
+
 # Main
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
 sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
@@ -47,6 +51,7 @@ arch-chroot /mnt
 # VirtualBox
 cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
+
 # Main
 cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system soulboy main Europe/Moscow
