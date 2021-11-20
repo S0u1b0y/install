@@ -4,10 +4,12 @@
 # disk     - Установочный диск
 # rootpart - Размер root-раздела
 # bootpart - Размер boot-раздела
+# swapfile - Размер файла подкачки
 # kernel   - Версия ядра
 disk=$1
 rootpart=$2
 bootpart=$3
+swapfile=$3
 kernel=$4
 
 # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
@@ -41,10 +43,6 @@ if [ -d /sys/firmware/efi ]; then
     mount $disk\2 /mnt/home
     # Примонтируем раздел sda3 в /mnt/boot/efi:
     mount $disk\3 /mnt/boot/efi
-    # Устанавливаем grub в систему
-    basestrap /mnt grub efibootmgr
-    # Устанавливаем grub на диск /dev/sda
-    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
 else
     ## Если BIOS:
     # Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
@@ -61,23 +59,69 @@ else
     mkdir -p /mnt/home
     # Примонтируем раздел sda2 в /mnt/home,
     mount $disk\2 /mnt/home
+fi
+
+# Ставим базовую систему:
+# base, base-devel - Базовая система и пакеты для компиляции,
+# $kernel $kernel\-headers - Ядро (см. переменную kernel),
+# linux-firmware - Драйвера,
+# nano - Простой консольный текстовый редактор.
+# wget - Консольный загрузчик,
+# Определяем из какого дистрибутива идет установка:
+if [ $(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"') = ManjaroLinux ]; then
+    # Если ставим из Manjaro:
+    basestrap /mnt base base-devel $kernel $kernel\-headers nano wget
+    # Генерируем fstab по UUID:
+    fstabgen -U /mnt > /mnt/etc/fstab
+else
+    # Если ставим из Arch:
+    pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget
+    # Генерируем fstab по UUID:
+    genfstab -U /mnt > /mnt/etc/fstab
+fi
+
+# Определяем по видеокарте виртуальную машину
+# И если компьютер не виртуальный, то ставим пакет драйверов, на виртуальном он не нужен.
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') != *' VMware '* ]]; then
+    basestrap /mnt linux-firmware
+fi
+
+## Настроим параметры запуска системы на ext4 (Меняем udev на systemd):
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
+
+## Grub ##
+# Определяем UEFI или BIOS на компьютере:
+if [ -d /sys/firmware/efi ]; then
+    ## Если UEFI:
+    # Устанавливаем grub в систему
+    basestrap /mnt grub efibootmgr
+    # Устанавливаем grub на диск /dev/sda
+    grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
+else
+    ## Если BIOS:
     # Устанавливаем grub в систему
     basestrap /mnt grub
     # Устанавливаем grub на диск
     grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
-# Ставим базовую систему:
-# base, base-devel - Базовая система,
-# $kernel $kernel\-headers - Ядро (см. переменную kernel),
-# nano - Простой консольный текстовый редактор.
-basestrap /mnt base base-devel $kernel $kernel\-headers nano
-
-# Генерируем fstab по UUID:
-fstabgen -U /mnt > /mnt/etc/fstab
-
-## Настроим параметры запуска системы на ext4 (Меняем udev на systemd):
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
+## Swapfile ##
+# Если параметр swapfile не 0, то создаём файл подкачки:
+if [ $swapfile != 0 ]; then
+    # Переходим в mnt установленной системы
+    cd /mnt/mnt
+    # Создаём файл нужного размера
+    dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+    # Разрешаем доступ к файлу подкачки только root-у
+    chmod 600 ./swapfile
+    # Инициализируем файл подкачки и включаем его
+    mkswap ./swapfile
+    swapon ./swapfile
+    # Прописываем в fstab, автомонтирование файла подкачки при загрузке системы 
+    echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
+    # Проверяем
+    swapon -s
+fi
 
 # Проверяем fstab:
 cat /mnt/etc/fstab
