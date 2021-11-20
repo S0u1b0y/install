@@ -41,6 +41,25 @@ sh arch-base ext4 /dev/sda linux 8192 300M 40G
 
 #-----------------------------------------------------------------
 
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер boot/efi-раздела,
+# 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+#wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+#sh arch-base-btrfs /dev/sda 300M 8192 linux
+
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер root-раздела (для раздела home - всё остальное пространство),
+# 3й - размер boot/efi-раздела,
+# 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+#wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+#sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
+
+#-----------------------------------------------------------------
+
 ## Чрутимся:
 # Если ставим из Manjaro
 manjaro-chroot /mnt
@@ -52,7 +71,8 @@ arch-chroot /mnt
 ## Установка основной системы ##
 
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
-cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+cd /tmp
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
@@ -117,7 +137,6 @@ sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol thunar-archive-plu
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
     xfce4-weather-plugin gnome-disk-utility
 sudo systemctl enable lxdm.service
-sudo pacman --noconfirm -Rns xfce4-terminal
 
 #-----------------------------------------------------------------
 
