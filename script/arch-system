@@ -129,4 +129,5 @@ pacman --noconfirm -S git curl mc htop neofetch
 ## Оформление ##
 
 # Шрифты:
-sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto \
+    ttf-roboto-mono noto-fonts
