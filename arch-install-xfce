@@ -37,7 +37,7 @@ sh arch-base btrfs /dev/sda linux 8192 300M
 # Для BIOS скрипт создаёт два раздела: root, home
 # Передаваемые скрипту параметры смотри в описании btrfs
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
-sh arch-base btrfs /dev/sda linux 8192 300M 40G
+sh arch-base ext4 /dev/sda linux 8192 300M 40G
 
 #-----------------------------------------------------------------
 
