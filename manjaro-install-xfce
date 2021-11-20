@@ -101,22 +101,16 @@ sudo systemctl enable optimus-manager
 # xorg-server - Иксы,
 # xfce4 - Минимальная установка XFCE,
 # lxdm - Загрузчик,
-# tilix - Тайлинговый эмулятор терминала,
-# xed - Простой текстовый редактор X-Apps,
 # pavucontrol - Панель управления звуком Pulseaudio,
-# galculator - Калькулятор,
+# tilix - Тайлинговый эмулятор терминала,
+# thunar-archive-plugin - Работа с архивами,
 # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-whiskermenu-plugin - Современное меню,
 # xfce4-weather-plugin - Плагин показа погоды,
-# menulibre - Редактор меню,
-# xviewer xviewer-plugins - Просмотр фото X-Apps,
-# xreader - Просмотр документов X-Apps,
-# foliate - Читалка книг,
-# file-roller thunar-archive-plugin - Работа с архивами,
 # gnome-disk-utility - Управление дисками,
-# gnome-system-monitor - Мониторинг системы.
+# menulibre - Редактор меню.
 sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol tilix thunar-archive-plugin \
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
     xfce4-weather-plugin gnome-disk-utility menulibre
@@ -308,7 +302,8 @@ sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules
 sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
 
 # KVM (Qemu):
-sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu \
+    qemu-arch-extra qemu-guest-agent ovmf vde2
 sudo systemctl enable --now libvirtd dnsmasq
 sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
 sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
