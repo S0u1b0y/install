@@ -5,12 +5,6 @@
 # Перейдем в учётную запись рута:
 sudo su
 
-# Скачаем необходимые скрипты и дадим им право на запуск:
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-btrfs"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-ext4"
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-system"
-chmod u+x manjaro*
-
 #-----------------------------------------------------------------
 
 ### Установка ###
@@ -23,6 +17,7 @@ chmod u+x manjaro*
 # Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
 # Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела,
 # 3й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-btrfs"
 sh manjaro-base-btrfs /dev/sda 300M linux515
 
 ## Ext4 ##
@@ -31,12 +26,10 @@ sh manjaro-base-btrfs /dev/sda 300M linux515
 # Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
 # Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела,
 # 4й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-ext4"
 sh manjaro-base-ext4 /dev/sda 40G 300M linux515
 
 #-----------------------------------------------------------------
-
-# Если вдруг, по какой-то причине, fstab не сгенерировался по UUID,
-# то командой blkid смотрим UUID диска /dev/sdX и прописываем его в fstab вместо /dev/sdaX - nano /mnt/etc/fstab.
 
 # Чрутимся:
 manjaro-chroot /mnt
@@ -45,6 +38,7 @@ manjaro-chroot /mnt
 
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-system"
 sh manjaro-system user virt Europe/Moscow
 
 #-----------------------------------------------------------------
