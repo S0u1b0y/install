@@ -14,40 +14,20 @@ swapfile=$4
 bootpart=$5
 rootpart=$6
 
+#-----------------------------------------------------------------
 
-# Пропишем в конфиги Pacman'а репозитории Archlinux и русские зеркала:
-# (Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/)
-echo -e '[options]
-HoldPkg = pacman glibc
-Architecture = auto
-Color
-CheckSpace
-VerbosePkgLists
-ParallelDownloads = 10
-SigLevel = Required DatabaseOptional
-LocalFileSigLevel = Optional
-[core]
-Include = /etc/pacman.d/mirrorlist
-[extra]
-Include = /etc/pacman.d/mirrorlist
-[community]
-Include = /etc/pacman.d/mirrorlist
-[multilib]
-Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-echo -e '## Russia
-Server = http://mirror.yandex.ru/archlinux/$repo/os/$arch
-Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
-Server = http://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-Server = http://mirror.rol.ru/archlinux/$repo/os/$arch
-Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
-Server = http://mirror.surf/archlinux/$repo/os/$arch
-Server = https://mirror.surf/archlinux/$repo/os/$arch
-Server = http://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-Server = http://mirrors.powernet.com.ru/archlinux/$repo/os/$arch
-Server = http://archlinux.zepto.cloud/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-pacman --noconfirm -Syy
+## Определение переменных ##
+
+# Определение операционной системы Manjaro или Arch:
+os=$(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"')
+# Определяем по видеокарте виртуальная или реальная машина:
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
+    comp=virtual
+else
+    comp=real
+fi
+
+#-----------------------------------------------------------------
 
 # Если примонтированы диски, то отмонтируем их
 umount -R /mnt
@@ -56,7 +36,7 @@ umount -R /mnt
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     if [ $filesystem = btrfs ]; then
-        # Создаем два раздела Root(Остальное-sda1) и EFI(300Mb-sda2),
+        # Создаем два раздела Root и EFI,
         parted -s $disk -- mktable gpt \
             mkpart Root btrfs 1M \-$bootpart \
             mkpart EFI fat32 \-$bootpart 100% \
@@ -83,7 +63,7 @@ if [ -d /sys/firmware/efi ]; then
         # Примонтируем раздел sda2 в /mnt/boot/efi:
         mount $disk\2 /mnt/boot/efi
     elif [ $filesystem = ext4 ]; then
-        # Создаем три раздела Root(40Gb-sda1), Home(Остальное-sda2) и EFI(300Mb-sda3):
+        # Создаем три раздела Root, Home и EFI:
         parted -s $disk -- mktable gpt \
             mkpart Root ext4 1M $rootpart \
             mkpart Home ext4 $rootpart \-$bootpart \
@@ -128,7 +108,7 @@ else
         # Примонтируем подтом @snaphot в /mnt/.snaphot с доп. параметрами:
         mount $disk\1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
     elif [ $filesystem = ext4 ]; then
-        # Создаем два раздела Root(40Gb-sda1) и Home(Остальное-sda2):
+        # Создаем два раздела Root и Home:
         parted -s $disk mktable msdos \
             mkpart primary ext4 1M $rootpart \
             mkpart primary ext4 $rootpart 100% \
@@ -147,47 +127,64 @@ fi
 
 # Ставим базовую систему:
 # base, base-devel - Базовая система и пакеты для компиляции,
-# $kernel $kernel\-headers - Ядро (см. переменную kernel),
-# linux-firmware - Драйвера,
+# $kernel $kernel\-headers - Ядро,
 # nano - Простой консольный текстовый редактор,
-# wget - Консольный загрузчик,
-# btrfs-progs - Утилиты для btrfs.
+# wget - Консольный загрузчик.
 # Определяем из какого дистрибутива идет установка:
-if [ $(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"') = ManjaroLinux ]; then
+if [ $os = ManjaroLinux ]; then
     # Если ставим из Manjaro:
-    basestrap /mnt base base-devel $kernel $kernel\-headers nano wget btrfs-progs
+    basestrap /mnt base base-devel $kernel $kernel\-headers nano wget
     # Генерируем fstab по UUID:
     fstabgen -U /mnt > /mnt/etc/fstab
-else
+elif [ $os = Arch ]; then
     # Если ставим из Arch:
-    pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget btrfs-progs
+    pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget
     # Генерируем fstab по UUID:
     genfstab -U /mnt > /mnt/etc/fstab
 fi
 
-# Определяем по видеокарте виртуальную машину
-# И если компьютер не виртуальный, то ставим пакет драйверов, на виртуальном он не нужен.
-if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') != *' VMware '* ]]; then
-    basestrap /mnt linux-firmware
+# При установке Arch если компьютер реальный, то ставим пакет драйверов linux-firmware
+# на виртуальном компьютере он не нужен, а в Manjaro автоматически ставится в пакете base.
+if [ $os = Arch ]; then
+    if [ $comp = real ]; then
+        # Если ставим из Manjaro, то используем скрипт basestrap
+        if [ $os = ManjaroLinux ]; then basestrap /mnt linux-firmware fi
+        # Если ставим из EndeavourOS (Arch), то используем скрипт pacstrap
+        if [ $os = Arch ]; then pacstrap /mnt linux-firmware fi
+    fi
 fi
 
-## Настроим параметры запуска системы на btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
-sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
+## Настроим параметры запуска системы:
+if [ $filesystem = btrfs ]; then
+    # На btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
+    sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
+elif [ $filesystem = ext4 ]; then
+    # На ext4 (Меняем udev на systemd):
+    sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
+fi
 
 ## Grub ##
 # Определяем UEFI или BIOS на компьютере:
 if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Устанавливаем grub в систему
-    basestrap /mnt grub grub-btrfs efibootmgr
-    # Устанавливаем grub на диск /dev/sda
+    if [ $os = ManjaroLinux ]; then basestrap /mnt grub efibootmgr fi
+    if [ $os = Arch ]; then pacstrap /mnt grub efibootmgr fi
+    # Устанавливаем grub на диск
     grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
 else
     ## Если BIOS:
     # Устанавливаем grub в систему
-    basestrap /mnt grub grub-btrfs
+    if [ $os = ManjaroLinux ]; then basestrap /mnt grub fi
+    if [ $os = Arch ]; then pacstrap /mnt grub fi
     # Устанавливаем grub на диск
     grub-install --target=i386-pc --root-directory=/mnt $disk
+fi
+
+# Для btrfs установим утилиты
+if [ $filesystem = btrfs ]; then
+    if [ $os = ManjaroLinux ]; then basestrap /mnt btrfs-progs grub-btrfs fi
+    if [ $os = Arch ]; then pacstrap /mnt btrfs-progs grub-btrfs fi
 fi
 
 ## Swapfile ##
@@ -229,5 +226,6 @@ if [ $swapfile != 0 ]; then
 fi
 
 # Проверяем:
+lsblk
 swapon -s
 cat /mnt/etc/fstab
