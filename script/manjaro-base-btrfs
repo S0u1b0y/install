@@ -110,7 +110,7 @@ if [ -d /sys/firmware/efi ]; then
     ## Если UEFI:
     # Устанавливаем grub в систему
     basestrap /mnt grub grub-btrfs efibootmgr
-    # Устанавливаем grub на диск /dev/sda
+    # Устанавливаем grub на диск
     grub-install --target=x86_64-efi --root-directory=/mnt --bootloader-id=grub --efi-directory=/boot/efi
 else
     ## Если BIOS:
