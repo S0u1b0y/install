@@ -71,7 +71,7 @@ pacman --noconfirm -S sudo
 # Убираем коментарий с группы %wheel.
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 
-## Установим часовой пояс и время по UTC (Europe/Moscow - поменять на своё):
+## Установим часовой пояс:
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 
 ## Настроим сеть:
