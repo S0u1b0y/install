@@ -35,7 +35,7 @@ sh arch-base btrfs /dev/sda linux 8192 300M
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт три раздела: root, home и boot/efi
 # Для BIOS скрипт создаёт два раздела: root, home
-# Передаваемые скрипту параметры те же, что и у btrfs
+# Передаваемые скрипту параметры смотри в описании btrfs
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
 sh arch-base btrfs /dev/sda linux 8192 300M 40G
 
