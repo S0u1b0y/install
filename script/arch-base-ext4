@@ -113,7 +113,7 @@ if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') != *' VMware '* ]]; then
     basestrap /mnt linux-firmware
 fi
 
-## Настроим параметры запуска системы на btrfs (Меняем udev на systemd):
+## Настроим параметры запуска системы на ext4 (Меняем udev на systemd):
 sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
 
 ## Grub ##
