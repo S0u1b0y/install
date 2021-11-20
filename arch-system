@@ -14,7 +14,9 @@ timezone=$3
 
 # Определение операционной системы Manjaro или Arch:
 os=$(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"')
+# Определение видеокаты:
 videocard=$(LC_ALL=C lspci | grep -i '.* VGA .*')
+# Определение процессора:
 processor=$(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+')
 
 #-----------------------------------------------------------------
@@ -51,7 +53,7 @@ echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 # И генерируем локали
 locale-gen
 
-## Пропишем имя компьютера в сети (virtual - поменять на своё):
+## Пропишем имя компьютера в сети:
 echo "$hostname" > /etc/hostname
 echo "127.0.0.1    localhost" > /etc/hosts
 echo "::1          localhost" >> /etc/hosts
@@ -61,7 +63,7 @@ echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
 echo '>>>> Enter root password <<<<'
 passwd
 
-## Добавляем пользователя и задаем ему пароль (user - поменять на своё):
+## Добавляем пользователя и задаем ему пароль:
 useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
 echo ">>>> Enter $username password <<<<"
 passwd $username
