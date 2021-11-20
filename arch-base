@@ -46,6 +46,10 @@ else
     bootsys=BIOS
 fi
 
+defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
+btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
+ext4hook='HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)'
+
 #-----------------------------------------------------------------
 
 # Если примонтированы диски, то отмонтируем их
@@ -139,8 +143,8 @@ $installpack /mnt base base-devel $kernel $kernel\-headers nano wget
 # Генерируем fstab по UUID:
 $createfstab -U /mnt > /mnt/etc/fstab
 
-# При установке Arch если компьютер реальный, то ставим пакет драйверов linux-firmware
-# на виртуальном компьютере он не нужен, а в Manjaro ставится автоматически в пакете base.
+# При установке Arch на реальный компьютер ставим пакет драйверов linux-firmware
+# на виртуальном он не нужен, а в Manjaro ставится автоматически в пакете base.
 if [ $os = Arch -a $comp = real ]; then
     $installpack /mnt linux-firmware
 fi
@@ -148,10 +152,10 @@ fi
 ## Настроим параметры запуска системы:
 if [ $filesystem = btrfs ]; then
     # На btrfs (Меняем udev на systemd, fsck на keymap, добавляем btrfs):
-    sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)/' /mnt/etc/mkinitcpio.conf
+    sed -i "s/$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 elif [ $filesystem = ext4 ]; then
     # На ext4 (Меняем udev на systemd):
-    sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)/' /mnt/etc/mkinitcpio.conf
+    sed -i "s/$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
 fi
 
 ## Grub ##
