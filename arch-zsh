@@ -125,7 +125,7 @@ echo -e '
 #### Aliases ####
 
 # Переопеделение Pacman для установки и удаления без подтверждения:
-alias spacman="sudo pacman --noconfirm"
+alias spac="sudo pacman --noconfirm"
 
 # Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
 alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
