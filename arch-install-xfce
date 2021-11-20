@@ -22,25 +22,28 @@ sudo su
 # Для UEFI скрипт создаёт два раздела: основной с тремя подтомами @root, @home, @snapshot и boot/efi
 # Для BIOS скрипт создаёт один основной раздел с тремя подтомами @root, @home и @snapshot
 # Передаваемые скрипту параметры:
-# 1й - имя диска,
-# 2й - размер boot/efi-раздела,
+# 1й - файловая система (возможны 2 параметра: btrfs или ext4)
+# 2й - имя диска,
 # 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
-# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
-sh arch-base-btrfs /dev/sda 300M 8192 linux
+# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия),
+# 5й - размер boot/efi-раздела,
+# 6й - размер root-раздела для файловой системы ext4 (под раздел home - всё остальное пространство).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base btrfs /dev/sda linux 8192 300M
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
 # Для UEFI скрипт создаёт три раздела: root, home и boot/efi
 # Для BIOS скрипт создаёт два раздела: root, home
 # Передаваемые скрипту параметры:
-# 1й - имя диска,
-# 2й - размер root-раздела (для раздела home - всё остальное пространство),
-# 3й - размер boot/efi-раздела,
+# 1й - файловая система (возможны 2 параметра: btrfs или ext4)
+# 2й - имя диска,
+# 3й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия),
 # 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
-# 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
-sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
+# 5й - размер boot/efi-раздела,
+# 6й - размер root-раздела для файловой системы ext4 (под раздел home - всё остальное пространство).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base btrfs /dev/sda linux 8192 300M 40G
 
 #-----------------------------------------------------------------
 
@@ -109,16 +112,14 @@ sudo systemctl enable optimus-manager
 # xfce4 - XFCE,
 # lxdm - Загрузчик,
 # pavucontrol - Панель управления звуком Pulseaudio,
+# thunar-archive-plugin - Работа с архивами,
 # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-whiskermenu-plugin - Современное меню,
 # xfce4-weather-plugin - Плагин погоды,
-# tilix - Тайлинговый эмулятор терминала,
-# thunar-archive-plugin - Работа с архивами,
 # gnome-disk-utility - Управление дисками,
-# Удалим xfce4-terminal, т. к. вместо него установили tilix.
-sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol tilix thunar-archive-plugin \
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol thunar-archive-plugin \
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
     xfce4-weather-plugin gnome-disk-utility
 sudo systemctl enable lxdm.service
@@ -162,6 +163,17 @@ yay --noconfirm -S pamac-aur menulibre
 # foliate - Читалка книг,
 yay --noconfirm -S galculator xarchiver xed xviewer xviewer-plugins xreader foliate
 
+# tilix - Тайлинговый эмулятор терминала,
+# Удалим xfce4-terminal, т. к. вместо него установили tilix.
+# Небольшие настройки Tilix
+sudo pacman --noconfirm -S tilix
+sudo pacman --noconfirm -Rns xfce4-terminal
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.bashrc
+source ~/.bashrc
+
 # Шрифты, иконки и курсоры:
 yay --noconfirm -S papirus-icon-theme qogir-icon-theme matcha-gtk-theme ttf-meslo-nerd-font-powerlevel10k
 
@@ -185,13 +197,6 @@ sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 # ***
 
 ## Bash ##
-
-# Tilix #
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' >> ~/.bashrc
-source ~/.bashrc
 
 # Алиасы #
 echo -e '
@@ -318,8 +323,7 @@ sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules
 sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
 
 # KVM (Qemu):
-sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu \
-    qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
 sudo systemctl enable --now libvirtd dnsmasq
 sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
 sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
