@@ -13,21 +13,28 @@ sudo su
 
 ## Btrfs ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт два раздела: /dev/sda1 с двумя подтомами @root и @home и /dev/sda2 - boot/efi
-# Для BIOS скрипт создаёт один раздел /dev/sda1 и два подтома @root и @home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер boot/efi-раздела,
-# 3й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-btrfs"
-sh manjaro-base-btrfs /dev/sda 300M linux515
+# Для UEFI скрипт создаёт два раздела: основной с тремя подтомами @root, @home, @snapshot и boot/efi
+# Для BIOS скрипт создаёт один основной раздел с тремя подтомами @root, @home и @snapshot
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер boot/efi-раздела,
+# 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
+sh arch-base-btrfs /dev/sda 300M 8192 linux515
 
 ## Ext4 ##
 # Внимание!!! Все данные с указанного диска будут СТЁРТЫ!!!
-# Для UEFI скрипт создаёт три раздела: /dev/sda1 - root, /dev/sda2 - home, /dev/sda3 - boot/efi
-# Для BIOS скрипт создаёт два раздела: /dev/sda1 - root, /dev/sda2 - home
-# Передаваемые скрипту параметры: 1й - имя диска, 2й - размер root-раздела, 3й - размер boot/efi-раздела,
-# 4й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-base-ext4"
-sh manjaro-base-ext4 /dev/sda 40G 300M linux515
+# Для UEFI скрипт создаёт три раздела: root, home и boot/efi
+# Для BIOS скрипт создаёт два раздела: root, home
+# Передаваемые скрипту параметры:
+# 1й - имя диска,
+# 2й - размер root-раздела (для раздела home - всё остальное пространство),
+# 3й - размер boot/efi-раздела,
+# 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
+# 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
+sh arch-base-ext4 /dev/sda 40G 300M 8192 linux515
 
 #-----------------------------------------------------------------
 
@@ -39,7 +46,22 @@ manjaro-chroot /mnt
 # Установка основной системы:
 # Передаваемые скрипту параметры: 1й - имя пользователя, 2й - имя компьютера в сети, 3й - часовой пояс.
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/manjaro-system"
-sh manjaro-system user virt Europe/Moscow
+sh manjaro-system soulboy main Europe/Moscow
+
+#-----------------------------------------------------------------
+
+## Zswap - подкачка в оперативной памяти (Опционально) ##
+
+# Устанавливаем (строка 1)
+# Раскоментируем параметры в файле конфигурации (строка 2)
+# Включим использование (строка 3)
+# Отведем для zswap, вместо четверти, половину оперативной памяти (строка 4)
+# Включаем загрузку при старте системы (строка 5)
+pacman --noconfirm -S systemd-swap
+sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
+systemctl enable systemd-swap
 
 #-----------------------------------------------------------------
 
@@ -60,23 +82,14 @@ echo -e "static domain_name_servers=$gateway" >> /etc/dhcpcd.conf
 
 #-----------------------------------------------------------------
 
-## Драйвера ##
+## Драйвера для ноутбука ##
 
-## Видео:
-# AMD:
-pacman --noconfirm -S xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon
-# Intel:
-pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
-# nVidia:
-pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
-# VirtualBox:
-pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
-
-## Для ноутбука:
 # Драйвер тачпада:
 pacman --noconfirm -S xf86-input-synaptics
+
 # Управление гибридной графикой Optimus Manager:
-yay -S optimus-manager && sudo systemctl enable optimus-manager
+yay -S optimus-manager optimus-manager-qt
+sudo systemctl enable optimus-manager
 
 #-----------------------------------------------------------------
 
@@ -104,10 +117,9 @@ yay -S optimus-manager && sudo systemctl enable optimus-manager
 # file-roller thunar-archive-plugin - Работа с архивами,
 # gnome-disk-utility - Управление дисками,
 # gnome-system-monitor - Мониторинг системы.
-sudo pacman --noconfirm -S xorg-server xfce4 lxdm tilix xed pavucontrol galculator xfce4-xkb-plugin \
-        xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin \
-        menulibre xviewer xviewer-plugins xreader foliate file-roller thunar-archive-plugin \
-        gnome-disk-utility gnome-system-monitor
+sudo pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol tilix thunar-archive-plugin \
+    xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
+    xfce4-weather-plugin gnome-disk-utility menulibre
 sudo systemctl enable lxdm.service
 sudo pacman --noconfirm -Rs xfce4-terminal
 
@@ -134,18 +146,27 @@ sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --forc
 # То же самое, но на русском языке:
 sudo pacman --noconfirm -S xdg-user-dirs && xdg-user-dirs-update --force
 
+# Дополнительные программы (Опционально):
+# galculator - Калькулятор,
+# xarchiver - Работа с архивами,
+# xed - Простой текстовый редактор,
+# xviewer xviewer-plugins - Просмотр фото,
+# xreader - Просмотр документов,
+# foliate - Читалка книг,
+yay --noconfirm -S galculator xarchiver xed xviewer xviewer-plugins xreader foliate
+
+# Шрифты, иконки и курсоры:
+yay --noconfirm -S qogir-icon-theme
+
+# Оформление QT5 в стиле GTK:
+yay --noconfirm -S qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+
 #-----------------------------------------------------------------
 
 ## Настройки ##
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
-
-## Tilix для Bash ##
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' >> ~/.bashrc
-source ~/.bashrc
 
 # Установим более низкий уровень использования файла подкачки (строка 1),
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд (строка 2),
@@ -154,20 +175,58 @@ echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
 sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 
-#-----------------------------------------------------------------
+# ***
 
-## Оформление ##
+## Bash ##
 
-# Оформление QT5 в стиле GTK:
-yay --noconfirm -S qt5ct qt6-base adwaita-qt
-echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
+# Tilix #
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' >> ~/.bashrc
+source ~/.bashrc
 
-# Шрифты, иконки и курсоры:
-yay --noconfirm -S qogir-icon-theme
+# Алиасы #
+echo -e '
+#### Aliases ####
+
+# Переопеделение Pacman для установки и удаления без подтверждения:
+alias spac="sudo pacman --noconfirm"
+
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+
+# Быстрое обновление (pup - Pacman UPdate)
+alias pup="sudo pacman -Syu"
+alias згз="sudo pacman -Syu"
+
+# Пинг делает только 5 запросов.
+alias ping="ping -c 5"' >> ~/.bashrc
+source ~/.bashrc
+
+# ***
+
+## GRUB (Опционально) ##
+
+# Если есть ещё установленные системы, то ставим дополнительно:
+sudo pacman --noconfirm -S os-prober
+# И перегенерируем файл конфигурации grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+# Если нет других установленных систем, то убираем загрузочное меню Grub,
+# меняя GRUB_TIMEOUT с пяти секунд на ноль.
+sudo sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+# И перегенерируем файл конфигурации grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 #-----------------------------------------------------------------
 
 ## Программы ##
+
+## Plank ##
+# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
+sudo pacman --noconfirm -S plank
 
 # Ananicy - Управляет приоритетами приложений:
 yay --noconfirm -S ananicy && sudo systemctl enable --now ananicy
@@ -212,6 +271,9 @@ yay -S mediainfo mkvtoolnix-gui
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
 
+# gnome-system-monitor - Мониторинг системы.
+yay --noconfirm -S gnome-system-monitor
+
 # Мониторинг и разгон для nVidia карт Green With Envy (опционально):
 yay --noconfirm -S gwe
 
@@ -235,58 +297,6 @@ sh PortProton-97
 yay -S multimc jre8-openjdk
 sudo archlinux-java set java-17-openjdk
 java -version
-
-#-----------------------------------------------------------------
-
-## Подкачка (опционально) ##
-
-## Файл подкачки на Btrfs:
-# Создаем подтом @swap (строка 1)
-# Переходим в @swap (строка 2)
-# Создаём пустой файл подкачки (строка 3)
-# Отключаем копирование при записи для файла подкачки (строка 4)
-# Отключаем сжатие файла подкачки (строка 5)
-# Создаём файл нужного размера (строка 6)
-# Разрешаем доступ к файлу подкачки только root-у (строка 7)
-# Инициализируем файл подкачки и включаем его (строки 8-9)
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 10)
-sudo btrfs subvolume create /@swap
-cd /@swap
-sudo truncate -s 0 ./swapfile
-sudo chattr +C ./swapfile
-sudo btrfs property set ./swapfile compression none
-sudo dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
-sudo chmod 600 ./swapfile
-sudo mkswap ./swapfile
-sudo swapon ./swapfile
-echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-sudo mount -a
-
-## Файл подкачки на Ext4:
-# Переходим в mnt установленной системы (строка 1)
-# Создаём файл нужного размера (строка 2)
-# Разрешаем доступ к файлу подкачки только root-у (строка 3)
-# Инициализируем файл подкачки и включаем его (строки 4-5)
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы (строка 6)
-cd /mnt
-dd if=/dev/zero of=./swapfile bs=1M count=8192 status=progress
-chmod 600 ./swapfile
-mkswap ./swapfile
-swapon ./swapfile
-echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-sudo mount -a
-
-## Zswap:
-# Устанавливаем (строка 1)
-# Раскоментируем параметры в файле конфигурации (строка 2)
-# Включим использование (строка 3)
-# Отведем для zswap, вместо четверти, половину оперативной памяти (строка 4)
-# Включаем загрузку при старте системы (строка 5)
-sudo pacman --noconfirm -S systemd-swap
-sudo sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
-sudo sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
-sudo sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
-sudo systemctl enable --now systemd-swap.service
 
 #-----------------------------------------------------------------
 
