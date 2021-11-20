@@ -19,7 +19,7 @@ sudo su
 # 1й - имя диска,
 # 2й - размер boot/efi-раздела,
 # 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
-# 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+# 4й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
 sh arch-base-btrfs /dev/sda 300M 8192 linux515
 
@@ -32,7 +32,7 @@ sh arch-base-btrfs /dev/sda 300M 8192 linux515
 # 2й - размер root-раздела (для раздела home - всё остальное пространство),
 # 3й - размер boot/efi-раздела,
 # 4й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
-# 5й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия).
+# 5й - устанавливаемое ядро (linux510 - LTS-ядро, linux515 - Последняя стабильная версия).
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
 sh arch-base-ext4 /dev/sda 40G 300M 8192 linux515
 
