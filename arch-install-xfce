@@ -27,7 +27,7 @@ sudo su
 # 3й - размер файла подкачки в мегабайтах (8192 = 8х1024 = 8Gb), 0 - не создавать,
 # 4й - устанавливаемое ядро (linux-lts - LTS-ядро, linux - Последняя стабильная версия),
 # 5й - размер boot/efi-раздела,
-# 6й - размер root-раздела для файловой системы ext4 (под раздел home - всё остальное пространство).
+# 6й - размер root-раздела для ext4 (под раздел home - всё остальное пространство).
 wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
 sh arch-base btrfs /dev/sda linux 8192 300M
 
