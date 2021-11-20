@@ -17,24 +17,24 @@ sudo su
 ## Btrfs ##
 
 # VirtualBox
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
-sh arch-base-btrfs /dev/sda 300M 2048 linux
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base btrfs /dev/sda linux 2048 300M
 
 # Main
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-btrfs"
-sh arch-base-btrfs /dev/sda 300M 8192 linux
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base btrfs /dev/sda linux 8192 300M
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
-sh arch-base-ext4 /dev/sda 40G 300M 2048 linux
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base ext4 /dev/sda linux 2048 300M 40G
 
 # Main
-wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base-ext4"
-sh arch-base-ext4 /dev/sda 40G 300M 8192 linux
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-base"
+sh arch-base ext4 /dev/sda linux 8192 300M 40G
 
 #-----------------------------------------------------------------
 
@@ -49,11 +49,13 @@ arch-chroot /mnt
 ## Установка основной системы ##
 
 # VirtualBox
-cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+cd /tmp
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system user virt Europe/Moscow
 
 # Main
-cd /tmp && wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
+cd /tmp
+wget -c "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/script/arch-system"
 sh arch-system soulboy main Europe/Moscow
 
 #-----------------------------------------------------------------
