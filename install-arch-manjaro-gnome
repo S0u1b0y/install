@@ -13,54 +13,19 @@
 # Переходим в учётную запись рута:
 sudo su
 
-# ***
+## Настройка Pacman и репозиториев ##
+# Передаваемые скрипту параметры:
+# 1й - Устанавливаемая система, значения: archlinux или manjaro.
+# 2й - Зеркала страны, значения: ru - Россия, ua - Украина, by - Белоруссия, kz - Казахстан,
+# если страна не указана или указана неправильно, то будут прописаны только глобальные репозитории.
 
-## Только для установки Arch ##
+# Для установки Archlinux:
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/pacman-prepare"
+sh pacman-prepare archlinux ru
 
-# Пропишем в конфиги Pacman'а репозитории Archlinux и русские зеркала:
-# (Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/)
-echo -e '[options]
-HoldPkg = pacman glibc
-Architecture = auto
-Color
-CheckSpace
-VerbosePkgLists
-ParallelDownloads = 10
-SigLevel = Required DatabaseOptional
-LocalFileSigLevel = Optional
-[core]
-Include = /etc/pacman.d/mirrorlist
-[extra]
-Include = /etc/pacman.d/mirrorlist
-[community]
-Include = /etc/pacman.d/mirrorlist
-[multilib]
-Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-echo -e '## Russia
-Server = http://mirror.yandex.ru/archlinux/$repo/os/$arch
-Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
-Server = http://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-Server = http://mirror.rol.ru/archlinux/$repo/os/$arch
-Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
-Server = http://mirror.surf/archlinux/$repo/os/$arch
-Server = https://mirror.surf/archlinux/$repo/os/$arch
-Server = http://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-Server = http://mirrors.powernet.com.ru/archlinux/$repo/os/$arch
-Server = http://archlinux.zepto.cloud/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-pacman --noconfirm -Syy
-
-# ***
-
-## Только для установки Manjaro ##
-
-# Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
-sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
-echo -e '## Russia
-Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
-Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' | tee /etc/pacman.d/mirrorlist
-pacman --noconfirm -Syy
+# Для установки Manjaro:
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/pacman-prepare"
+sh pacman-prepare manjaro ru
 
 #-----------------------------------------------------------------
 
