@@ -101,7 +101,7 @@ Server = http://mirror.datacenter.by/pub/mirrors/manjaro/stable/$repo/$arch
 ## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
 Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
-if [ $country = * ]; then
+elif [ $country = * ]; then
 echo -e '## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
 Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
