@@ -46,6 +46,9 @@ else
     bootsys=BIOS
 fi
 
+# Определение процессора:
+processor=$(LC_ALL=C lscpu | grep -i '.*Vendor ID:*')
+
 defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
 btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
 ext4hook='HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)'
@@ -156,6 +159,14 @@ $createfstab -U /mnt > /mnt/etc/fstab
 # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
 if [ $comp = real ]; then
     $installpack /mnt linux-firmware
+fi
+
+## Микрокод процессора:
+if [[ $processor == *'GenuineIntel'* ]]; then
+	$installpack /mnt intel-ucode
+fi
+if [[ $processor == *'AuthenticAMD'* ]]; then
+	$installpack /mnt amd-ucode
 fi
 
 #-----------------------------------------------------------------
