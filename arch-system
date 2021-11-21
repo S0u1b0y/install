@@ -27,7 +27,7 @@ sed -i 's/#Color/Color/g' /etc/pacman.conf
 # Включаем параллельную загрузку пакетов, раскоментируя параметр "ParallelDownloads",
 sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
 # В Arch добавляем репозиторий 32х-битных библиотек Multilib,
-if [ $os = Arch Linux ]; then
+if [[ $os == 'Arch Linux' ]]; then
     echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 fi
 # Принудительно обновляем репозитории.
@@ -105,14 +105,24 @@ systemctl enable sshd.service
 pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
 
 ## Установим драйвера на видео:
-if   [[ $videocard == *' Intel '* ]]; then
-    pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
-elif [[ $videocard == *' AMD '* ]]; then
-    pacman --noconfirm -S xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon
-elif [[ $videocard == *' NVIDIA '* ]]; then
-    pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
-elif [[ $videocard == *' VMware '* ]]; then
-    pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+if [[ $os == 'Arch Linux' ]]; then
+    if   [[ $videocard == *' Intel '* ]]; then
+        pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
+    elif [[ $videocard == *' AMD '* ]]; then
+        pacman --noconfirm -S xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon
+    elif [[ $videocard == *' NVIDIA '* ]]; then
+        pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
+    elif [[ $videocard == *' VMware '* ]]; then
+        pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+elif [[ $os == 'Manjaro Linux' ]]; then
+    if   [[ $videocard == *' Intel '* ]]; then
+        pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
+    elif [[ $videocard == *' AMD '* ]]; then
+        pacman --noconfirm -S xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon
+    elif [[ $videocard == *' NVIDIA '* ]]; then
+        pacman --noconfirm -S linux515-nvidia nvidia-utils lib32-nvidia-utils
+    elif [[ $videocard == *' VMware '* ]]; then
+        pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
 fi
 
 ## Микрокод процессора:
