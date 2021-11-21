@@ -128,8 +128,12 @@ elif [[ $os == 'Manjaro Linux' ]]; then
 fi
 
 ## Микрокод процессора:
-if [[ $processor == *'GenuineIntel'* ]]; then pacman --noconfirm -S intel-ucode fi
-if [[ $processor == *'AuthenticAMD'* ]]; then pacman --noconfirm -S amd-ucode fi
+if [[ $processor == *'GenuineIntel'* ]]; then
+	pacman --noconfirm -S intel-ucode
+fi
+if [[ $processor == *'AuthenticAMD'* ]]; then
+	pacman --noconfirm -S amd-ucode
+fi
 
 #-----------------------------------------------------------------
 
