@@ -92,7 +92,7 @@ echo -e '## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
 Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 if [ $country = ru ]; then
-echo -e '## Russia
+echo -e "## Russia
 Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
 Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch
 $(cat /etc/pacman.d/mirrorlist)" > /etc/pacman.d/mirrorlist
