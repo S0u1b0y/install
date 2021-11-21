@@ -19,15 +19,15 @@ rootpart=$6
 ## Определение переменных ##
 
 # Определение операционной системы из которой идёт установка Manjaro или Arch:
-os=$(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"')
+os=$(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"')
 
 # Унификация команд из разных дистибутивов Manjaro и Arch:
 # installpack вместо basestrap(Manjaro) или pacstrap(Arch),
 # createfstab вместо fstabgen(Manjaro) или genfstab(Arch).
-if [ $os = ManjaroLinux ]; then
+if [ $os = Manjaro Linux ]; then
     installpack=basestrap
     createfstab=fstabgen
-elif [ $os = Arch ]; then
+elif [ $os = Arch Linux ]; then
     installpack=pacstrap
     createfstab=genfstab
 fi
