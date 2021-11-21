@@ -114,6 +114,7 @@ if [[ $os == 'Arch Linux' ]]; then
         pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
     elif [[ $videocard == *' VMware '* ]]; then
         pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+    fi
 elif [[ $os == 'Manjaro Linux' ]]; then
     if   [[ $videocard == *' Intel '* ]]; then
         pacman --noconfirm -S xf86-video-intel vulkan-intel lib32-vulkan-intel
@@ -123,6 +124,7 @@ elif [[ $os == 'Manjaro Linux' ]]; then
         pacman --noconfirm -S linux515-nvidia nvidia-utils lib32-nvidia-utils
     elif [[ $videocard == *' VMware '* ]]; then
         pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+    fi
 fi
 
 ## Микрокод процессора:
