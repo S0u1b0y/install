@@ -33,7 +33,7 @@ elif [ $os = Arch Linux ]; then
 fi
 
 # Определяем по видеокарте виртуальная машина или реальный компьютер:
-if [ $(LC_ALL=C lspci | grep -i '.* VGA .*') = *' VMware '* ]; then
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
     comp=virtual
 else
     comp=real
