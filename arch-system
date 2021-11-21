@@ -35,7 +35,7 @@ pacman -Syy
 
 ## Сконфигурируем GRUB:
 # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
-if [ $os = ManjaroLinux ]; then
+if [[ $os == 'Manjaro Linux' ]]; then
     sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
     sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
 fi
