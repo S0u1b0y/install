@@ -88,6 +88,9 @@ Include = /etc/pacman.d/mirrorlist
 [multilib]
 SigLevel = PackageRequired
 Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+echo -e '## Global
+Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 if [ $country = ru ]; then
 echo -e '## Russia
 Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
@@ -105,10 +108,6 @@ elif [ $country = by ]; then
 echo -e '## Belarus
 Server = http://mirror.datacenter.by/pub/mirrors/manjaro/stable/$repo/$arch
 ## Global
-Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
-elif [ $country = * ]; then
-echo -e '## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
 Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 fi
