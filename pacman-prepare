@@ -58,9 +58,9 @@ Server = https://mirror.hoster.kz/archlinux/$repo/os/$arch
 Server = https://mirror.ps.kz/archlinux/$repo/os/$arch
 ## Worldwide
 Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-#elif [ $country = * ]; then
-#echo -e '## Worldwide
-#Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+elif [ $country = * ]; then
+echo -e '## Worldwide
+Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 fi
 pacman --noconfirm -Syy
 
@@ -70,9 +70,6 @@ echo -e '[options]
 CacheDir = /var/cache/pacman/pkg/
 HoldPkg      = pacman glibc manjaro-system
 SyncFirst    = manjaro-system archlinux-keyring manjaro-keyring
-#XferCommand = /usr/bin/axel -a -n 16 %u -o %o
-#XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
-#XferCommand = /usr/bin/curl -C - -f %u > %o
 Architecture = auto
 Color
 CheckSpace
@@ -110,10 +107,10 @@ Server = http://mirror.datacenter.by/pub/mirrors/manjaro/stable/$repo/$arch
 ## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
 Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
-#elif [ $country = * ]; then
-#echo -e '## Global
-#Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-#Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+elif [ $country = * ]; then
+echo -e '## Global
+Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 fi
 pacman --noconfirm -Syy
 fi
