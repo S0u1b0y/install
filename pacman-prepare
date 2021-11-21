@@ -72,7 +72,7 @@ HoldPkg      = pacman glibc manjaro-system
 SyncFirst    = manjaro-system archlinux-keyring manjaro-keyring
 #XferCommand = /usr/bin/axel -a -n 16 %u -o %o
 #XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
-XferCommand = /usr/bin/curl -C - -f %u > %o
+#XferCommand = /usr/bin/curl -C - -f %u > %o
 Architecture = auto
 Color
 CheckSpace
