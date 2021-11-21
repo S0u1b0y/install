@@ -8,7 +8,7 @@ cp /etc/pacman.conf /etc/pacman.conf.bak
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 
 # Прописываем конфиги Pacman в зависимости от устанавливаемой оси:
-if [ $os = arch ]; then
+if [ $os = archlinux ]; then
     # Пропишем репозитории Archlinux и русские зеркала:
     # Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/
     echo -e '[options]
