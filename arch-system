@@ -13,11 +13,11 @@ timezone=$3
 ## Определение переменных ##
 
 # Определение операционной системы Manjaro или Arch:
-os=$(cat /etc/*-release | grep -w DISTRIB_ID | cut -d= -f2 | tr -d '"')
+os=$(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"')
 # Определение видеокаты:
 videocard=$(LC_ALL=C lspci | grep -i '.* VGA .*')
 # Определение процессора:
-processor=$(LC_ALL=C lscpu | grep -oP 'Vendor ID:\s*\K.+')
+processor=$(LC_ALL=C lscpu | grep -i '.*Vendor ID:*')
 
 #-----------------------------------------------------------------
 
@@ -27,7 +27,7 @@ sed -i 's/#Color/Color/g' /etc/pacman.conf
 # Включаем параллельную загрузку пакетов, раскоментируя параметр "ParallelDownloads",
 sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
 # В Arch добавляем репозиторий 32х-битных библиотек Multilib,
-if [ $os = Arch ]; then
+if [ $os = Arch Linux ]; then
     echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 fi
 # Принудительно обновляем репозитории.
@@ -116,8 +116,8 @@ elif [[ $videocard == *' VMware '* ]]; then
 fi
 
 ## Микрокод процессора:
-if [ $processor = GenuineIntel ]; then pacman --noconfirm -S intel-ucode fi
-if [ $processor = AuthenticAMD ]; then pacman --noconfirm -S amd-ucode fi
+if [[ $processor == *'GenuineIntel'* ]]; then pacman --noconfirm -S intel-ucode fi
+if [[ $processor == *'AuthenticAMD'* ]]; then pacman --noconfirm -S amd-ucode fi
 
 #-----------------------------------------------------------------
 
