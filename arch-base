@@ -143,9 +143,8 @@ $installpack /mnt base base-devel $kernel $kernel\-headers nano wget
 # Генерируем fstab по UUID:
 $createfstab -U /mnt > /mnt/etc/fstab
 
-# При установке Arch на реальный компьютер ставим пакет драйверов linux-firmware
-# на виртуальном он не нужен, а в Manjaro ставится автоматически в пакете base.
-if [[ $os == 'Arch Linux' && $comp == real ]]; then
+# На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
+if [ $comp = real ]; then
     $installpack /mnt linux-firmware
 fi
 
