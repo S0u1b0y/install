@@ -2,10 +2,11 @@
 
 # Приём входных данных и запись их в переменные для дальнейшей установки:
 os=$1
+country=$2
 
 # Сделаем резевные копии на всякий случай.
-cp /etc/pacman.conf /etc/pacman.conf.bak
-cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+cp -n /etc/pacman.conf /etc/pacman.conf.bak
+cp -n /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 
 # Прописываем конфиги Pacman в зависимости от устанавливаемой оси:
 if [ $os = archlinux ]; then
@@ -27,26 +28,80 @@ if [ $os = archlinux ]; then
     Include = /etc/pacman.d/mirrorlist
     [multilib]
     Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-    echo -e '## Russia
-    Server = http://mirror.yandex.ru/archlinux/$repo/os/$arch
-    Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
-    Server = http://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-    Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-    Server = http://mirror.rol.ru/archlinux/$repo/os/$arch
-    Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
-    Server = http://mirror.surf/archlinux/$repo/os/$arch
-    Server = https://mirror.surf/archlinux/$repo/os/$arch
-    Server = http://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-    Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-    Server = http://mirrors.powernet.com.ru/archlinux/$repo/os/$arch
-    Server = http://archlinux.zepto.cloud/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    if [ $country = ru ]; then
+        echo -e '## Russia
+        Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
+        Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
+        Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
+        Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arc
+        Server = https://mirror.surf/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    elif [ $country = ua ]; then
+        echo -e '## Ukraine
+        Server = https://archlinux.astra.in.ua/$repo/os/$arch
+        Server = https://repo.endpoint.ml/archlinux/$repo/os/$arch
+        Server = https://archlinux.ip-connect.vn.ua/$repo/os/$arch
+        Server = https://mirror.mirohost.net/archlinux/$repo/os/$arch
+        Server = https://mirrors.nix.org.ua/linux/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    elif [ $country = by ]; then
+        echo -e '## Belarus
+        Server = http://ftp.byfly.by/pub/archlinux/$repo/os/$arch
+        Server = http://mirror.datacenter.by/pub/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    elif [ $country = kz ]; then
+        echo -e '## Kazakhstan
+        Server = https://mirror.hoster.kz/archlinux/$repo/os/$arch
+        Server = https://mirror.ps.kz/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    fi
+    echo -e '## Worldwide
+    Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
     pacman --noconfirm -Syy
 
 elif [ $os = manjaro ]; then
-    # Настроим Pacman, пропишем вручную региональные зеркала репозитория и перечитаем репозитории:
-    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
-    echo -e '## Russia
-    Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
-    Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+    # Пропишем репозитории Manjaro и русские зеркала:
+    echo -e '[options]
+    CacheDir = /var/cache/pacman/pkg/
+    HoldPkg      = pacman glibc manjaro-system
+    SyncFirst    = manjaro-system archlinux-keyring manjaro-keyring
+    #XferCommand = /usr/bin/axel -a -n 16 %u -o %o
+    #XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
+    XferCommand = /usr/bin/curl -C - -f %u > %o
+    Architecture = auto
+    Color
+    CheckSpace
+    ParallelDownloads = 10
+    SigLevel = Required DatabaseOptional
+    LocalFileSigLevel = Optional
+    [core]
+    SigLevel = PackageRequired
+    Include = /etc/pacman.d/mirrorlist
+    [extra]
+    SigLevel = PackageRequired
+    Include = /etc/pacman.d/mirrorlist
+    [community]
+    SigLevel = PackageRequired
+    Include = /etc/pacman.d/mirrorlist
+    [multilib]
+    SigLevel = PackageRequired
+    Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+    case $country in
+    ru )echo -e '## Russia
+        Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
+        Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch
+        ## Global
+        Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+        Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
+    ua )echo -e '## Ukraine
+        Server = https://fastmirror.pp.ua/manjaro/stable/$repo/$arch
+        ## Global
+        Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+        Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
+    by )echo -e '## Belarus
+        Server = http://mirror.datacenter.by/pub/mirrors/manjaro/stable/$repo/$arch
+        ## Global
+        Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+        Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
+    *  )echo -e '## Global
+        Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+        Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
+    esac
     pacman --noconfirm -Syy
 fi
