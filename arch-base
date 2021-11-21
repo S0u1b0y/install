@@ -52,8 +52,12 @@ ext4hook='HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck
 
 #-----------------------------------------------------------------
 
-# Если примонтированы диски, то отмонтируем их
-umount -l /mnt
+# Выключаем файл подкачки и если примонтированы диски, то отмонтируем их
+swapoff /mnt/@swap/swapfile
+swapoff /mnt/swapfile
+umount -R /mnt
+
+#-----------------------------------------------------------------
 
 ## Btrfs ##
 if [ $filesystem = btrfs ]; then
@@ -87,7 +91,7 @@ if [ $filesystem = btrfs ]; then
     mount $disk\1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
     # Примонтируем подтом @snap в /mnt/.snap с доп. параметрами:
     mount $disk\1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
-    # UEFI Boot
+    # Загрузочный раздел UEFI
     if [ $bootsys = UEFI ]; then
         # Форматируем раздел EFI в fat32:
         mkfs.fat -F32 $disk\2
@@ -122,7 +126,7 @@ elif [ $filesystem = ext4 ]; then
     mkdir -p /mnt/home
     # Примонтируем раздел Home в /mnt/home:
     mount $disk\2 /mnt/home
-    # UEFI Boot
+    # Загрузочный раздел UEFI
     if [ $bootsys = UEFI ]; then
         # Форматируем раздел EFI в fat32:
         mkfs.fat -F32 $disk\3
@@ -133,6 +137,8 @@ elif [ $filesystem = ext4 ]; then
     fi
 fi
 
+#-----------------------------------------------------------------
+
 # Ставим базовую систему:
 # base, base-devel - Базовая система и пакеты для компиляции,
 # $kernel $kernel\-headers - Ядро,
@@ -140,13 +146,19 @@ fi
 # wget - Консольный загрузчик.
 $installpack /mnt base base-devel $kernel $kernel\-headers nano wget
 
+#-----------------------------------------------------------------
+
 # Генерируем fstab по UUID:
 $createfstab -U /mnt > /mnt/etc/fstab
+
+#-----------------------------------------------------------------
 
 # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
 if [ $comp = real ]; then
     $installpack /mnt linux-firmware
 fi
+
+#-----------------------------------------------------------------
 
 ## Настроим параметры запуска системы:
 if [ $filesystem = btrfs ]; then
@@ -156,6 +168,8 @@ elif [ $filesystem = ext4 ]; then
     # На ext4 (Меняем udev на systemd):
     sed -i "s/$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
 fi
+
+#-----------------------------------------------------------------
 
 ## Grub ##
 # Определяем UEFI или BIOS на компьютере:
@@ -173,10 +187,14 @@ else
     grub-install --target=i386-pc --root-directory=/mnt $disk
 fi
 
+#-----------------------------------------------------------------
+
 # Для btrfs установим утилиты
 if [ $filesystem = btrfs ]; then
     $installpack /mnt btrfs-progs grub-btrfs
 fi
+
+#-----------------------------------------------------------------
 
 ## Swapfile ##
 # Если параметр swapfile не 0, то создаём файл подкачки:
@@ -215,6 +233,8 @@ if [ $swapfile != 0 ]; then
         echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
     fi
 fi
+
+#-----------------------------------------------------------------
 
 # Проверяем:
 lsblk
