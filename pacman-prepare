@@ -82,26 +82,29 @@ Include = /etc/pacman.d/mirrorlist
 [multilib]
 SigLevel = PackageRequired
 Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-case "$country" in
-ru )echo -e '## Russia
+if [ $country = ru ]; then
+echo -e '## Russia
 Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
 Server = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch
 ## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
-ua )echo -e '## Ukraine
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+elif [ $country = ua ]; then
+echo -e '## Ukraine
 Server = https://fastmirror.pp.ua/manjaro/stable/$repo/$arch
 ## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
-by )echo -e '## Belarus
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+elif [ $country = by ]; then
+echo -e '## Belarus
 Server = http://mirror.datacenter.by/pub/mirrors/manjaro/stable/$repo/$arch
 ## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
-*  )echo -e '## Global
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+if [ $country = * ]; then
+echo -e '## Global
 Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
-Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist;;
-esac
+Server = https://mirrors.manjaro.org/repo/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+fi
 pacman --noconfirm -Syy
 fi
