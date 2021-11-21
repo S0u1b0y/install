@@ -156,17 +156,17 @@ $createfstab -U /mnt > /mnt/etc/fstab
 
 #-----------------------------------------------------------------
 
-# На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
-if [ $comp = real ]; then
-    $installpack /mnt linux-firmware
-fi
-
 ## Микрокод процессора:
 if [[ $processor == *'GenuineIntel'* ]]; then
 	$installpack /mnt intel-ucode
 fi
 if [[ $processor == *'AuthenticAMD'* ]]; then
 	$installpack /mnt amd-ucode
+fi
+
+# На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
+if [ $comp = real ]; then
+    $installpack /mnt linux-firmware
 fi
 
 #-----------------------------------------------------------------
