@@ -145,7 +145,7 @@ $createfstab -U /mnt > /mnt/etc/fstab
 
 # При установке Arch на реальный компьютер ставим пакет драйверов linux-firmware
 # на виртуальном он не нужен, а в Manjaro ставится автоматически в пакете base.
-if [ $os = Arch -a $comp = real ]; then
+if [[ $os == Arch -a $comp == real ]]; then
     $installpack /mnt linux-firmware
 fi
 
