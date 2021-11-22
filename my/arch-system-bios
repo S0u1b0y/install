@@ -32,8 +32,6 @@ sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
 systemctl enable systemd-swap
 
 ## GRUB:
-# Устанавливаем grub в систему
-pacman --noconfirm -S grub grub-btrfs
 # Устанавливаем grub на диск
 grub-install --target=i386-pc /dev/sda
 # Генерируем файл конфигурации grub
