@@ -88,7 +88,7 @@ hwclock --systohc --utc && date
 #-----------------------------------------------------------------
 
 ## Статический IP для VirualBox ##
-cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
+cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
 echo -e "interface enp0s3
 static ip_address=192.168.0.50/24
 static routers=192.168.0.100
@@ -166,7 +166,7 @@ autoremove
 yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
 # Code OSS (free Visual Studio Code):
-yay -S --noconfirm code
+yay --noconfirm -S code
 # Мои настройки:
 mouseWheelScrollSensitivity - 2
 editor.renderWhitespace - none
