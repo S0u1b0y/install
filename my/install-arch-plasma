@@ -52,11 +52,11 @@ Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d
 # Разметка, форматирование диска и установка базовой системы.
 
 # VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs"
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
 sh arch_base_btrfs 2048 linux
 
 # Main (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs"
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
 sh arch_base_btrfs 8192 linux
 
 #-----------------------------------------------------------------
@@ -70,11 +70,11 @@ manjaro-chroot /mnt
 ## Установка основной системы ##
 
 # VirtualBox
-cd /tmp && curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs"
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs'
 sh arch_system_bios_btrfs user virt
 
 # Main
-cd /tmp && curl -O "https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs"
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs'
 sh arch_system_bios_btrfs soulboy main
 
 #-----------------------------------------------------------------
@@ -89,10 +89,10 @@ hwclock --systohc --utc && date
 
 ## Статический IP для VirualBox ##
 cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e "interface enp0s3
+echo -e 'interface enp0s3
 static ip_address=192.168.0.50/24
 static routers=192.168.0.100
-static domain_name_servers=192.168.0.100" > /etc/dhcpcd.conf
+static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
 
 #-----------------------------------------------------------------
 
@@ -192,7 +192,7 @@ sudo pacman --noconfirm -S steam
 
 # PortProton (https://portwine-linux.ru/port-proton-linux):
 sudo pacman --noconfirm -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
-wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
+wget -c 'https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97'
 sh PortProton-97
 
 # Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки,
