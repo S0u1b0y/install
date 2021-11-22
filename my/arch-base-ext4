@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Приём входных данных и запись их в переменные для дальнейшей установки:
+# swapfile   - Размер файла подкачки
+# kernel     - Версия ядра
+rootpart=$1
+let swapfile="${2//G}*1024"
+kernel=$3
+
+#-----------------------------------------------------------------
+
+## Определение переменных ##
+
+# Определяем по видеокарте виртуальная машина или реальный компьютер:
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
+    comp=virtual
+else
+    comp=real
+fi
+
+defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
+ext4hook='HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)'
+btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
+
+#-----------------------------------------------------------------
+
+# Выключаем файл подкачки и если примонтированы диски, то отмонтируем их
+swapoff /mnt/@swap/swapfile
+swapoff /mnt/mnt/swapfile
+umount -R /mnt
+
+#-----------------------------------------------------------------
+
+# Для BIOS создаем два раздела Root и Home:
+parted -s /dev/sda mktable msdos \
+    mkpart primary ext4 1M $rootpart \
+    mkpart primary ext4 $rootpart 100% \
+set 1 boot on
+# Форматируем разделы Root и Home в ext4:
+mkfs.ext4 -L Root /dev/sda1
+mkfs.ext4 -L Home /dev/sda2
+# Примонтируем раздел Root в /mnt:
+mount /dev/sda1 /mnt
+# Создаем каталог /mnt/home:
+mkdir -p /mnt/home
+# Примонтируем раздел Home в /mnt/home:
+mount /dev/sda2 /mnt/home
+
+#-----------------------------------------------------------------
+
+# Ставим базовую систему:
+# base, base-devel - Базовая система и пакеты для компиляции,
+# $kernel $kernel\-headers - Ядро,
+# nano - Простой консольный текстовый редактор,
+# wget - Консольный загрузчик,
+# intel-ucode - Микрокод для интела,
+# btrfs-progs - Утилиты для btrfs.
+pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget intel-ucode
+
+#-----------------------------------------------------------------
+
+# Генерируем fstab по UUID:
+genfstab -U /mnt > /mnt/etc/fstab
+
+#-----------------------------------------------------------------
+
+# На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
+if [ $comp = real ]; then
+    pacstrap /mnt linux-firmware
+fi
+
+#-----------------------------------------------------------------
+
+## GRUB:
+# Устанавливаем grub в систему
+pacstrap /mnt grub
+
+#-----------------------------------------------------------------
+
+## Настроим параметры запуска системы:
+sed -i "s/$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
+
+#-----------------------------------------------------------------
+
+## Swapfile ##
+# Переходим в mnt устанавливаемой системы
+cd /mnt/mnt
+# Создаём файл нужного размера
+dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+# Разрешаем доступ к файлу подкачки только root-у
+chmod 600 ./swapfile
+# Инициализируем файл подкачки и включаем его
+mkswap ./swapfile
+swapon ./swapfile
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
+echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
+
+#-----------------------------------------------------------------
+
+# Проверяем:
+lsblk
+swapon -s
+cat /mnt/etc/fstab
