@@ -57,7 +57,9 @@ mount /dev/sda1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,sp
 # base, base-devel - Базовая система и пакеты для компиляции,
 # $kernel $kernel\-headers - Ядро,
 # nano - Простой консольный текстовый редактор,
-# wget - Консольный загрузчик.
+# wget - Консольный загрузчик,
+# intel-ucode - Микрокод для интела,
+# btrfs-progs - Утилиты для btrfs.
 pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget intel-ucode btrfs-progs
 
 #-----------------------------------------------------------------
