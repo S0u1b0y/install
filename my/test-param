@@ -1,4 +1,4 @@
 #!/bin/bash
 
 let swapfile="${1//G}*1024"
-echo swapfile
+echo $swapfile
