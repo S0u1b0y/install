@@ -226,7 +226,7 @@ sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules
 sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
 
 # KVM (Qemu):
-sudo pacman -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables \
+sudo pacman --noconfirm -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables \
     openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
 sudo systemctl enable --now libvirtd dnsmasq
 sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
