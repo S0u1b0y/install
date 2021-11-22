@@ -51,13 +51,27 @@ Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d
 ### Установка ###
 # Разметка, форматирование диска и установка базовой системы.
 
+## Btrfs ##
+
 # VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
-sh arch_base_btrfs 2048 linux
+sh arch_base_btrfs 2G linux
 
 # Main (linux - стандартное ядро, linux-lts - LTS-ядро)
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
-sh arch_base_btrfs 8192 linux
+sh arch_base_btrfs 8G linux
+
+# ***
+
+## Ext4 ##
+
+# VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_ext4'
+sh arch_base_ext4 40G 2G linux
+
+# Main (linux - стандартное ядро, linux-lts - LTS-ядро)
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_ext4'
+sh arch_base_ext4 40G 8G linux
 
 #-----------------------------------------------------------------
 
@@ -70,12 +84,12 @@ manjaro-chroot /mnt
 ## Установка основной системы ##
 
 # VirtualBox
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs'
-sh arch_system_bios_btrfs user virt
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios'
+sh arch_system_bios user virt
 
 # Main
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios_btrfs'
-sh arch_system_bios_btrfs soulboy main
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios'
+sh arch_system_bios soulboy main
 
 #-----------------------------------------------------------------
 
