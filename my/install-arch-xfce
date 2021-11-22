@@ -6,12 +6,13 @@
 
 # Скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
+# Загружаемся с записанного образа
 
 # Переходим в учётную запись рута:
 sudo su
 
 ## Настройка Pacman и репозиториев ##
-# Сделаем резевные копии на всякий случай.
+# Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/
 cp -n /etc/pacman.conf /etc/pacman.conf.bak
 cp -n /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 echo -e '[options]
@@ -36,6 +37,14 @@ Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
 Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
 Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
 Server = https://mirror.surf/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+echo -e '\n## Finland
+Server = https://arch.mcstrugs.org/$repo/os/$arch
+Server = https://mirror.arctic.lol/ArchMirror/$repo/os/$arch
+Server = https://mirror.srv.fail/archlinux/$repo/os/$arch
+Server = https://mirror.wuki.li/archlinux/$repo/os/$arch
+Server = https://arch.yhtez.xyz/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo -e '\n## Worldwide
+Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 
 #-----------------------------------------------------------------
 
@@ -70,6 +79,14 @@ sh arch_system_bios_btrfs soulboy main
 
 #-----------------------------------------------------------------
 
+#Если, на компьютере, есть MS Windows, то установим локальное время:
+hwclock --systohc --localtime && date
+
+#Если, на компьютере, только GNU/Linux, то установим время по UTC:
+hwclock --systohc --utc && date
+
+#-----------------------------------------------------------------
+
 ## Статический IP для VirualBox ##
 cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
 echo -e "interface enp0s3
@@ -95,8 +112,6 @@ reboot
 #-----------------------------------------------------------------
 
 #### После перезагрузки ####
-
-## Настройки ##
 
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
 
@@ -147,22 +162,25 @@ autoremove
 
 ## Программы для Main ##
 
-# Дополнительный софт (Опционально):
-yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate
-yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui cherrytree
-sudo systemctl enable --now ananicy nohang
-
 # Браузеры:
 yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
 # Code OSS (free Visual Studio Code):
-yay -S code
+yay -S --noconfirm code
 # Мои настройки:
 mouseWheelScrollSensitivity - 2
 editor.renderWhitespace - none
 editor.wordWrap - On
 editor.fontSize - 12
 editor.dragAndDrop - false
+# Сменить язык на русский
+Ctrl-Shift-P -> Configure Display Language -> Меняем на Русский
+
+# Дополнительный софт:
+yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate \
+    gnome-disk-utility deadbeef mpv
+yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui cherrytree
+sudo systemctl enable --now ananicy nohang
 
 # Plank:
 # Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
@@ -171,11 +189,11 @@ sudo pacman --noconfirm -S plank
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
 
-# gnome-system-monitor - Мониторинг системы.
-yay --noconfirm -S gnome-system-monitor
-
 # Мониторинг и разгон для nVidia карт Green With Envy:
 yay --noconfirm -S gwe
+
+# gnome-system-monitor - Мониторинг системы.
+yay --noconfirm -S gnome-system-monitor
 
 #-----------------------------------------------------------------
 
@@ -188,6 +206,10 @@ sudo pacman --noconfirm -S steam
 sudo pacman --noconfirm -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
 wget -c "https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97"
 sh PortProton-97
+
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки,
+# выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов",
+# жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
 # Minecraft:
 yay --noconfirm -S multimc5 jre8-openjdk
