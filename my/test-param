@@ -1,5 +1,5 @@
 #!/bin/bash
 
-swap=$1
-let swapfile="${'swap'//G}*1024"
+temp=$1
+let swapfile="${temp//G}*1024"
 echo $swapfile
