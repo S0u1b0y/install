@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Приём входных данных и запись их в переменные для дальнейшей установки:
+# swapfile   - Размер файла подкачки
+# kernel     - Версия ядра
+swapfile=$1
+kernel=$2
+
+#-----------------------------------------------------------------
+
+## Определение переменных ##
+
+# Определяем по видеокарте виртуальная машина или реальный компьютер:
+if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
+    comp=virtual
+else
+    comp=real
+fi
+
+defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
+btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
+
+#-----------------------------------------------------------------
+
+# Выключаем файл подкачки и если примонтированы диски, то отмонтируем их
+swapoff /mnt/@swap/swapfile
+umount -R /mnt
+
+#-----------------------------------------------------------------
+
+# Для BIOS создаём один раздел Root на весь диск:
+parted -s /dev/sda -- mktable msdos \
+    mkpart primary btrfs 1M 100% \
+set 1 boot on
+# Форматируем раздел Root в Btrfs:
+mkfs.btrfs -f /dev/sda1
+# Примонтируем раздел Root в /mnt:
+mount /dev/sda1 /mnt
+# Создаем три подтома @root, @home и @snapshot:
+btrfs subvolume create /mnt/@root
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@snap
+# Отмонтируем раздел Root:
+umount /dev/sda1
+# И примонтируем уже подтом @root в /mnt с доп. параметрам:
+mount /dev/sda1 /mnt -o subvol=@root,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+# Создаем каталоги /mnt/home и /mnt/.snap,
+mkdir -p /mnt/{home,.snap}
+# Примонтируем подтом @home в /mnt/home с доп. параметрами:
+mount /dev/sda1 /mnt/home -o subvol=@home,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+# Примонтируем подтом @snap в /mnt/.snap с доп. параметрами:
+mount /dev/sda1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,space_cache=v2,discard=async
+
+#-----------------------------------------------------------------
+
+# Ставим базовую систему:
+# base, base-devel - Базовая система и пакеты для компиляции,
+# $kernel $kernel\-headers - Ядро,
+# nano - Простой консольный текстовый редактор,
+# wget - Консольный загрузчик.
+pacstrap /mnt base base-devel $kernel $kernel\-headers nano wget intel-ucode btrfs-progs
+
+#-----------------------------------------------------------------
+
+# Генерируем fstab по UUID:
+genfstab -U /mnt > /mnt/etc/fstab
+
+#-----------------------------------------------------------------
+
+# На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
+if [ $comp = real ]; then
+    pacstrap /mnt linux-firmware
+fi
+
+#-----------------------------------------------------------------
+
+## Настроим параметры запуска системы:
+sed -i "s/$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
+
+#-----------------------------------------------------------------
+
+## Swapfile ##
+# Создаем подтом @swap
+btrfs subvolume create /mnt/@swap
+# Переходим в @swap
+cd /mnt/@swap
+# Создаём пустой файл подкачки
+truncate -s 0 ./swapfile
+# Отключаем копирование при записи для файла подкачки
+chattr +C ./swapfile
+# Отключаем сжатие файла подкачки
+btrfs property set ./swapfile compression none
+# Создаём файл нужного размера
+dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+# Разрешаем доступ к файлу подкачки только root-у
+chmod 600 ./swapfile
+# Инициализируем файл подкачки и включаем его
+mkswap ./swapfile
+swapon ./swapfile
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
+echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | tee -a /mnt/etc/fstab
+
+#-----------------------------------------------------------------
+
+# Проверяем:
+lsblk
+swapon -s
+cat /mnt/etc/fstab
