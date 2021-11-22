@@ -1,0 +1,130 @@
+#!/bin/bash
+
+# Приём входных данных для дальнейшей установки:
+# username - Имя пользователя
+# hostname - Имя компьтера в сети
+# timezone - Часовой пояс
+username=$1
+hostname=$2
+
+#-----------------------------------------------------------------
+
+## Настроим Pacman:
+# Включаем "цветной" режим, раскоментируя параметр "Color",
+sed -i 's/#Color/Color/g' /etc/pacman.conf
+# Включаем параллельную загрузку пакетов, раскоментируя параметр "ParallelDownloads",
+sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
+# В Arch добавляем репозиторий 32х-битных библиотек Multilib,
+echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
+# Принудительно обновляем репозитории.
+pacman -Syy
+
+## Zswap:
+pacman --noconfirm -S systemd-swap
+sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
+systemctl enable systemd-swap
+
+## GRUB:
+# Устанавливаем grub в систему
+pacman --noconfirm -S grub grub-btrfs
+# Устанавливаем grub на диск
+grub-install --target=i386-pc /dev/sda
+# Генерируем файл конфигурации grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+## Локализуем систему и консоль:
+# Раскоментируем локали en_US и ru_RU в файле locale.gen
+sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
+sed -i 's/#ru_RU.UTF-8/ru_RU.UTF-8/g' /etc/locale.gen
+# Добавляем язык будущей системы в файл locale.conf
+echo 'LANG=ru_RU.UTF-8' > /etc/locale.conf
+# Русифицируем консоль, прописываем локаль и шрифт в файл vconsole.conf
+echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
+# И генерируем локали
+locale-gen
+
+## Пропишем имя компьютера в сети:
+echo "$hostname" > /etc/hostname
+echo "127.0.0.1    localhost" > /etc/hosts
+echo "::1          localhost" >> /etc/hosts
+echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
+
+## Введем пароль root:
+echo '>>>> Enter root password <<<<'
+passwd
+
+## Добавляем пользователя и задаем ему пароль:
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
+echo ">>>> Enter $username password <<<<"
+passwd $username
+
+## Установим и настроим sudo:
+pacman --noconfirm -S sudo
+# Убираем коментарий с группы %wheel.
+sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
+
+## Установим часовой пояс:
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+
+## Настроим сеть:
+# Устанавливаем демон (службу) dhcpcd
+pacman --noconfirm -S dhcpcd
+# Включаем загрузку при старте системы
+systemctl enable dhcpcd.service
+
+## Включим синхронизацию времени:
+# Устанавливаем демон (службу) ntp
+pacman --noconfirm -S ntp
+# Включаем загрузку при старте системы
+systemctl enable ntpd.service
+
+## SSH:
+# Устанавливаем ssh
+pacman --noconfirm -S openssh
+# Включаем загрузку при старте системы
+systemctl enable sshd.service
+
+#-----------------------------------------------------------------
+
+## Драйвера ##
+
+## Установим драйвера на звук:
+# pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
+# pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
+# gst-plugin-pipewire - Плагин для GStreamer,
+pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
+
+## Установим драйвера на видео:
+if   [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' NVIDIA '* ]]; then
+pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
+elif [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
+pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
+fi
+
+#-----------------------------------------------------------------
+
+## Утилиты ##
+
+## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
+# p7zip unrar unace lrzip - Работа с архивами,
+# cifs-utils - Поддержка подключения к Samba,
+# davfs2 - Поддержка WebDAV (например для Yandex Disk),
+# gvfs gvfs-smb gvfs-nfs - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
+
+## Установим некоторые утилиты:
+# git - Работа с GitHub и Gitlab,
+# curl - Консольный загрузчик,
+# mc - Консольный файловый менеджер Midnight Comander,
+# htop - Мониторинг параметров системы из консоли,
+# neofetch - Информация о системе в консоли.
+pacman --noconfirm -S git curl mc htop neofetch
+
+#-----------------------------------------------------------------
+
+## Оформление ##
+
+# Шрифты:
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
