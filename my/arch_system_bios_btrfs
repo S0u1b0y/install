@@ -80,7 +80,7 @@ pacman --noconfirm -S dhcpcd
 systemctl enable dhcpcd.service
 
 ## Включим синхронизацию времени:
-# Устанавливаем демон (службу) ntp
+# Устанавливаем демон ntp
 pacman --noconfirm -S ntp
 # Включаем загрузку при старте системы
 systemctl enable ntpd.service
