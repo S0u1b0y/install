@@ -99,7 +99,7 @@ systemctl enable systemd-swap
 #-----------------------------------------------------------------
 
 ## GRUB:
-if [ $os = ManjaroLinux ]; then
+if [ $os = Manjaro ]; then
     # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
     sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
     sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
