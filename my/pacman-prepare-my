@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Приём входных данных и запись их в переменные для дальнейшей установки:
+os=$1
+
+#-----------------------------------------------------------------
+
+# Сделаем резевные копии на всякий случай.
+cp -n /etc/pacman.conf /etc/pacman.conf.bak
+cp -n /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+
+#-----------------------------------------------------------------
+
+# Прописываем конфиги Pacman в зависимости от устанавливаемой оси:
+
+## Archlinux ##
+
+if [ $os = archlinux ]; then
+# Пропишем репозитории Archlinux и русские зеркала:
+# Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/
+# Автоматически сгенерировать зеркала можно командой - pacman-mirrors -f
+echo -e '[options]
+HoldPkg = pacman glibc
+Architecture = auto
+Color
+CheckSpace
+ParallelDownloads = 10
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+[core]
+Include = /etc/pacman.d/mirrorlist
+[extra]
+Include = /etc/pacman.d/mirrorlist
+[community]
+Include = /etc/pacman.d/mirrorlist
+[multilib]
+Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+echo -e '\nServer = https://mirror.wuki.li/archlinux/$repo/os/$arch
+Server = https://mirror.kumi.systems/archlinux/$repo/os/$arch
+Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
+Server = https://mirror.srv.fail/archlinux/$repo/os/$arch
+Server = https://archlinux.koyanet.lv/archlinux/$repo/os/$arch
+Server = https://ftp.lysator.liu.se/pub/archlinux/$repo/os/$arch
+Server = https://appuals.com/archlinux/$repo/os/$arch
+Server = https://ftp.acc.umu.se/mirror/archlinux/$repo/os/$arch
+Server = https://mirrors.ims.nksc.lt/archlinux/$repo/os/$arch
+Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+
+# Установка зеркал по скорости по странам: RU, FI, LV, LT, SE, DE, DK:
+# curl -s 'https://archlinux.org/mirrorlist/?country=RU&country=FI&country=LV&country=LT&country=SE&country=DE&country=DK&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
+
+# Установка зеркал по скорости по всем странам:
+# curl -s 'https://archlinux.org/mirrorlist/?country=all&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
+
+#-----------------------------------------------------------------
+
+## Manjaro ##
+
+elif [ $os = manjaro ]; then
+# Пропишем репозитории Manjaro и русские зеркала:
+# Автоматически сгенерировать зеркала можно командой - pacman-mirrors -f
+echo -e '[options]
+CacheDir = /var/cache/pacman/pkg/
+HoldPkg      = pacman glibc manjaro-system
+SyncFirst    = manjaro-system archlinux-keyring manjaro-keyring
+Architecture = auto
+Color
+CheckSpace
+ParallelDownloads = 10
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+[core]
+SigLevel = PackageRequired
+Include = /etc/pacman.d/mirrorlist
+[extra]
+SigLevel = PackageRequired
+Include = /etc/pacman.d/mirrorlist
+[community]
+SigLevel = PackageRequired
+Include = /etc/pacman.d/mirrorlist
+[multilib]
+SigLevel = PackageRequired
+Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+echo -e 'Server = https://manjaro.kyberorg.fi/stable/$repo/$arch
+Server = https://fastmirror.pp.ua/manjaro/stable/$repo/$arch
+Server = https://mirror.futureweb.be/manjaro/stable/$repo/$arch
+Server = https://ftp.lysator.liu.se/pub/manjaro/stable/$repo/$arch
+Server = https://manjaro.moson.eu/stable/$repo/$arch
+Server = https://mirrors.fossho.st/manjaro/stable/$repo/$arch
+Server = https://manjaro.lucassymons.net/stable/$repo/$arch
+Server = https://manjaro.mirrors.lavatech.top/stable/$repo/$arch
+Server = https://mirror.init7.net/manjaro/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+
+# Установка зеркал по скорости по всем странам:
+pacman-mirrors --fasttrack
+fi
+
+pacman --noconfirm -Syy
