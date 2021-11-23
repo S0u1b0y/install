@@ -13,67 +13,44 @@
 sudo su
 
 ## Настройка Pacman и репозиториев ##
-# Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/
-cp -n /etc/pacman.conf /etc/pacman.conf.bak
-cp -n /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
-echo -e '[options]
-HoldPkg = pacman glibc
-Architecture = auto
-Color
-CheckSpace
-ParallelDownloads = 10
-SigLevel = Required DatabaseOptional
-LocalFileSigLevel = Optional
-[core]
-Include = /etc/pacman.d/mirrorlist
-[extra]
-Include = /etc/pacman.d/mirrorlist
-[community]
-Include = /etc/pacman.d/mirrorlist
-[multilib]
-Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-echo -e '## Russia
-Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
-Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
-Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
-Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
-Server = https://mirror.surf/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-echo -e '\n## Finland
-Server = https://arch.mcstrugs.org/$repo/os/$arch
-Server = https://mirror.arctic.lol/ArchMirror/$repo/os/$arch
-Server = https://mirror.srv.fail/archlinux/$repo/os/$arch
-Server = https://mirror.wuki.li/archlinux/$repo/os/$arch
-Server = https://arch.yhtez.xyz/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo -e '\n## Worldwide
-Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch
-Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+# Передаваемые скрипту параметры:
+# 1й - Устанавливаемая система, значения: archlinux или manjaro.
+
+# Для установки Archlinux:
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare"
+sh pacman-prepare archlinux
+
+# Для установки Manjaro:
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare"
+sh pacman-prepare manjaro
 
 #-----------------------------------------------------------------
 
 ### Установка ###
 # Разметка, форматирование диска и установка базовой системы.
+# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 
 ## Btrfs ##
 
-# VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_btrfs'
-sh arch_base_btrfs 2G linux
+# VirtualBox
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
+sh arch-base-btrfs 2G linux
 
-# Main (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_btrfs'
-sh arch_base_btrfs 8G linux
+# Main
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
+sh arch-base-btrfs 8G linux
 
 # ***
 
 ## Ext4 ##
 
-# VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_ext4'
-sh arch_base_ext4 40G 2G linux
+# VirtualBox
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
+sh arch-base-ext4 40G 2G linux
 
-# Main (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_ext4'
-sh arch_base_ext4 40G 8G linux
+# Main
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
+sh arch-base-ext4 40G 8G linux
 
 #-----------------------------------------------------------------
 
@@ -88,12 +65,12 @@ arch-chroot /mnt
 ## Установка основной системы ##
 
 # VirtualBox
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_system_bios'
-sh arch_system_bios user virt
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
+sh arch-system-bios user virt
 
 # Main
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_system_bios'
-sh arch_system_bios soulboy main
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
+sh arch-system-bios soulboy main
 
 #-----------------------------------------------------------------
 
@@ -130,7 +107,7 @@ reboot
 
 #### После перезагрузки ####
 
-# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/Instructions/arch-zsh
+# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
 
 echo -e '\n#### Aliases ####
 
@@ -156,6 +133,7 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 yay --noconfirm -S pamac-aur pamac-tray-icon-plasma qogir-icon-theme ttf-meslo-nerd-font-powerlevel10k
+autoremove
 
 #-----------------------------------------------------------------
 
