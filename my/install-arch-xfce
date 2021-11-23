@@ -28,14 +28,15 @@ sh pacman-prepare manjaro
 
 ### Установка ###
 # Разметка, форматирование диска и установка базовой системы.
+# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 
 ## Btrfs ##
 
-# VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро)
+# VirtualBox
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
 sh arch-base-btrfs 2G linux
 
-# Main (linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро)
+# Main
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
 sh arch-base-btrfs 8G linux
 
@@ -43,11 +44,11 @@ sh arch-base-btrfs 8G linux
 
 ## Ext4 ##
 
-# VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро)
+# VirtualBox
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
 sh arch-base-ext4 40G 2G linux
 
-# Main (linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро)
+# Main
 curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
 sh arch-base-ext4 40G 8G linux
 
