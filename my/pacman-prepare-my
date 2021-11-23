@@ -35,7 +35,7 @@ Include = /etc/pacman.d/mirrorlist
 Include = /etc/pacman.d/mirrorlist
 [multilib]
 Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-echo -e '\nServer = https://mirror.wuki.li/archlinux/$repo/os/$arch
+echo -e 'Server = https://mirror.wuki.li/archlinux/$repo/os/$arch
 Server = https://mirror.kumi.systems/archlinux/$repo/os/$arch
 Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
 Server = https://mirror.srv.fail/archlinux/$repo/os/$arch
