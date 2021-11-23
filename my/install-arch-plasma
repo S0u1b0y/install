@@ -18,11 +18,11 @@ sudo su
 
 # Для установки Archlinux:
 curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
-sh pacman-prepare archlinux
+sh pacman-prepare-my archlinux
 
 # Для установки Manjaro:
 curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
-sh pacman-prepare manjaro
+sh pacman-prepare-my manjaro
 
 #-----------------------------------------------------------------
 
