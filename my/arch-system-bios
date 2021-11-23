@@ -88,9 +88,9 @@ pacman -Syy
 # Устанавливаем
 pacman --noconfirm -S systemd-swap
 # Раскоментируем параметры в файле конфигурации
-sed -i 's/#zram_/zram_/g' /etc/systemd/swap.conf
+sed -i 's/^#zram_/zram_/g' /etc/systemd/swap.conf
 # Включим использование
-sed -i 's/zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
+sed -i 's/^zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
 # Отведем для zswap, вместо четверти, половину оперативной памяти
 sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
 # Включаем загрузку при старте системы
@@ -101,8 +101,8 @@ systemctl enable systemd-swap
 ## GRUB:
 if [ $os = Manjaro ]; then
     # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
-    sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
-    sed -i 's/GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
+    sed -i 's/^GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
+    sed -i 's/^GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
 fi
 # Устанавливаем grub на диск
 grub-install --target=i386-pc /dev/sda
@@ -113,8 +113,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Локализуем систему и консоль:
 # Раскоментируем локали en_US и ru_RU в файле locale.gen
-sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
-sed -i 's/#ru_RU.UTF-8/ru_RU.UTF-8/g' /etc/locale.gen
+sed -i 's/^#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
+sed -i 's/^#ru_RU.UTF-8/ru_RU.UTF-8/g' /etc/locale.gen
 # Устанавливаем язык будущей системы в файл locale.conf
 echo 'LANG=ru_RU.UTF-8' > /etc/locale.conf
 # Русифицируем консоль, прописываем локаль и шрифт в файл vconsole.conf
@@ -153,7 +153,7 @@ passwd $username
 ## Установим и настроим sudo:
 pacman --noconfirm -S sudo
 # Убираем коментарий с группы %wheel.
-sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
+sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 
 #-----------------------------------------------------------------
 
@@ -162,11 +162,11 @@ ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 
 #-----------------------------------------------------------------
 
-## Настроим сеть, включим синхронизацию времени и установим SSH:
+## Установим поддержку сети и SSH, включим синхронизацию времени:
 # Устанавливаем демоны (службы) dhcpcd, ntp, ssh
-pacman --noconfirm -S dhcpcd ntp openssh
+pacman --noconfirm -S dhcpcd openssh ntp
 # Включаем загрузку демонов при старте системы
-systemctl enable dhcpcd ntpd sshd
+systemctl enable dhcpcd sshd ntpd
 
 #-----------------------------------------------------------------
 
