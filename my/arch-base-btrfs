@@ -41,7 +41,7 @@ fi && umount -R /mnt
 ## Разбивка диска ##
 
 # Для BIOS создаём один раздел Root на весь диск:
-parted -s /dev/sda -- mktable msdos \
+parted -s /dev/sda mktable msdos \
     mkpart primary btrfs 1M 100% \
 set 1 boot on
 # Форматируем раздел Root в Btrfs:
