@@ -9,17 +9,31 @@ hostname=$2
 
 #-----------------------------------------------------------------
 
-## Настроим Pacman:
-# Включаем "цветной" режим, раскоментируя параметр "Color",
-sed -i 's/#Color/Color/g' /etc/pacman.conf
-# Включаем параллельную загрузку пакетов, раскоментируя параметр "ParallelDownloads",
-sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/g' /etc/pacman.conf
-# В Arch добавляем репозиторий 32х-битных библиотек Multilib,
-echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
-# Принудительно обновляем репозитории.
-pacman -Syy
+## Настроим Pacman в устанавливаемой системе:
+cp -n /etc/pacman.conf /etc/pacman.conf.bak
+echo -e '[options]
+HoldPkg = pacman glibc
+Architecture = auto
+Color
+CheckSpace
+ParallelDownloads = 10
 
-## Zswap:
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+[community]
+Include = /etc/pacman.d/mirrorlist
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+
+## Zramswap:
 # Устанавливаем
 pacman --noconfirm -S systemd-swap
 # Раскоментируем параметры в файле конфигурации
@@ -58,7 +72,12 @@ echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
 echo '>>>> Enter root password <<<<'
 passwd
 
-## Добавляем пользователя и задаем ему пароль:
+## Создаём пользователя:
+# Удаляем пользователя если он существует.
+if [ -d /home/$username ]; then
+    userdel -fr $username
+fi
+# Добавляем пользователя и задаем ему пароль
 useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
 echo ">>>> Enter $username password <<<<"
 passwd $username
@@ -71,23 +90,11 @@ sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 ## Установим часовой пояс:
 ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 
-## Настроим сеть:
-# Устанавливаем демон (службу) dhcpcd
-pacman --noconfirm -S dhcpcd
-# Включаем загрузку при старте системы
-systemctl enable dhcpcd.service
-
-## Включим синхронизацию времени:
-# Устанавливаем демон ntp
-pacman --noconfirm -S ntp
-# Включаем загрузку при старте системы
-systemctl enable ntpd.service
-
-## SSH:
-# Устанавливаем ssh
-pacman --noconfirm -S openssh
-# Включаем загрузку при старте системы
-systemctl enable sshd.service
+## Настроим сеть, включим синхронизацию времени и установим SSH:
+# Устанавливаем демон (службу) dhcpcd ntp ssh
+pacman --noconfirm -S dhcpcd ntp openssh
+# Включаем загрузку демонов при старте системы
+systemctl enable dhcpcd ntpd sshd
 
 #-----------------------------------------------------------------
 
@@ -114,7 +121,7 @@ fi
 # p7zip unrar unace lrzip - Работа с архивами,
 # cifs-utils - Поддержка подключения к Samba,
 # davfs2 - Поддержка WebDAV (например для Yandex Disk),
-# gvfs gvfs-smb gvfs-nfs - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+# gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
 pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
 
 ## Установим некоторые утилиты:
@@ -130,4 +137,5 @@ pacman --noconfirm -S git curl mc htop neofetch
 ## Оформление ##
 
 # Шрифты:
-sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts
+sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack \
+    ttf-roboto ttf-roboto-mono noto-fonts
