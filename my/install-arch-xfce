@@ -13,8 +13,7 @@
 sudo su
 
 ## Настройка Pacman и репозиториев ##
-# Передаваемые скрипту параметры:
-# 1й - Устанавливаемая система, значения: archlinux или manjaro.
+# Передаваемые скрипту параметры: Устанавливаемая система, значения: archlinux или manjaro.
 
 # Для установки Archlinux:
 curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
@@ -118,7 +117,7 @@ fi
 
 #### Aliases ####
 
-# Переопеделение Pacman для установки и удаления без подтверждения:
+# Переопределение Pacman для установки и удаления без подтверждения:
 alias spac="sudo pacman --noconfirm"
 
 # Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
@@ -140,12 +139,13 @@ sudo sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
 yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme matcha-gtk-theme \
     ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 # Автологин LXDM:
-#echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
+echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
 
 #-----------------------------------------------------------------
 
@@ -175,8 +175,9 @@ Ctrl-Shift-P -> Configure Display Language -> Меняем на Русский
 
 # Дополнительный софт:
 yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate \
-    gnome-disk-utility deadbeef mpv
-yay --noconfirm -S ananicy nohang mediainfo mkvtoolnix-gui cherrytree
+    gnome-disk-utility deadbeef mpv mediainfo mkvtoolnix-gui cherrytree
+    
+yay --noconfirm -S ananicy nohang
 sudo systemctl enable --now ananicy nohang
 
 # Plank:
