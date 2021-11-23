@@ -17,11 +17,11 @@ sudo su
 # 1й - Устанавливаемая система, значения: archlinux или manjaro.
 
 # Для установки Archlinux:
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare"
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
 sh pacman-prepare archlinux
 
 # Для установки Manjaro:
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare"
+curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
 sh pacman-prepare manjaro
 
 #-----------------------------------------------------------------
