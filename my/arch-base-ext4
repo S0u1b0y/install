@@ -57,21 +57,6 @@ mount /dev/sda2 /mnt/home
 
 #-----------------------------------------------------------------
 
-## Swapfile ##
-# Переходим в mnt устанавливаемой системы
-cd /mnt/mnt
-# Создаём файл нужного размера
-dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
-# Разрешаем доступ к файлу подкачки только root-у
-chmod 600 ./swapfile
-# Инициализируем файл подкачки и включаем его
-mkswap ./swapfile
-swapon ./swapfile
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
-echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
-
-#-----------------------------------------------------------------
-
 # Ставим базовую систему:
 # base, base-devel - Базовая система и пакеты для компиляции,
 # $kernel $kernel\-headers - Ядро,
@@ -95,6 +80,21 @@ else # Установка из Arch-подобных дистрибутивов 
     # Генерируем fstab по UUID:
     genfstab -U /mnt > /mnt/etc/fstab
 fi
+
+#-----------------------------------------------------------------
+
+## Swapfile ##
+# Переходим в mnt устанавливаемой системы
+cd /mnt/mnt
+# Создаём файл нужного размера
+dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+# Разрешаем доступ к файлу подкачки только root-у
+chmod 600 ./swapfile
+# Инициализируем файл подкачки и включаем его
+mkswap ./swapfile
+swapon ./swapfile
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
+echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fstab
 
 #-----------------------------------------------------------------
 
