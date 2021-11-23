@@ -65,30 +65,6 @@ mount /dev/sda1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,sp
 
 #-----------------------------------------------------------------
 
-## Swapfile ##
-
-# Создаем подтом @swap
-btrfs subvolume create /mnt/@swap
-# Переходим в @swap
-cd /mnt/@swap
-# Создаём пустой файл подкачки
-truncate -s 0 ./swapfile
-# Отключаем копирование при записи для файла подкачки
-chattr +C ./swapfile
-# Отключаем сжатие файла подкачки
-btrfs property set ./swapfile compression none
-# Создаём файл нужного размера
-dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
-# Разрешаем доступ к файлу подкачки только root-у
-chmod 600 ./swapfile
-# Инициализируем файл подкачки и включаем его
-mkswap ./swapfile
-swapon ./swapfile
-# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
-echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | tee -a /mnt/etc/fstab
-
-#-----------------------------------------------------------------
-
 ## Установка базовой системы ##
 
 # base, base-devel - Базовая система и пакеты для компиляции,
@@ -125,6 +101,30 @@ if [ $os = Manjaro ]; then
 else
     pacstrap /mnt btrfs-progs grub-btrfs
 fi
+
+#-----------------------------------------------------------------
+
+## Swapfile ##
+
+# Создаем подтом @swap
+btrfs subvolume create /mnt/@swap
+# Переходим в @swap
+cd /mnt/@swap
+# Создаём пустой файл подкачки
+truncate -s 0 ./swapfile
+# Отключаем копирование при записи для файла подкачки
+chattr +C ./swapfile
+# Отключаем сжатие файла подкачки
+btrfs property set ./swapfile compression none
+# Создаём файл нужного размера
+dd if=/dev/zero of=./swapfile bs=1M count=$swapfile status=progress
+# Разрешаем доступ к файлу подкачки только root-у
+chmod 600 ./swapfile
+# Инициализируем файл подкачки и включаем его
+mkswap ./swapfile
+swapon ./swapfile
+# Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
+echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | tee -a /mnt/etc/fstab
 
 #-----------------------------------------------------------------
 
