@@ -4,7 +4,8 @@
 
 ### Подготовка ###
 
-# Скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
+# Скачиваем образ Manjaro Minimal для установки Manjaro или Archlinux - https://manjaro.org/downloads/official/xfce/
+# Или скачиваем образ EndeavourOS для установки только Archlinux - https://endeavouros.com/latest-release/
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
 # Загружаемся с записанного образа
 
@@ -44,6 +45,7 @@ Server = https://mirror.srv.fail/archlinux/$repo/os/$arch
 Server = https://mirror.wuki.li/archlinux/$repo/os/$arch
 Server = https://arch.yhtez.xyz/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo -e '\n## Worldwide
+Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch
 Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 
 #-----------------------------------------------------------------
@@ -54,11 +56,11 @@ Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pacman.d
 ## Btrfs ##
 
 # VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_btrfs'
 sh arch_base_btrfs 2G linux
 
 # Main (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_btrfs'
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_btrfs'
 sh arch_base_btrfs 8G linux
 
 # ***
@@ -66,16 +68,19 @@ sh arch_base_btrfs 8G linux
 ## Ext4 ##
 
 # VirtualBox (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_ext4'
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_ext4'
 sh arch_base_ext4 40G 2G linux
 
 # Main (linux - стандартное ядро, linux-lts - LTS-ядро)
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_base_ext4'
+curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_base_ext4'
 sh arch_base_ext4 40G 8G linux
 
 #-----------------------------------------------------------------
 
 ## Чрутимся:
+# Если ставим из Manjaro
+manjaro-chroot /mnt
+# Если ставим из Endeavour или Arch
 arch-chroot /mnt
 
 #-----------------------------------------------------------------
@@ -83,11 +88,11 @@ arch-chroot /mnt
 ## Установка основной системы ##
 
 # VirtualBox
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios'
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_system_bios'
 sh arch_system_bios user virt
 
 # Main
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/Instructions/my/arch_system_bios'
+cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch_system_bios'
 sh arch_system_bios soulboy main
 
 #-----------------------------------------------------------------
@@ -110,6 +115,7 @@ static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
 #-----------------------------------------------------------------
 
 ## Установка XFCE ##
+
 pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
     xfce4-weather-plugin gnome-disk-utility
@@ -192,7 +198,7 @@ Ctrl-Shift-P -> Configure Display Language -> Меняем на Русский
 # Дополнительный софт:
 yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate \
     gnome-disk-utility deadbeef mpv
-yay --noconfirm -S ananicy nohang jre-openjdk mediainfo mkvtoolnix-gui cherrytree
+yay --noconfirm -S ananicy nohang mediainfo mkvtoolnix-gui cherrytree
 sudo systemctl enable --now ananicy nohang
 
 # Plank:
@@ -225,7 +231,7 @@ sh PortProton-97
 # жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
 
 # Minecraft:
-yay --noconfirm -S multimc5 jre8-openjdk
+yay --noconfirm -S multimc jre-openjdk jre8-openjdk
 sudo archlinux-java set java-17-openjdk
 archlinux-java status
 
