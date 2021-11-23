@@ -92,7 +92,7 @@ Server = https://manjaro.mirrors.lavatech.top/stable/$repo/$arch
 Server = https://mirror.init7.net/manjaro/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 
 # Установка зеркал по скорости по всем странам:
-pacman-mirrors --fasttrack
+# pacman-mirrors --fasttrack
 fi
 
 pacman --noconfirm -Syy
