@@ -25,7 +25,6 @@ else
 fi
 
 defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
-ext4hook='HOOKS=(base systemd autodetect modconf block filesystems keyboard fsck)'
 btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
 
 #-----------------------------------------------------------------
@@ -130,7 +129,7 @@ fi
 #-----------------------------------------------------------------
 
 # Настроим параметры запуска системы:
-sed -i "s/$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
+sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 
 #-----------------------------------------------------------------
 
