@@ -6,6 +6,7 @@
 let swapfile="${1//G}*1024"
 kernel=$2
 
+# Сквозные данные для передачи в следующий скрипт:
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
 username=$3
@@ -34,12 +35,17 @@ btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboa
 
 #-----------------------------------------------------------------
 
-# Выключаем файл подкачки и если примонтированы диски, то отмонтируем их
+# Если этот скрипт уже запускался, то остаются примонтированные диски и файл подкачки.
+# Поэтому, отключаем файл подкачки ...
 if [ -d /mnt/@swap/swapfile ]; then
+    # созданный для btrfs ...
     swapoff /mnt/@swap/swapfile
 elif [ -d /mnt/mnt/swapfile ]; then
+    # или созданный для ext4 ...
     swapoff /mnt/mnt/swapfile
-fi && umount -R /mnt
+fi
+# и отмонтируем все примонтированные диски.
+umount -R /mnt
 
 #-----------------------------------------------------------------
 
@@ -102,8 +108,10 @@ fi
 # btrfs-progs - Утилиты для btrfs,
 # grub-btrfs - Загрузка со снимков(снапшотов) btrfs,
 if [ $os = Manjaro ]; then
+    # Для Manjaro:
     basestrap /mnt btrfs-progs grub-btrfs
 else
+    # Для Archlinux:
     pacstrap /mnt btrfs-progs grub-btrfs
 fi
 
@@ -138,7 +146,7 @@ sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 
 #-----------------------------------------------------------------
 
-## Чрутимся и продолаем установку:
+## Чрутимся и продолжаем установку:
 
 # Скачиваем скрипт для дальнейшей установки:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
