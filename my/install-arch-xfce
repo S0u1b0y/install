@@ -17,7 +17,6 @@ scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
 curl -o pacman-prepare "$scripturl/pacman-prepare-my"
 curl -o arch-base-btrfs "$scripturl/arch-base-btrfs"
 curl -o arch-base-ext4 "$scripturl/arch-base-ext4"
-curl -o arch-system-bios "$scripturl/arch-system-bios"
 
 # ***
 
