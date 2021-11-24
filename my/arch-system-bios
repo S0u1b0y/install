@@ -138,7 +138,7 @@ passwd
 #-----------------------------------------------------------------
 
 ## Создаём пользователя:
-# Удаляем пользователя если он существует.
+# Удаляем пользователя если он уже существует.
 if [ -d /home/$username ]; then
     userdel -fr $username
 fi
@@ -150,7 +150,10 @@ passwd $username
 #-----------------------------------------------------------------
 
 ## Установим и настроим sudo:
-pacman --noconfirm -S sudo
+# Если пакет не установлен, то устанавливаем
+if pacman -Qs sudo = 1 > /dev/null ; then
+    echo pacman --noconfirm -S sudo
+fi
 # Убираем коментарий с группы %wheel.
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 
@@ -161,8 +164,8 @@ ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 
 #-----------------------------------------------------------------
 
-## Установим поддержку сети и SSH, включим синхронизацию времени:
-# Устанавливаем демоны (службы) dhcpcd, ntp, ssh
+## Установим поддержку сети, SSH и включим синхронизацию времени:
+# Устанавливаем демоны (службы) dhcpcd, ssh, ntp
 pacman --noconfirm -S dhcpcd openssh ntp
 # Включаем загрузку демонов при старте системы
 systemctl enable dhcpcd sshd ntpd
