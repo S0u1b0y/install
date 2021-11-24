@@ -13,27 +13,28 @@
 sudo su
 
 # Загрузим необходмые скрипты:
-curl -sO 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my'
-curl -sO 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
+curl -so pacman-prepare 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my'
+curl -so arch-base-btrfs 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
+curl -so arch-base-ext4 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
 
 # ***
 
 ## Подготовка Pacman и репозиториев ##
 
 # Для установки Archlinux:
-sh pacman-prepare-my archlinux
+sh pacman-prepare archlinux
 
 # Для установки Manjaro:
-sh pacman-prepare-my manjaro
+sh pacman-prepare manjaro
 
 #-----------------------------------------------------------------
 
 ### Установка ###
+# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 
 ## Btrfs ##
 
 # VirtualBox
-# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 sh arch-base-btrfs 2G linux user virt
 
 # Main
