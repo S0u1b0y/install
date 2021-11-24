@@ -49,7 +49,7 @@ Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch' > /etc/pacman.d/mirr
 # Установка зеркал по скорости по странам: RU, FI, LV, LT, SE, DE, DK:
 # curl -s 'https://archlinux.org/mirrorlist/?country=RU&country=FI&country=LV&country=LT&country=SE&country=DE&country=DK&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
 
-# Установка зеркал по скорости по всем странам:
+# Установка зеркал по всем странам по скорости:
 # curl -s 'https://archlinux.org/mirrorlist/?country=all&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
 
 #-----------------------------------------------------------------
