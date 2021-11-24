@@ -60,15 +60,6 @@ hwclock --systohc --utc && date
 
 #-----------------------------------------------------------------
 
-## Статический IP для VirualBox ##
-cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e 'interface enp0s3
-static ip_address=192.168.0.50/24
-static routers=192.168.0.100
-static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
-
-#-----------------------------------------------------------------
-
 ## Установка XFCE ##
 
 pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
