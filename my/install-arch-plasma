@@ -14,9 +14,9 @@ sudo su
 
 # Загрузим необходмые скрипты:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
-curl -so pacman-prepare "$scripturl/pacman-prepare-my"
-curl -so arch-base-btrfs "$scripturl/arch-base-btrfs"
-curl -so arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o pacman-prepare "$scripturl/pacman-prepare-my"
+curl -o arch-base-btrfs "$scripturl/arch-base-btrfs"
+curl -o arch-base-ext4 "$scripturl/arch-base-ext4"
 
 # ***
 
