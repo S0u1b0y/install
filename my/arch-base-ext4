@@ -118,8 +118,7 @@ sed -i "s/^$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
 
 ## Чрутимся и продолжаем установку:
 
-# Копируем скрипт в /mnt, чтобы он был доступен после чрута
-cp arch-system-bios /mnt/arch-system-bios
+curl -so /mnt/arch-system-bios "https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios"
 if [ $os = Manjaro ]; then
     # Если ставим из Manjaro
     manjaro-chroot /mnt sh /arch-system-bios $username $hostname $deskenv
