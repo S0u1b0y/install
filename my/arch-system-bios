@@ -236,60 +236,99 @@ sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-
 ## Установка окружения рабочего стола ##
 
 if [ $deskenv = xfce ]; then
-    # Установка XFCE:
-    # xorg-server - Иксы,
-    # xfce4 - XFCE,
-    # lxdm - Загрузчик,
-    # pavucontrol - Панель управления звуком Pulseaudio,
-    # xed - Простой текстовый редактор,
-    # tilix - Тайлинговый эмулятор терминала,
-    # thunar-archive-plugin - Работа с архивами,
-    # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
-    # xfce4-pulseaudio-plugin - Плагин управления звуком,
-    # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
-    # xfce4-whiskermenu-plugin - Современное меню,
-    # xfce4-weather-plugin - Плагин погоды,
-    # gnome-disk-utility - Управление дисками,
-    pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
-        xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-        xfce4-weather-plugin gnome-disk-utility
-    # Включаем загрузчик в автостарт при запуске системы.
-    systemctl enable lxdm.service
-    # xfce4-terminal - удаляем встроенный терминал.
-    pacman --noconfirm -R xfce4-terminal
+# Установка XFCE:
+# xorg-server - Иксы,
+# xfce4 - XFCE,
+# lxdm - Загрузчик,
+# pavucontrol - Панель управления звуком Pulseaudio,
+# xed - Простой текстовый редактор,
+# tilix - Тайлинговый эмулятор терминала,
+# thunar-archive-plugin - Работа с архивами,
+# xfce4-xkb-plugin - Плагин раскладки клавиатуры,
+# xfce4-pulseaudio-plugin - Плагин управления звуком,
+# xfce4-clipman-plugin - Плагин расширенного буфера обмена,
+# xfce4-whiskermenu-plugin - Современное меню,
+# xfce4-weather-plugin - Плагин погоды,
+# gnome-disk-utility - Управление дисками,
+pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
+    xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
+    xfce4-weather-plugin gnome-disk-utility
+# Включаем загрузчик в автостарт при запуске системы.
+systemctl enable lxdm.service
+# xfce4-terminal - удаляем встроенный терминал.
+pacman --noconfirm -R xfce4-terminal
+echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' | sudo tee -a /home/$hostname/.bashrc /root/.bashrc
 
 elif [ $deskenv = plasma ]; then
-    # Установка KDE Plasma:
-    # sddm - Загрузчик,
-    # plasma-desktop - Минимальная установка Plasma,
-    # kscreen - Утилита управления мониторами,
-    # powerdevil - Утилита управления питанием,
-    # plasma-pa - Апплет управления звуком,
-    # kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
-    # konsole - Эмулятор терминала,
-    # kwrite - Простой текстовый редактор,
-    # kcalc - Калькулятор,
-    # dolphin dolphin-plugins - Файловый менеджер.
-    sudo pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
-        kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
-    # Включаем загрузчик в автостарт при запуске системы.
-    sudo systemctl enable sddm
+# Установка KDE Plasma:
+# sddm - Загрузчик,
+# plasma-desktop - Минимальная установка Plasma,
+# kscreen - Утилита управления мониторами,
+# powerdevil - Утилита управления питанием,
+# plasma-pa - Апплет управления звуком,
+# kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
+# konsole - Эмулятор терминала,
+# kwrite - Простой текстовый редактор,
+# kcalc - Калькулятор,
+# dolphin dolphin-plugins - Файловый менеджер.
+sudo pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
+    kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
+# Включаем загрузчик в автостарт при запуске системы.
+sudo systemctl enable sddm
 
 elif [ $deskenv = gnome ]; then
-    # Установка Gnome:
-    # gnome-shell - Минимальная установка Gnome,
-    # gdm - Загрузчик,
-    # gnome-control-center - Панель настроек Gnome,
-    # gnome-tweak-tool - Дополнительные настройки Gnome,
-    # tilix - Тайлинговый эмулятор терминала,
-    # gedit - Простой текстовый редактор,
-    # nautilus libnautilus-extension - Файловый менеджер и расширение,
-    # caffeine-ng - Предотвращение активации экранной заставки,
-    # gnome-disk-utility - Управление дисками. 
-    sudo pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool tilix \
-        gedit nautilus libnautilus-extension caffeine-ng gnome-disk-utility
-    # Включаем загрузчик в автостарт при запуске системы.
-    sudo systemctl enable gdm.service
-    # cheese - Удаляем приложение для веб-камеры.
-    sudo pacman --noconfirm -R cheese
+# Установка Gnome:
+# gnome-shell - Минимальная установка Gnome,
+# gdm - Загрузчик,
+# gnome-control-center - Панель настроек Gnome,
+# gnome-tweak-tool - Дополнительные настройки Gnome,
+# tilix - Тайлинговый эмулятор терминала,
+# gedit - Простой текстовый редактор,
+# nautilus libnautilus-extension - Файловый менеджер и расширение,
+# caffeine-ng - Предотвращение активации экранной заставки,
+# gnome-disk-utility - Управление дисками. 
+sudo pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool tilix \
+    gedit nautilus libnautilus-extension caffeine-ng gnome-disk-utility
+# Включаем загрузчик в автостарт при запуске системы.
+sudo systemctl enable gdm.service
+# cheese - Удаляем приложение для веб-камеры.
+sudo pacman --noconfirm -R cheese
+
 fi
+
+#-----------------------------------------------------------------
+
+## Настройки ##
+
+# Добавим алиасы в баш пользователя и рута:
+echo -e '\n#### Aliases ####
+
+# Переопределение Pacman для установки и удаления без подтверждения:
+alias spac="sudo pacman --noconfirm"
+
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
+
+# Быстрое обновление (pup - Pacman UPdate)
+alias pup="sudo pacman -Syu"
+alias згз="sudo pacman -Syu"
+
+# Пинг делает только 5 запросов.
+alias ping="ping -c 5"' | sudo tee -a /home/$hostname/.bashrc /root/.bashrc
+
+# Создаем каталоги пользователя в домашней папке на английском языке:
+sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+
+# Установим более низкий уровень использования файла подкачки
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
+
+# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
+sudo sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+
+# Зададим максимальный размер systemd-журнала
+sudo sed -i 's/^#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
