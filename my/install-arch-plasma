@@ -4,18 +4,19 @@
 
 ### Подготовка ###
 
-# Скачиваем образ Manjaro Minimal для установки Manjaro или Archlinux - https://manjaro.org/downloads/official/xfce/
+# Скачиваем образ Manjaro для установки Manjaro или Archlinux - https://manjaro.org/download/
 # Или скачиваем образ EndeavourOS для установки только Archlinux - https://endeavouros.com/latest-release/
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
 # Загружаемся с записанного образа
-
+# Запускаем эмулятор терминала.
 # Переходим в учётную запись рута:
 sudo su
 
 # Загрузим необходмые скрипты:
-curl -so pacman-prepare 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my'
-curl -so arch-base-btrfs 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
-curl -so arch-base-ext4 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
+scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
+curl -so pacman-prepare "$scripturl/pacman-prepare-my"
+curl -so arch-base-btrfs "$scripturl/arch-base-btrfs"
+curl -so arch-base-ext4 "$scripturl/arch-base-ext4"
 
 # ***
 
@@ -64,7 +65,7 @@ hwclock --systohc --utc && date
 
 sudo pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
     kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
-sudo systemctl enable sddm.service
+sudo systemctl enable sddm
 
 #-----------------------------------------------------------------
 
@@ -95,19 +96,22 @@ alias згз="sudo pacman -Syu"
 alias ping="ping -c 5"' >> ~/.bashrc
 source ~/.bashrc
 echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
-sudo sed -i 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
-sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
-sudo sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+sudo sed -i 's/^#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
 sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
+sudo sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 yay --noconfirm -S pamac-aur pamac-tray-icon-plasma qogir-icon-theme ttf-meslo-nerd-font-powerlevel10k
 
 # Автологин SDDM:
+sudo mkdir -p /etc/sddm.conf.d
+sudo touch /etc/sddm.conf.d/autologin.conf
 echo -e "[Autologin]
 User=${USER}
-Session=plasma" > /etc/sddm.conf.d/autologin.conf
+Session=plasma" | sudo tee /etc/sddm.conf.d/autologin.conf
 
 #-----------------------------------------------------------------
 
@@ -189,6 +193,6 @@ sudo pacman --noconfirm -S virt-manager bridge-utils dnsmasq dmidecode ebtables 
     openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
 sudo systemctl enable --now libvirtd dnsmasq
 sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
-sudo sed -i 's/#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
-sudo sed -i 's/#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/^#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/^#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
 sudo systemctl restart libvirtd.service
