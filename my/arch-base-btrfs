@@ -6,6 +6,11 @@
 let swapfile="${1//G}*1024"
 kernel=$2
 
+# username - Имя пользователя
+# hostname - Имя компьтера в сети
+username=$3
+hostname=$4
+
 #-----------------------------------------------------------------
 
 ## Определение переменных, оборудования, оси и др. ##
@@ -133,7 +138,17 @@ sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 
 #-----------------------------------------------------------------
 
-# Проверяем:
-lsblk
-swapon -s
-cat /mnt/etc/fstab
+## Чрутимся и продолаем установку:
+
+# Скачиваем скрипт для дальнейшей установки:
+scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
+curl -so /mnt/arch-system-bios $scripturl
+if [ $os = Manjaro ]; then
+    # Если ставим из Manjaro
+    manjaro-chroot /mnt sh /arch-system-bios $username $hostname
+else
+    # Если ставим из Arch
+    arch-chroot /mnt sh /arch-system-bios $username $hostname
+fi
+# Удаляем скрипт, чтобы он не остался в установленной системе
+rm /mnt/arch-system-bios
