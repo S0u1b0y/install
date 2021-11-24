@@ -4,7 +4,7 @@
 
 ### Подготовка ###
 
-# Скачиваем образ Manjaro Minimal для установки Manjaro или Archlinux - https://manjaro.org/downloads/official/xfce/
+# Скачиваем образ Manjaro Minimal для установки Manjaro или Archlinux - https://manjaro.org/downloads/official/
 # Или скачиваем образ EndeavourOS для установки только Archlinux - https://endeavouros.com/latest-release/
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
 # Загружаемся с записанного образа
@@ -12,64 +12,42 @@
 # Переходим в учётную запись рута:
 sudo su
 
-## Настройка Pacman и репозиториев ##
-# Передаваемые скрипту параметры: Устанавливаемая система, значения: archlinux или manjaro.
+# Загрузим необходмые скрипты:
+curl -sO 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my'
+curl -sO 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
+
+# ***
+
+## Подготовка Pacman и репозиториев ##
 
 # Для установки Archlinux:
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
 sh pacman-prepare-my archlinux
 
 # Для установки Manjaro:
-curl -O "https://raw.githubusercontent.com/S0u1b0y/install/in/my/pacman-prepare-my"
 sh pacman-prepare-my manjaro
 
 #-----------------------------------------------------------------
 
 ### Установка ###
-# Разметка, форматирование диска и установка базовой системы.
-# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 
 ## Btrfs ##
 
 # VirtualBox
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
-sh arch-base-btrfs 2G linux
+# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
+sh arch-base-btrfs 2G linux user virt
 
 # Main
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-btrfs'
-sh arch-base-btrfs 8G linux
+sh arch-base-btrfs 8G linux soulboy main
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
-sh arch-base-ext4 40G 2G linux
+sh arch-base-ext4 40G 2G linux user virt
 
 # Main
-curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-base-ext4'
-sh arch-base-ext4 40G 8G linux
-
-#-----------------------------------------------------------------
-
-## Чрутимся:
-# Если ставим из Manjaro
-manjaro-chroot /mnt
-# Если ставим из EndeavourOS или Archlinux
-arch-chroot /mnt
-
-#-----------------------------------------------------------------
-
-## Установка основной системы ##
-
-# VirtualBox
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
-sh arch-system-bios user virt
-
-# Main
-cd /tmp && curl -O 'https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
-sh arch-system-bios soulboy main
+sh arch-base-ext4 40G 8G linux soulboy main
 
 #-----------------------------------------------------------------
 
