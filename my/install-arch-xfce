@@ -14,9 +14,10 @@ sudo su
 
 # Загрузим необходмые скрипты:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
-curl -so pacman-prepare "$scripturl/pacman-prepare-my"
-curl -so arch-base-btrfs "$scripturl/arch-base-btrfs"
-curl -so arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o pacman-prepare "$scripturl/pacman-prepare-my"
+curl -o arch-base-btrfs "$scripturl/arch-base-btrfs"
+curl -o arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o arch-system-bios "$scripturl/arch-system-bios"
 
 # ***
 
@@ -36,20 +37,20 @@ sh pacman-prepare manjaro
 ## Btrfs ##
 
 # VirtualBox
-sh arch-base-btrfs 2G linux user virt
+sh arch-base-btrfs 2G linux user virt xfce
 
 # Main
-sh arch-base-btrfs 8G linux soulboy main
+sh arch-base-btrfs 8G linux soulboy main xfce
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-sh arch-base-ext4 40G 2G linux user virt
+sh arch-base-ext4 40G 2G linux user virt xfce
 
 # Main
-sh arch-base-ext4 40G 8G linux soulboy main
+sh arch-base-ext4 40G 8G linux soulboy main xfce
 
 #-----------------------------------------------------------------
 
@@ -61,17 +62,7 @@ hwclock --systohc --utc && date
 
 #-----------------------------------------------------------------
 
-## Установка XFCE ##
-
-pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
-    xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-    xfce4-weather-plugin gnome-disk-utility
-systemctl enable lxdm.service
-pacman --noconfirm -R xfce4-terminal
-
-#-----------------------------------------------------------------
-
-# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+# Завершаем установку и перезагружаемся:
 reboot
 
 #-----------------------------------------------------------------
