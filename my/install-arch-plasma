@@ -36,20 +36,20 @@ sh pacman-prepare manjaro
 ## Btrfs ##
 
 # VirtualBox
-sh arch-base-btrfs 2G linux user virt
+sh arch-base-btrfs 2G linux user virt plasma
 
 # Main
-sh arch-base-btrfs 8G linux soulboy main
+sh arch-base-btrfs 8G linux soulboy main plasma
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-sh arch-base-ext4 40G 2G linux user virt
+sh arch-base-ext4 40G 2G linux user virt plasma
 
 # Main
-sh arch-base-ext4 40G 8G linux soulboy main
+sh arch-base-ext4 40G 8G linux soulboy main plasma
 
 #-----------------------------------------------------------------
 
@@ -61,15 +61,7 @@ hwclock --systohc --utc && date
 
 #-----------------------------------------------------------------
 
-## Установка KDE Plasma ##
-
-sudo pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
-    kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
-sudo systemctl enable sddm
-
-#-----------------------------------------------------------------
-
-# Завершаем установку, выходим (Ctrl+D) и перезагружаемся:
+# Завершаем установку и перезагружаемся:
 reboot
 
 #-----------------------------------------------------------------
