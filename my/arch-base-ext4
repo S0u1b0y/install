@@ -99,11 +99,21 @@ echo -e '# Swapfile\n/mnt/swapfile none swap sw 0 0' | sudo tee -a /mnt/etc/fsta
 #-----------------------------------------------------------------
 
 ## Настроим параметры запуска системы:
-sed -i "s/$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
+sed -i "s/^$defaulthook/$ext4hook/" /mnt/etc/mkinitcpio.conf
 
 #-----------------------------------------------------------------
 
-# Проверяем:
-lsblk
-swapon -s
-cat /mnt/etc/fstab
+## Чрутимся и продолаем установку:
+
+# Скачиваем скрипт для дальнейшей установки:
+scriptpath='https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios'
+curl -so /mnt/arch-system-bios $scriptpath
+if [ $os = Manjaro ]; then
+    # Если ставим из Manjaro
+    manjaro-chroot /mnt sh /arch-system-bios $username $hostname
+else
+    # Если ставим из Arch
+    arch-chroot /mnt sh /arch-system-bios $username $hostname
+fi
+# Удаляем скрипт, чтобы он не остался в установленной системе
+rm /mnt/arch-system-bios
