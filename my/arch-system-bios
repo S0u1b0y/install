@@ -3,7 +3,6 @@
 # Приём входных данных для дальнейшей установки:
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
-# timezone - Часовой пояс
 username=$1
 hostname=$2
 
@@ -170,6 +169,18 @@ systemctl enable dhcpcd sshd ntpd
 
 #-----------------------------------------------------------------
 
+## Статический IP для VirualBox:
+# Определяем по видеокарте виртуальную машину. 
+if [ $videocard = VMware ]; then
+cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
+echo -e 'interface enp0s3
+static ip_address=192.168.0.50/24
+static routers=192.168.0.100
+static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
+fi
+
+#-----------------------------------------------------------------
+
 ## Драйвера ##
 
 ## Установим драйвера на звук:
@@ -179,6 +190,7 @@ systemctl enable dhcpcd sshd ntpd
 pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
 
 ## В Arch Linux установим драйвера на видео:
+#pacman --noconfirm -S xf86-video-nouveau # Свободный драйвер nVidia
 if [ $os = Archlinux ]; then
     if [ $videocard = nVidia ]; then
         pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
