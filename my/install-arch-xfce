@@ -9,24 +9,26 @@
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
 # Загружаемся с записанного образа
 # Запускаем эмулятор терминала.
+
 # Переходим в учётную запись рута:
 sudo su
 
 # Загрузим необходмые скрипты:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
-curl -o pacman-prepare "$scripturl/pacman-prepare-my"
-curl -o arch-base-btrfs "$scripturl/arch-base-btrfs"
-curl -o arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o /pacman-prepare "$scripturl/pacman-prepare-my"
+curl -o /arch-base-btrfs "$scripturl/arch-base-btrfs"
+curl -o /arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o /arch-system-bios "$scripturl/arch-system-bios"
 
 # ***
 
 ## Подготовка Pacman и репозиториев ##
 
 # Для установки Archlinux:
-sh pacman-prepare archlinux
+sh /pacman-prepare archlinux
 
 # Для установки Manjaro:
-sh pacman-prepare manjaro
+sh /pacman-prepare manjaro
 
 #-----------------------------------------------------------------
 
@@ -36,20 +38,20 @@ sh pacman-prepare manjaro
 ## Btrfs ##
 
 # VirtualBox
-sh arch-base-btrfs 2G linux user virt xfce
+sh /arch-base-btrfs 2G linux user virt xfce
 
 # Main
-sh arch-base-btrfs 8G linux soulboy main xfce
+sh /arch-base-btrfs 8G linux soulboy main xfce
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-sh arch-base-ext4 40G 2G linux user virt xfce
+sh /arch-base-ext4 40G 2G linux user virt xfce
 
 # Main
-sh arch-base-ext4 40G 8G linux soulboy main xfce
+sh /arch-base-ext4 40G 8G linux soulboy main xfce
 
 #-----------------------------------------------------------------
 
@@ -68,6 +70,8 @@ reboot
 
 #### После перезагрузки ####
 
+#*****************************************************************
+
 # Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
 
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
@@ -79,7 +83,7 @@ yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme match
     ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
-# ***
+#-----------------------------------------------------------------
 
 # Автологин LXDM:
 echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
@@ -94,26 +98,31 @@ autoremove
 
 #-----------------------------------------------------------------
 
-## Программы для Main ##
+## Программы ##
 
 # Браузеры:
 yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
+# Torrent:
+sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
+
 # Code OSS (free Visual Studio Code):
 yay --noconfirm -S code
-# Мои настройки:
+# Файл->Настроки->Параметры:
 mouseWheelScrollSensitivity - 2
 editor.renderWhitespace - none
 editor.wordWrap - On
 editor.fontSize - 12
 editor.dragAndDrop - false
+Render Line Highlight - none
 # Сменить язык на русский
-Ctrl-Shift-P -> Configure Display Language -> Меняем на Русский
+Ctrl-Shift-P -> вводим: Configure Display Language -> Меняем на Русский
 
 # Дополнительный софт:
-yay --noconfirm -S xarchiver galculator xed xviewer xviewer-plugins xreader foliate \
+yay --noconfirm -S xarchiver galculator xviewer xviewer-plugins xreader foliate \
     gnome-disk-utility deadbeef mpv mediainfo mkvtoolnix-gui cherrytree
-    
+
+# Утилиты для контроля за использованием памяти:
 yay --noconfirm -S ananicy nohang
 sudo systemctl enable --now ananicy nohang
 
@@ -124,11 +133,11 @@ sudo pacman --noconfirm -S plank
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
 
-# Мониторинг и разгон для nVidia карт Green With Envy:
-yay --noconfirm -S gwe
-
 # gnome-system-monitor - Мониторинг системы.
 yay --noconfirm -S gnome-system-monitor
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
