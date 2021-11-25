@@ -6,7 +6,7 @@
 let swapfile="${1//G}*1024"
 kernel=$2
 
-# Сквозные данные для передачи в следующий скрипт:
+# Сквозные данные для передачи во второй скрипт:
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
 # deskenv - Окружение рабочего стола
@@ -149,8 +149,11 @@ sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 #-----------------------------------------------------------------
 
 # Скачиваем второй скрипт для продолжения установки
-curl -so /mnt/arch-system-bios "https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios"
-# Продолжаем установку в чрут, отправляя туда второй скрипт:
+#curl -so /mnt/arch-system-bios "https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios"
+
+# Скопируем второй установочный скрипт в каталог /mnt, чтобы он был доступен из под chroot:
+cp /arch-system-bios /mnt/arch-system-bios
+# Продолжаем установку в chroot и отправляем туда второй скрипт:
 if [ $os = Manjaro ]; then
     # Если ставим из Manjaro
     manjaro-chroot /mnt sh /arch-system-bios $username $hostname $deskenv
@@ -158,5 +161,5 @@ else
     # Если ставим из Arch
     arch-chroot /mnt sh /arch-system-bios $username $hostname $deskenv
 fi
-# Удаляем скрипт, чтобы он не остался в установленной системе
+# После выхода из chroot удаляем скрипт, чтобы он не остался в установленной системе
 rm /mnt/arch-system-bios
