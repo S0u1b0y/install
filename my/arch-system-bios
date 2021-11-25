@@ -1,334 +1,179 @@
 #!/bin/bash
 
-# Приём входных данных и запись их в переменные для дальнейшей установки:
-# username - Имя пользователя
-# hostname - Имя компьтера в сети
-username=$1
-hostname=$2
-deskenv=$3
+#### Установка Arch XFCE ####
+
+### Подготовка ###
+
+# Скачиваем образ Manjaro для установки Manjaro или Archlinux - https://manjaro.org/download/
+# Или скачиваем образ EndeavourOS для установки только Archlinux - https://endeavouros.com/latest-release/
+# Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
+# Загружаемся с записанного образа
+# Запускаем эмулятор терминала.
+
+# Переходим в учётную запись рута:
+sudo su
+
+# Загрузим необходмые скрипты:
+scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
+curl -o /pacman-prepare "$scripturl/pacman-prepare-my"
+curl -o /arch-base-btrfs "$scripturl/arch-base-btrfs"
+curl -o /arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o /arch-system-bios "$scripturl/arch-system-bios"
+
+# ***
+
+## Подготовка Pacman и репозиториев ##
+
+# Для установки Archlinux:
+sh /pacman-prepare archlinux
+
+# Для установки Manjaro:
+sh /pacman-prepare manjaro
 
 #-----------------------------------------------------------------
 
-## Определение переменных, оборудования, оси и др. ##
+### Установка ###
+# Ядра: linux - стандартное ядро, linux-lts - LTS-ядро, linux-zen - Zen-ядро
 
-# Определение устанавливаемой операционной системы:
-if [[ $(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"') == 'Manjaro Linux' ]]; then
-    os=Manjaro
-else
-    os=Archlinux
-fi
+## Btrfs ##
 
-# Определение видеокаты:
-if   [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' NVIDIA '* ]]; then
-    videocard=nVidia
-elif [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
-    videocard=VMware
-fi
+# VirtualBox
+sh /arch-base-btrfs 2G linux user virt xfce
 
-#-----------------------------------------------------------------
+# Main
+sh /arch-base-btrfs 8G linux soulboy main xfce
 
-## Настроим Pacman в устанавливаемой системе:
-cp -n /etc/pacman.conf /etc/pacman.conf.bak
-if [ $os = Manjaro ]; then
-echo -e '[options]
-CacheDir     = /var/cache/pacman/pkg/
-HoldPkg      = pacman glibc manjaro-system
-SyncFirst    = manjaro-system archlinux-keyring manjaro-keyring
-Architecture = auto
-Color
-CheckSpace
-ParallelDownloads = 10
+# ***
 
-SigLevel = Required DatabaseOptional
-LocalFileSigLevel = Optional
+## Ext4 ##
 
-[core]
-SigLevel = PackageRequired
-Include = /etc/pacman.d/mirrorlist
+# VirtualBox
+sh /arch-base-ext4 40G 2G linux user virt xfce
 
-[extra]
-SigLevel = PackageRequired
-Include = /etc/pacman.d/mirrorlist
-
-[community]
-SigLevel = PackageRequired
-Include = /etc/pacman.d/mirrorlist
-
-[multilib]
-SigLevel = PackageRequired
-Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-else
-echo -e '[options]
-HoldPkg = pacman glibc
-Architecture = auto
-Color
-CheckSpace
-ParallelDownloads = 10
-
-SigLevel = Required DatabaseOptional
-LocalFileSigLevel = Optional
-
-[core]
-Include = /etc/pacman.d/mirrorlist
-
-[extra]
-Include = /etc/pacman.d/mirrorlist
-
-[community]
-Include = /etc/pacman.d/mirrorlist
-
-[multilib]
-Include = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
-fi
-pacman -Syy
+# Main
+sh /arch-base-ext4 40G 8G linux soulboy main xfce
 
 #-----------------------------------------------------------------
 
-## Zramswap:
-# Устанавливаем
-pacman --noconfirm -S systemd-swap
-# Раскоментируем параметры в файле конфигурации
-sed -i 's/^#zram_/zram_/g' /etc/systemd/swap.conf
-# Включим использование
-sed -i 's/^zram_enabled=0/zram_enabled=1/' /etc/systemd/swap.conf
-# Отведем для zswap, вместо четверти, половину оперативной памяти
-sed -i 's/RAM_SIZE \/ 4/RAM_SIZE \/ 2/' /etc/systemd/swap.conf
-# Включаем загрузку при старте системы
-systemctl enable systemd-swap
+#Если, на компьютере, есть MS Windows, то установим локальное время:
+hwclock --systohc --localtime && date
+
+#Если, на компьютере, только GNU/Linux, то установим время по UTC:
+hwclock --systohc --utc && date
 
 #-----------------------------------------------------------------
 
-## GRUB:
-if [ $os = Manjaro ]; then
-    # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
-    sed -i 's/^GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
-    sed -i 's/^GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
-fi
-# Устанавливаем grub на диск
-grub-install --target=i386-pc /dev/sda
-# Генерируем файл конфигурации grub
-grub-mkconfig -o /boot/grub/grub.cfg
+# Завершаем установку и перезагружаемся:
+reboot
+
+#*****************************************************************
+
+#### После перезагрузки ####
+
+#*****************************************************************
+
+# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
+
+cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
+
+sudo sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme matcha-gtk-theme \
+    ttf-meslo-nerd-font-powerlevel10k qt5ct qt6-base adwaita-qt
+echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile
 
 #-----------------------------------------------------------------
 
-## Локализуем систему и консоль:
-# Раскоментируем локали en_US и ru_RU в файле locale.gen
-sed -i 's/^#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
-sed -i 's/^#ru_RU.UTF-8/ru_RU.UTF-8/g' /etc/locale.gen
-# Устанавливаем язык будущей системы в файл locale.conf
-echo 'LANG=ru_RU.UTF-8' > /etc/locale.conf
-# Русифицируем консоль, прописываем локаль и шрифт в файл vconsole.conf
-echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
-# И генерируем локали
-locale-gen
+# Автологин LXDM:
+echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
 
 #-----------------------------------------------------------------
 
-## Пропишем имя компьютера в сети:
-echo "$hostname" > /etc/hostname
-echo "127.0.0.1    localhost" > /etc/hosts
-echo "::1          localhost" >> /etc/hosts
-echo "127.0.1.1    $hostname.localdomain $hostname" >> /etc/hosts
+## Программы для VirualBox ##
+
+yay --noconfirm -S ananicy nohang librewolf-bin
+sudo systemctl enable --now ananicy nohang
+autoremove
 
 #-----------------------------------------------------------------
 
-## Введем пароль root:
-echo '>>>> Enter root password <<<<'
-passwd
+## Программы ##
+
+# Браузеры:
+yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
+
+# Torrent:
+sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
+
+# Code OSS (free Visual Studio Code):
+yay --noconfirm -S code
+# Файл->Настроки->Параметры:
+mouseWheelScrollSensitivity - 2
+editor.renderWhitespace - none
+editor.wordWrap - On
+editor.fontSize - 12
+editor.dragAndDrop - false
+Render Line Highlight - none
+# Сменить язык на русский
+Ctrl-Shift-P -> вводим: Configure Display Language -> Меняем на Русский
+
+# Дополнительный софт:
+yay --noconfirm -S xarchiver galculator xviewer xviewer-plugins xreader foliate \
+    gnome-disk-utility deadbeef mpv mediainfo mkvtoolnix-gui cherrytree
+
+# Утилиты для контроля за использованием памяти:
+yay --noconfirm -S ananicy nohang
+sudo systemctl enable --now ananicy nohang
+
+# Plank:
+# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
+sudo pacman --noconfirm -S plank
+
+# Yandex Disk:
+yay --noconfirm -S yandex-disk && yandex-disk setup
+
+# gnome-system-monitor - Мониторинг системы.
+yay --noconfirm -S gnome-system-monitor
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
 
 #-----------------------------------------------------------------
 
-## Создаём пользователя:
-# Удаляем пользователя если он уже существует.
-if [ -d /home/$username ]; then
-    userdel -fr $username
-fi
-# Добавляем пользователя и задаем ему пароль
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
-echo ">>>> Enter $username password <<<<"
-passwd $username
+## Игры ##
+
+# Steam:
+sudo pacman --noconfirm -S steam
+
+# PortProton (https://portwine-linux.ru/port-proton-linux):
+sudo pacman --noconfirm -S gamemode lib32-gamemode icoutils zenity bubblewrap zstd cabextract tar
+wget -c 'https://github.com/Castro-Fidel/PortWINE/raw/master/portwine_install_script/PortProton-97'
+sh PortProton-97
+
+# Настройка Proton в Steam-клиенте на Linux: В меню (вверху слева) нажимаем: Steam->Настройки,
+# выбираем раздел Steam Play (в самом низу) и там ставим галочку "Включить Steam Play для других продуктов",
+# жмем ОК. Все Proton включён, можно пытаться запускать Windows-игры.
+
+# Minecraft:
+yay --noconfirm -S multimc jre-openjdk jre8-openjdk
+sudo archlinux-java set java-17-openjdk
+archlinux-java status
 
 #-----------------------------------------------------------------
 
-## Установим и настроим sudo:
-# Если пакет не установлен, то устанавливаем
-if pacman -Qs sudo = 1 > /dev/null ; then
-    echo pacman --noconfirm -S sudo
-fi
-# Убираем коментарий с группы %wheel.
-sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
+## Виртуализация ##
 
-#-----------------------------------------------------------------
+# VirtualBox стандартное ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-modules-arch
+# VirtualBox LTS-ядро:
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
 
-## Установим часовой пояс:
-ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
-
-#-----------------------------------------------------------------
-
-## Установим поддержку сети, SSH и включим синхронизацию времени:
-# Устанавливаем демоны (службы) dhcpcd, ssh, ntp
-pacman --noconfirm -S dhcpcd openssh ntp
-# Включаем загрузку демонов при старте системы
-systemctl enable dhcpcd sshd ntpd
-
-#-----------------------------------------------------------------
-
-## Статический IP для VirualBox:
-# Определяем по видеокарте виртуальную машину. 
-if [ $videocard = VMware ]; then
-cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e 'interface enp0s3
-static ip_address=192.168.0.50/24
-static routers=192.168.0.100
-static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
-fi
-
-#-----------------------------------------------------------------
-
-## Драйвера ##
-
-## Установим драйвера на звук:
-# pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
-# pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
-# gst-plugin-pipewire - Плагин для GStreamer,
-pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
-
-## В Arch Linux установим драйвера на видео:
-#pacman --noconfirm -S xf86-video-nouveau # Свободный драйвер nVidia
-if [ $os = Archlinux ]; then
-    if [ $videocard = nVidia ]; then
-        pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
-    fi
-    if [ $videocard = VMware ]; then
-        pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
-    fi
-fi
-
-#-----------------------------------------------------------------
-
-## Утилиты ##
-
-## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
-# p7zip unrar unace lrzip - Работа с архивами,
-# cifs-utils - Поддержка подключения к Samba,
-# davfs2 - Поддержка WebDAV (например для Yandex Disk),
-# gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
-pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
-
-## Установим некоторые утилиты:
-# git - Работа с GitHub и Gitlab,
-# curl wget - Консольные загрузчики,
-# mc - Консольный файловый менеджер Midnight Comander,
-# htop - Мониторинг параметров системы из консоли,
-# neofetch - Информация о системе в консоли.
-pacman --noconfirm -S git curl wget mc htop neofetch
-
-#-----------------------------------------------------------------
-
-## Оформление ##
-
-# Шрифты:
-sudo pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack \
-    ttf-roboto ttf-roboto-mono noto-fonts
-
-#-----------------------------------------------------------------
-
-## Установка окружения рабочего стола ##
-
-if [ $deskenv = xfce ]; then
-# Установка XFCE:
-# xorg-server - Иксы,
-# xfce4 - XFCE,
-# lxdm - Загрузчик,
-# pavucontrol - Панель управления звуком Pulseaudio,
-# xed - Простой текстовый редактор,
-# tilix - Тайлинговый эмулятор терминала,
-# thunar-archive-plugin - Работа с архивами,
-# xfce4-xkb-plugin - Плагин раскладки клавиатуры,
-# xfce4-pulseaudio-plugin - Плагин управления звуком,
-# xfce4-clipman-plugin - Плагин расширенного буфера обмена,
-# xfce4-whiskermenu-plugin - Современное меню,
-# xfce4-weather-plugin - Плагин погоды,
-# gnome-disk-utility - Управление дисками,
-pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
-    xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-    xfce4-weather-plugin gnome-disk-utility
-# Включаем загрузчик в автостарт при запуске системы.
-systemctl enable lxdm.service
-# xfce4-terminal - удаляем встроенный терминал.
-pacman --noconfirm -R xfce4-terminal
-echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' | sudo tee -a /home/$hostname/.bashrc /root/.bashrc
-
-elif [ $deskenv = plasma ]; then
-# Установка KDE Plasma:
-# sddm - Загрузчик,
-# plasma-desktop - Минимальная установка Plasma,
-# kscreen - Утилита управления мониторами,
-# powerdevil - Утилита управления питанием,
-# plasma-pa - Апплет управления звуком,
-# kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
-# konsole - Эмулятор терминала,
-# kwrite - Простой текстовый редактор,
-# kcalc - Калькулятор,
-# dolphin dolphin-plugins - Файловый менеджер.
-sudo pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
-    kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
-# Включаем загрузчик в автостарт при запуске системы.
-sudo systemctl enable sddm
-
-elif [ $deskenv = gnome ]; then
-# Установка Gnome:
-# gnome-shell - Минимальная установка Gnome,
-# gdm - Загрузчик,
-# gnome-control-center - Панель настроек Gnome,
-# gnome-tweak-tool - Дополнительные настройки Gnome,
-# tilix - Тайлинговый эмулятор терминала,
-# gedit - Простой текстовый редактор,
-# nautilus libnautilus-extension - Файловый менеджер и расширение,
-# caffeine-ng - Предотвращение активации экранной заставки,
-# gnome-disk-utility - Управление дисками. 
-sudo pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool tilix \
-    gedit nautilus libnautilus-extension caffeine-ng gnome-disk-utility
-# Включаем загрузчик в автостарт при запуске системы.
-sudo systemctl enable gdm.service
-# cheese - Удаляем приложение для веб-камеры.
-sudo pacman --noconfirm -R cheese
-
-fi
-
-#-----------------------------------------------------------------
-
-## Настройки ##
-
-# Добавим алиасы в баш пользователя и рута:
-echo -e '\n#### Aliases ####
-
-# Переопределение Pacman для установки и удаления без подтверждения:
-alias spac="sudo pacman --noconfirm"
-
-# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
-alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
-alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
-
-# Быстрое обновление (pup - Pacman UPdate)
-alias pup="sudo pacman -Syu"
-alias згз="sudo pacman -Syu"
-
-# Пинг делает только 5 запросов.
-alias ping="ping -c 5"' | sudo tee -a /home/$hostname/.bashrc /root/.bashrc
-
-# Создаем каталоги пользователя в домашней папке на английском языке:
-sudo pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-
-# Установим более низкий уровень использования файла подкачки
-echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf
-
-# Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
-sudo sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
-
-# Зададим максимальный размер systemd-журнала
-sudo sed -i 's/^#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+# KVM (Qemu):
+sudo pacman --noconfirm -S virt-manager bridge-utils dnsmasq dmidecode ebtables iptables \
+    openbsd-netcat qemu qemu-arch-extra qemu-guest-agent ovmf vde2
+sudo systemctl enable --now libvirtd dnsmasq
+sudo gpasswd -a $(whoami) kvm libvirt && newgrp libvirt
+sudo sed -i 's/^#unix_sock_group = "libvirt"/unix_sock_group = "libvirt"/' /etc/libvirt/libvirtd.conf
+sudo sed -i 's/^#unix_sock_rw_perms = "0770"/unix_sock_rw_perms = "0770"/' /etc/libvirt/libvirtd.conf
+sudo systemctl restart libvirtd.service
