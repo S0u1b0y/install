@@ -9,14 +9,18 @@ kernel=$2
 # Сквозные данные для передачи во второй скрипт:
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
-# deskenv - Окружение рабочего стола
+# deskenv - Окружение рабочего стола (Возможные варианты: xfce, plasma, gnome)
 username=$3
 hostname=$4
 deskenv=$5
 
+# Переменные:
+defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
+btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
+
 #-----------------------------------------------------------------
 
-## Определение переменных, оборудования, оси и др. ##
+## Определение оборудования, оси и др. ##
 
 # Определение операционной системы из которой идёт установка:
 if [[ $(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"') == 'Manjaro Linux' ]]; then
@@ -31,9 +35,6 @@ if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
 else
     computer=Real
 fi
-
-defaulthook='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
-btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboard keymap)'
 
 #-----------------------------------------------------------------
 
@@ -84,9 +85,10 @@ mount /dev/sda1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,sp
 # $kernel $kernel\-headers - Ядро,
 # nano - Простой консольный текстовый редактор,
 # grub - загрузчик оси,
-# intel-ucode - Микрокод для интела.
+# intel-ucode - Микрокод для интела,
+# zsh - Продвинутая командная оболочка.
 if [ $os = Manjaro ]; then # Установка из Manjaro
-    basestrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode
+    basestrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode zsh
     # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
     if [ $computer = Real ]; then
         basestrap /mnt linux-firmware
@@ -94,7 +96,7 @@ if [ $os = Manjaro ]; then # Установка из Manjaro
     # Генерируем fstab по UUID:
     fstabgen -U /mnt > /mnt/etc/fstab
 else # Установка из Arch-подобных дистрибутивов (Archlinux, EndeavourOS и др.)
-    pacstrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode
+    pacstrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode zsh
     # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
     if [ $computer = Real ]; then
         pacstrap /mnt linux-firmware
@@ -108,7 +110,7 @@ fi
 ## Утилиты для btrfs ##
 
 # btrfs-progs - Утилиты для btrfs,
-# grub-btrfs - Загрузка со снимков(снапшотов) btrfs,
+# grub-btrfs - Загрузка в grub со снимков(снапшотов) btrfs,
 if [ $os = Manjaro ]; then
     # Для Manjaro:
     basestrap /mnt btrfs-progs grub-btrfs
@@ -148,18 +150,15 @@ sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 
 #-----------------------------------------------------------------
 
-# Скачиваем второй скрипт для продолжения установки
-#curl -so /mnt/arch-system-bios "https://raw.githubusercontent.com/S0u1b0y/install/in/my/arch-system-bios"
-
 # Скопируем второй установочный скрипт в каталог /mnt, чтобы он был доступен из под chroot:
-cp /arch-system-bios /mnt/arch-system-bios
+cp /arch-bios /mnt/arch-bios
 # Продолжаем установку в chroot и отправляем туда второй скрипт:
 if [ $os = Manjaro ]; then
     # Если ставим из Manjaro
-    manjaro-chroot /mnt sh /arch-system-bios $username $hostname $deskenv
+    manjaro-chroot /mnt sh /arch-bios $username $hostname $deskenv
 else
     # Если ставим из Arch
-    arch-chroot /mnt sh /arch-system-bios $username $hostname $deskenv
+    arch-chroot /mnt sh /arch-bios $username $hostname $deskenv
 fi
 # После выхода из chroot удаляем скрипт, чтобы он не остался в установленной системе
-rm /mnt/arch-system-bios
+rm /mnt/arch-bios
