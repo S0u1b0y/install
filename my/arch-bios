@@ -29,7 +29,7 @@ fi
 
 ## Настроим Pacman в устанавливаемой системе:
 cp -n /etc/pacman.conf /etc/pacman.conf.bak
-if [ $os = Manjaro ]; then
+if $os = Manjaro ; then
 echo -e '[options]
 CacheDir     = /var/cache/pacman/pkg/
 HoldPkg      = pacman glibc manjaro-system
@@ -99,7 +99,7 @@ systemctl enable systemd-swap
 #-----------------------------------------------------------------
 
 ## GRUB:
-if [ $os = Manjaro ]; then
+if $os = Manjaro ; then
     # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
     sed -i 's/^GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
     sed -i 's/^GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
@@ -144,7 +144,7 @@ if [ -d /home/$username ]; then
     userdel -fr $username
 fi
 # Добавляем пользователя и задаем ему пароль
-useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/bash $username
+useradd -m -g users -G video,audio,games,lp,optical,power,storage,wheel -s /bin/zsh $username
 echo ">>>> Enter $username password <<<<"
 passwd $username
 
@@ -175,7 +175,7 @@ systemctl enable dhcpcd sshd ntpd
 
 ## Статический IP для VirualBox:
 # Определяем по видеокарте виртуальную машину. 
-if [ $videocard = VMware ]; then
+if $videocard = VMware ; then
 cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
 echo -e 'interface enp0s3
 static ip_address=192.168.0.50/24
@@ -195,10 +195,10 @@ pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-pl
 
 ## В Arch Linux установим драйвера на видео:
 #pacman --noconfirm -S xf86-video-nouveau # Свободный драйвер nVidia
-if [ $os = Archlinux ]; then
-    if   [ $videocard = nVidia ]; then
+if $os = Archlinux ; then
+    if   $videocard = nVidia ; then
         pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
-    elif [ $videocard = VMware ]; then
+    elif $videocard = VMware ; then
         pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
     fi
 fi
@@ -214,13 +214,14 @@ fi
 # gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
 pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
 
-## Установим некоторые утилиты:
+## Установим некоторые консольные утилиты:
 # git - Работа с GitHub и Gitlab,
 # curl wget - Консольные загрузчики,
-# mc - Консольный файловый менеджер Midnight Comander,
+# xdg-utils - Консольные инструменты, которые помогают приложениям решать различные задачи интеграции.
+# mc - Консольный файловый менеджер Midnight Commander,
 # htop - Мониторинг параметров системы из консоли,
 # neofetch - Информация о системе в консоли.
-pacman --noconfirm -S git curl wget mc htop neofetch
+pacman --noconfirm -S git curl wget xdg-utils mc htop neofetch
 
 #-----------------------------------------------------------------
 
@@ -234,7 +235,7 @@ pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid
 
 ## Установка окружения рабочего стола ##
 
-if [ $deskenv = xfce ]; then
+if $deskenv = xfce ; then
 # Установка XFCE:
 # xorg-server - Иксы,
 # xfce4 - XFCE,
@@ -256,13 +257,15 @@ pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archiv
 systemctl enable lxdm.service
 # xfce4-terminal - удаляем встроенный терминал.
 pacman --noconfirm -R xfce4-terminal
+# No_Beep (Отключение, раздражающего звука, pc-спикера):
 echo 'blacklist pcspkr' | tee /etc/modprobe.d/nobeep.conf
+# Небольшие настройки Tilix для правильного разделения панели
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
 fi' | tee -a /home/$username/.bashrc /root/.bashrc
 
-elif [ $deskenv = plasma ]; then
+elif $deskenv = plasma ; then
 # Установка KDE Plasma:
 # sddm - Загрузчик,
 # plasma-desktop - Минимальная установка Plasma,
@@ -279,7 +282,7 @@ pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable sddm
 
-elif [ $deskenv = gnome ]; then
+elif $deskenv = gnome ; then
 # Установка Gnome:
 # gnome-shell - Минимальная установка Gnome,
 # gdm - Загрузчик,
@@ -296,11 +299,11 @@ pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool tili
 systemctl enable gdm.service
 # cheese - Удаляем приложение для веб-камеры.
 pacman --noconfirm -R cheese
+# Небольшая настройка Tilix для правильного разделения панели
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
 fi' | tee -a /home/$username/.bashrc /root/.bashrc
-
 fi
 
 #-----------------------------------------------------------------
@@ -310,14 +313,14 @@ fi
 # Добавим алиасы в баш для пользователя и рута:
 echo -e '\n#### Aliases ####
 
-# Переопределение Pacman для установки и удаления без подтверждения:
-alias spac="sudo pacman --noconfirm"
-
-# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально).
+# Удаление неиспользуемых пакетов (Если нечего удалять, вылезет "ошибка: аргумент "-" указан с пустым stdin", это нормально):
 alias autoremove="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
 alias фгещкуьщму="sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns -"
 
-# Быстрое обновление (pup - Pacman UPdate)
+# Быстрая установка и удаление из под рута без подтверждения (spac - Sudo PACman):
+alias spac="sudo pacman --noconfirm"
+
+# Быстрое обновление (pup - Pacman UPdate):
 alias pup="sudo pacman -Syu"
 alias згз="sudo pacman -Syu"
 
@@ -325,7 +328,8 @@ alias згз="sudo pacman -Syu"
 alias ping="ping -c 5"' | tee -a /home/$username/.bashrc /root/.bashrc
 
 # Создаем каталоги пользователя в домашней папке на английском языке:
-pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+pacman --noconfirm -S xdg-user-dirs
+LC_ALL=C xdg-user-dirs-update --force
 # Если существуют каталоги на русском, то удаляем их:
 if [ -d /home/$username/Видео ]; then
     cd /home/$username
@@ -333,7 +337,7 @@ if [ -d /home/$username/Видео ]; then
 fi
 
 # Установим более низкий уровень использования файла подкачки
-echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
+echo 'vm.swappiness=60' | tee /etc/sysctl.d/99-swappiness.conf
 
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
 sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
