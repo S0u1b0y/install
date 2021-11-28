@@ -15,10 +15,10 @@ sudo su
 
 # Загрузим необходмые скрипты:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
-curl -o /pacman-prepare "$scripturl/pacman-prepare-my"
-curl -o /arch-base-btrfs "$scripturl/arch-base-btrfs"
-curl -o /arch-base-ext4 "$scripturl/arch-base-ext4"
-curl -o /arch-system-bios "$scripturl/arch-system-bios"
+curl -o /pacman-prepare "$scripturl/pacman-prepare"
+curl -o /arch-btrfs "$scripturl/arch-btrfs"
+curl -o /arch-ext4 "$scripturl/arch-ext4"
+curl -o /arch-bios "$scripturl/arch-bios"
 
 # ***
 
@@ -38,20 +38,20 @@ sh /pacman-prepare manjaro
 ## Btrfs ##
 
 # VirtualBox
-sh /arch-base-btrfs 2G linux user virt xfce
+sh /arch-btrfs 2G linux user virt xfce
 
 # Main
-sh /arch-base-btrfs 8G linux soulboy main xfce
+sh /arch-btrfs 8G linux soulboy main xfce
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-sh /arch-base-ext4 40G 2G linux user virt xfce
+sh /arch-ext4 20G 2G linux normal user virt xfce
 
 # Main
-sh /arch-base-ext4 40G 8G linux soulboy main xfce
+sh /arch-ext4 40G 8G linux safe soulboy main xfce
 
 #-----------------------------------------------------------------
 
@@ -66,13 +66,11 @@ hwclock --systohc --utc && date
 # Завершаем установку и перезагружаемся:
 reboot
 
-#*****************************************************************
+#-----------------------------------------------------------------
+                #### После перезагрузки ####
+#-----------------------------------------------------------------
 
-#### После перезагрузки ####
-
-#*****************************************************************
-
-# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
+# Настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
 
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
@@ -90,9 +88,9 @@ echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
 
 #-----------------------------------------------------------------
 
-## Программы для VirualBox ##
-
-yay --noconfirm -S ananicy nohang librewolf-bin
+# Программы для VirualBox:
+yay --noconfirm -S ananicy nohang librewolf-bin xarchiver galculator \
+    xviewer xviewer-plugins xreader foliate
 sudo systemctl enable --now ananicy nohang
 autoremove
 
@@ -108,15 +106,22 @@ sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
 
 # Code OSS (free Visual Studio Code):
 yay --noconfirm -S code
-# Файл->Настроки->Параметры:
-mouseWheelScrollSensitivity - 2
-editor.renderWhitespace - none
-editor.wordWrap - On
-editor.fontSize - 12
-editor.dragAndDrop - false
-Render Line Highlight - none
+# Настроки:
+echo -e '{
+    "workbench.colorTheme": "Default Dark+",
+    "window.menuBarVisibility": "compact",
+    "workbench.activityBar.visible": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.mouseWheelScrollSensitivity": 2,
+    "editor.renderWhitespace": "none",
+    "editor.wordWrap": "on",
+    "editor.fontSize": 12,
+    "editor.dragAndDrop": false,
+    "editor.renderLineHighlight": "none"
+    "editor.guides.indentation": false
+}' > ~/.config/Code - OSS/User/settings.json
 # Сменить язык на русский
-Ctrl-Shift-P -> вводим: Configure Display Language -> Меняем на Русский
+Ctrl+Shift+P -> вводим: Configure Display Language -> Меняем на Русский
 
 # Дополнительный софт:
 yay --noconfirm -S xarchiver galculator xviewer xviewer-plugins xreader foliate \
