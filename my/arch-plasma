@@ -9,24 +9,26 @@
 # Записываем образ на флешку програмой Ventoy - https://github.com/ventoy/Ventoy/releases
 # Загружаемся с записанного образа
 # Запускаем эмулятор терминала.
+
 # Переходим в учётную запись рута:
 sudo su
 
 # Загрузим необходмые скрипты:
 scripturl='https://raw.githubusercontent.com/S0u1b0y/install/in/my'
-curl -o pacman-prepare "$scripturl/pacman-prepare-my"
-curl -o arch-base-btrfs "$scripturl/arch-base-btrfs"
-curl -o arch-base-ext4 "$scripturl/arch-base-ext4"
+curl -o /pacman-prepare "$scripturl/pacman-prepare"
+curl -o /arch-btrfs "$scripturl/arch-btrfs"
+curl -o /arch-ext4 "$scripturl/arch-ext4"
+curl -o /arch-bios "$scripturl/arch-bios"
 
 # ***
 
 ## Подготовка Pacman и репозиториев ##
 
 # Для установки Archlinux:
-sh pacman-prepare archlinux
+sh /pacman-prepare archlinux
 
 # Для установки Manjaro:
-sh pacman-prepare manjaro
+sh /pacman-prepare manjaro
 
 #-----------------------------------------------------------------
 
@@ -36,20 +38,20 @@ sh pacman-prepare manjaro
 ## Btrfs ##
 
 # VirtualBox
-sh arch-base-btrfs 2G linux user virt plasma
+sh /arch-btrfs 2G linux user virt plasma
 
 # Main
-sh arch-base-btrfs 8G linux soulboy main plasma
+sh /arch-btrfs 8G linux soulboy main plasma
 
 # ***
 
 ## Ext4 ##
 
 # VirtualBox
-sh arch-base-ext4 40G 2G linux user virt plasma
+sh /arch-ext4 40G 2G linux normal user virt plasma
 
 # Main
-sh arch-base-ext4 40G 8G linux soulboy main plasma
+sh /arch-ext4 40G 8G linux safe soulboy main plasma
 
 #-----------------------------------------------------------------
 
@@ -64,11 +66,11 @@ hwclock --systohc --utc && date
 # Завершаем установку и перезагружаемся:
 reboot
 
-#*****************************************************************
+#-----------------------------------------------------------------
+                #### После перезагрузки ####
+#-----------------------------------------------------------------
 
-#### После перезагрузки ####
-
-# Установку и настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
+# Настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
 
 cd /tmp && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg --noconfirm -si
 
@@ -77,7 +79,7 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 yay --noconfirm -S pamac-aur pamac-tray-icon-plasma qogir-icon-theme ttf-meslo-nerd-font-powerlevel10k
 
-# ***
+#-----------------------------------------------------------------
 
 # Автологин SDDM:
 sudo mkdir -p /etc/sddm.conf.d
@@ -90,46 +92,63 @@ Session=plasma" | sudo tee /etc/sddm.conf.d/autologin.conf
 
 ## Программы для VirualBox ##
 
-yay --noconfirm -S ananicy nohang librewolf-bin
+yay --noconfirm -S ananicy nohang librewolf-bin xdg-utils gwenview kimageformats qt5-imageformats \
+    okular poppler-data kcalc foliate ark
 sudo systemctl enable --now ananicy nohang
 autoremove
 
 #-----------------------------------------------------------------
 
-## Программы для Main ##
+## Программы ##
 
 # Браузеры:
 yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
+# Torrent:
+sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
+
 # Code OSS (free Visual Studio Code):
 yay --noconfirm -S code
-# Мои настройки:
-mouseWheelScrollSensitivity - 2
-editor.renderWhitespace - none
-editor.wordWrap - On
-editor.fontSize - 12
-editor.dragAndDrop - false
+# Настроки:
+echo -e '{
+    "workbench.colorTheme": "Default Dark+",
+    "window.menuBarVisibility": "compact",
+    "workbench.activityBar.visible": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.mouseWheelScrollSensitivity": 2,
+    "editor.renderWhitespace": "none",
+    "editor.wordWrap": "on",
+    "editor.fontSize": 12,
+    "editor.dragAndDrop": false,
+    "editor.renderLineHighlight": "none"
+    "editor.guides.indentation": false
+}' > ~/.config/Code - OSS/User/settings.json
 # Сменить язык на русский
-Ctrl-Shift-P -> Configure Display Language -> Меняем на Русский
+Ctrl+Shift+P -> вводим: Configure Display Language -> Меняем на Русский
 
 # Дополнительный софт:
-sudo pacman --noconfirm -S gwenview kimageformats qt5-imageformats okular poppler-data kcalc foliate \
-    ark gnome-disk-utility audacious mpv mediainfo mkvtoolnix-gui cherrytree
-    
+sudo pacman --noconfirm -S xdg-utils gwenview kimageformats qt5-imageformats okular poppler-data \
+    kcalc foliate ark gnome-disk-utility audacious mpv mediainfo mkvtoolnix-gui cherrytree
+
+# Утилиты для контроля за использованием памяти:
 yay --noconfirm -S ananicy nohang
 sudo systemctl enable --now ananicy nohang
 
 # Yandex Disk:
 yay --noconfirm -S yandex-disk && yandex-disk setup
 
-# Мониторинг и разгон для nVidia карт Green With Envy:
-yay --noconfirm -S gwe
-
 # Дополнительный софт Plasma:
 sudo pacman --noconfirm -S plasma-systemmonitor plasma-browser-integration kinfocenter kinit
 
 # Вижет погоды (Удаляем города по умолчанию, добавлям нужный +OWM, Нужный город ищем на https://openweathermap.org):
 yay --noconfirm -S qt5-xmlpatterns plasma5-applets-weather-widget
+
+# Мониторинг и разгон для nVidia карт Green With Envy:
+yay --noconfirm -S gwe
+
+# Управление сетевыми соединениями (опционально):
+sudo pacman --noconfirm -S networkmanager plasma-nm
+sudo systemctl enable --now NetworkManager
 
 #-----------------------------------------------------------------
 
