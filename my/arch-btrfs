@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Приём входных данных и запись их в переменные для дальнейшей установки:
-# swapfile   - Размер файла подкачки
-# kernel     - Версия ядра
+# swapfile - Размер файла подкачки
+# kernel   - Версия ядра
 let swapfile="${1//G}*1024"
 kernel=$2
 
-# Сквозные данные для передачи во второй скрипт:
+# Сквозные данные для передачи во второй установочный скрипт:
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
-# deskenv - Окружение рабочего стола (Возможные варианты: xfce, plasma, gnome)
+# deskenv  - Окружение рабочего стола
 username=$3
 hostname=$4
 deskenv=$5
@@ -141,7 +141,7 @@ chmod 600 ./swapfile
 mkswap ./swapfile
 swapon ./swapfile
 # Прописываем в fstab, автомонтирование файла подкачки при загрузке системы
-echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | tee -a /mnt/etc/fstab
+echo -e '# Swapfile\n/@swap/swapfile none swap sw 0 0' | tee -a /mnt/etc/fstab > /dev/null
 
 #-----------------------------------------------------------------
 
@@ -155,10 +155,10 @@ cp /arch-bios /mnt/arch-bios
 # Продолжаем установку в chroot и отправляем туда второй скрипт:
 if [ $os = Manjaro ]; then
     # Если ставим из Manjaro
-    manjaro-chroot /mnt sh /arch-bios $username $hostname $deskenv
+    manjaro-chroot /mnt sh /arch-bios $kernel $username $hostname $deskenv
 else
     # Если ставим из Arch
-    arch-chroot /mnt sh /arch-bios $username $hostname $deskenv
+    arch-chroot /mnt sh /arch-bios $kernel $username $hostname $deskenv
 fi
 # После выхода из chroot удаляем скрипт, чтобы он не остался в установленной системе
 rm /mnt/arch-bios
