@@ -257,17 +257,16 @@ if [ $deskenv = xfce ]; then
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-whiskermenu-plugin - Современное меню,
-# xfce4-weather-plugin - Плагин погоды,
-# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
+# xfce4-weather-plugin - Плагин погоды.
 pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-    xfce4-weather-plugin xdg-user-dirs
+    xfce4-weather-plugin
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lxdm.service
 # xfce4-terminal - удаляем встроенный терминал.
 pacman --noconfirm -R xfce4-terminal
 # Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-LC_ALL=C xdg-user-dirs-update --force
+pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # No_Beep (Отключение, раздражающего звука, pc-спикера):
 echo 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
 # Небольшие настройки Tilix для правильного разделения терминала
@@ -288,14 +287,13 @@ elif [ $deskenv = plasma ]; then
 # kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
 # konsole - Эмулятор терминала,
 # kwrite - Простой текстовый редактор,
-# dolphin dolphin-plugins - Файловый менеджер,
-# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
+# dolphin dolphin-plugins - Файловый менеджер.
 pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa kde-gtk-config breeze-gtk \
-    konsole kwrite dolphin dolphin-plugins xdg-user-dirs
+    konsole kwrite dolphin dolphin-plugins
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable sddm.service
 # Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-LC_ALL=C xdg-user-dirs-update --force
+pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # Удаляем каталоги пользователя на русском языке:
 rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
 
@@ -310,16 +308,15 @@ elif [ $deskenv = gnome ]; then
 # caffeine-ng - Предотвращение активации экранной заставки,
 # tilix - Тайлинговый эмулятор терминала,
 # gedit - Простой текстовый редактор,
-# nautilus libnautilus-extension - Файловый менеджер,
-# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
+# nautilus libnautilus-extension - Файловый менеджер.
 pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool caffeine-ng \
-    tilix gedit nautilus libnautilus-extension xdg-user-dirs
+    tilix gedit nautilus libnautilus-extension
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable gdm.service
 # cheese - Удаляем приложение для веб-камеры.
 pacman --noconfirm -R cheese
 # Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-LC_ALL=C xdg-user-dirs-update --force
+pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # Небольшая настройка Tilix для правильного разделения терминала
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
