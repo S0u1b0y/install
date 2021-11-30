@@ -273,7 +273,7 @@ echo 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.zshrc /root/.zshrc > /dev/null
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
@@ -321,7 +321,7 @@ pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.zshrc /root/.zshrc > /dev/null
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
@@ -346,7 +346,7 @@ alias pup="sudo pacman -Syu"
 alias згз="sudo pacman -Syu"
 
 # Пинг делает только 5 запросов.
-alias ping="ping -c 5"' | tee -a /home/$username/.zshrc /root/.zshrc > /dev/null
+alias ping="ping -c 5"' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # Установим уровень использования файла подкачки
 echo 'vm.swappiness=60' > /etc/sysctl.d/99-swappiness.conf
