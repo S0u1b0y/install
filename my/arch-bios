@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # Приём входных данных и запись их в переменные для дальнейшей установки:
+# kernel   - Версия ядра
 # username - Имя пользователя
 # hostname - Имя компьтера в сети
-username=$1
-hostname=$2
-deskenv=$3
+# deskenv  - Окружение рабочего стола
+kernel=$1
+username=$2
+hostname=$3
+deskenv=$4
 
 #-----------------------------------------------------------------
 
@@ -29,7 +32,7 @@ fi
 
 ## Настроим Pacman в устанавливаемой системе:
 cp -n /etc/pacman.conf /etc/pacman.conf.bak
-if $os = Manjaro ; then
+if [ $os = Manjaro ]; then
 echo -e '[options]
 CacheDir     = /var/cache/pacman/pkg/
 HoldPkg      = pacman glibc manjaro-system
@@ -99,11 +102,13 @@ systemctl enable systemd-swap
 #-----------------------------------------------------------------
 
 ## GRUB:
-if $os = Manjaro ; then
+if [ $os = Manjaro ]; then
     # В Manjaro, что бы небыло ошибки - error: sparse file not allowed:
     sed -i 's/^GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
     sed -i 's/^GRUB_SAVEDEFAULT=true/GRUB_SAVEDEFAULT=false/g' /etc/default/grub
 fi
+# Отключаем загрузочное меню grub.
+sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
 # Устанавливаем grub на диск
 grub-install --target=i386-pc /dev/sda
 # Генерируем файл конфигурации grub
@@ -151,10 +156,7 @@ passwd $username
 #-----------------------------------------------------------------
 
 ## Установим и настроим sudo:
-# Если пакет не установлен, то устанавливаем
-if pacman -Qs sudo = 1 > /dev/null ; then
-    echo pacman --noconfirm -S sudo
-fi
+pacman --noconfirm -S sudo
 # Убираем коментарий с группы %wheel.
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
 
@@ -175,67 +177,74 @@ systemctl enable dhcpcd sshd ntpd
 
 ## Статический IP для VirualBox:
 # Определяем по видеокарте виртуальную машину. 
-if $videocard = VMware ; then
-cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
-echo -e 'interface enp0s3
-static ip_address=192.168.0.50/24
-static routers=192.168.0.100
-static domain_name_servers=192.168.0.100' > /etc/dhcpcd.conf
+if [ $videocard = VMware ]; then
+    cp -n /etc/dhcpcd.conf /etc/dhcpcd.conf.bak
+    echo 'interface enp0s3' > /etc/dhcpcd.conf
+    echo 'static ip_address=192.168.0.50/24' >> /etc/dhcpcd.conf
+    echo 'static routers=192.168.0.100' >> /etc/dhcpcd.conf
+    echo 'static domain_name_servers=192.168.0.100' >> /etc/dhcpcd.conf
 fi
 
 #-----------------------------------------------------------------
 
-## Драйвера ##
+## Установим консольные утилиты:
+# git - Работа с GitHub,
+# curl wget - Консольные загрузчики,
+# mc - Консольный файловый менеджер Midnight Commander,
+# htop - Мониторинг параметров системы из консоли.
+pacman --noconfirm -S git curl wget mc htop
 
-## Установим драйвера на звук:
-# pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
-# pipewire-alsa pipewire-pulse pipewire-jack - Плагины для совместимости с программами написанными под Pulseaudio, Alsa и Jack,
-# gst-plugin-pipewire - Плагин для GStreamer,
-pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
+#-----------------------------------------------------------------
 
-## В Arch Linux установим драйвера на видео:
-#pacman --noconfirm -S xf86-video-nouveau # Свободный драйвер nVidia
-if $os = Archlinux ; then
-    if   $videocard = nVidia ; then
+# Если устанавливаем DE, то ставим драйвера, утилиты для DE и шрифты.
+if [ $deskenv = xfce ] || [ $deskenv = plasma ] || [ $deskenv = gnome ]; then
+    ## Драйвера ##
+
+    ## Установим драйвера на звук:
+    # pipewire - Современный сервер для мультимедийной маршрутизации на замену Pulseaudio, Alsa и Jack,
+    # pipewire-alsa pipewire-pulse pipewire-jack - Плагины совместимости,
+    # gst-plugin-pipewire - Плагин для GStreamer,
+    pacman --noconfirm -S pipewire pipewire-alsa pipewire-pulse pipewire-jack gst-plugin-pipewire
+
+    ## Установим драйвера на видео:
+    #pacman --noconfirm -S xf86-video-nouveau # Свободный драйвер nVidia
+    if   [ $videocard = nVidia ] && [ $os = Archlinux ]; then
         pacman --noconfirm -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings
-    elif $videocard = VMware ; then
+    elif [ $videocard = nVidia ] && [ $os = Manjaro ]; then
+        pacman --noconfirm -S $kernel\-nvidia nvidia-utils lib32-nvidia-utils
+    elif [ $videocard = VMware ]; then
         pacman --noconfirm -S xf86-video-vesa virtualbox-guest-utils
     fi
+
+    # ***
+
+    ## Утилиты ##
+
+    ## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
+    # p7zip unrar unace lrzip - Работа с архивами,
+    # cifs-utils - Поддержка подключения к Samba,
+    # davfs2 - Поддержка WebDAV (например для Yandex Disk),
+    # gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+    # xdg-utils - Консольные инструменты, которые помогают приложениям решать различные задачи интеграции,
+    # neofetch - Информация о системе в консоли.
+    pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils \
+        xdg-utils neofetch
+
+    # ***
+
+    ## Оформление ##
+
+    # Дополнительные шрифты:
+    pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack \
+        ttf-roboto ttf-roboto-mono noto-fonts
+
 fi
 
 #-----------------------------------------------------------------
 
-## Утилиты ##
+## Установка окружения рабочего стола (DE) ##
 
-## Установим архиваторы и поддержку некоторых сетевых протоколов и ФС:
-# p7zip unrar unace lrzip - Работа с архивами,
-# cifs-utils - Поддержка подключения к Samba,
-# davfs2 - Поддержка WebDAV (например для Yandex Disk),
-# gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
-pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils
-
-## Установим некоторые консольные утилиты:
-# git - Работа с GitHub и Gitlab,
-# curl wget - Консольные загрузчики,
-# xdg-utils - Консольные инструменты, которые помогают приложениям решать различные задачи интеграции.
-# mc - Консольный файловый менеджер Midnight Commander,
-# htop - Мониторинг параметров системы из консоли,
-# neofetch - Информация о системе в консоли.
-pacman --noconfirm -S git curl wget xdg-utils mc htop neofetch
-
-#-----------------------------------------------------------------
-
-## Оформление ##
-
-# Шрифты:
-pacman --noconfirm -S ttf-ubuntu-font-family ttf-liberation ttf-dejavu ttf-droid ttf-hack \
-    ttf-roboto ttf-roboto-mono noto-fonts
-
-#-----------------------------------------------------------------
-
-## Установка окружения рабочего стола ##
-
-if $deskenv = xfce ; then
+if [ $deskenv = xfce ]; then
 # Установка XFCE:
 # xorg-server - Иксы,
 # xfce4 - XFCE,
@@ -249,23 +258,27 @@ if $deskenv = xfce ; then
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-whiskermenu-plugin - Современное меню,
 # xfce4-weather-plugin - Плагин погоды,
-# gnome-disk-utility - Управление дисками,
+# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
 pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
     xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-    xfce4-weather-plugin gnome-disk-utility
+    xfce4-weather-plugin xdg-user-dirs
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lxdm.service
 # xfce4-terminal - удаляем встроенный терминал.
 pacman --noconfirm -R xfce4-terminal
+# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
+LC_ALL=C xdg-user-dirs-update --force
 # No_Beep (Отключение, раздражающего звука, pc-спикера):
-echo 'blacklist pcspkr' | tee /etc/modprobe.d/nobeep.conf
-# Небольшие настройки Tilix для правильного разделения панели
+echo 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
+# Небольшие настройки Tilix для правильного разделения терминала
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.bashrc /root/.bashrc
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
-elif $deskenv = plasma ; then
+# ***
+
+elif [ $deskenv = plasma ]; then
 # Установка KDE Plasma:
 # sddm - Загрузчик,
 # plasma-desktop - Минимальная установка Plasma,
@@ -275,35 +288,46 @@ elif $deskenv = plasma ; then
 # kde-gtk-config, breeze-gtk - Настройка тем GTK в QT и тема GTK,
 # konsole - Эмулятор терминала,
 # kwrite - Простой текстовый редактор,
-# kcalc - Калькулятор,
-# dolphin dolphin-plugins - Файловый менеджер.
-pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa \
-    kde-gtk-config breeze-gtk konsole kwrite kcalc dolphin dolphin-plugins
+# dolphin dolphin-plugins - Файловый менеджер,
+# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
+pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa kde-gtk-config breeze-gtk \
+    konsole kwrite dolphin dolphin-plugins xdg-user-dirs
 # Включаем загрузчик в автостарт при запуске системы.
-systemctl enable sddm
+systemctl enable sddm.service
+# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
+LC_ALL=C xdg-user-dirs-update --force
+# Удаляем каталоги пользователя на русском языке:
+rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
 
-elif $deskenv = gnome ; then
+# ***
+
+elif [ $deskenv = gnome ]; then
 # Установка Gnome:
 # gnome-shell - Минимальная установка Gnome,
 # gdm - Загрузчик,
 # gnome-control-center - Панель настроек Gnome,
 # gnome-tweak-tool - Дополнительные настройки Gnome,
+# caffeine-ng - Предотвращение активации экранной заставки,
 # tilix - Тайлинговый эмулятор терминала,
 # gedit - Простой текстовый редактор,
-# nautilus libnautilus-extension - Файловый менеджер и расширение,
-# caffeine-ng - Предотвращение активации экранной заставки,
-# gnome-disk-utility - Управление дисками. 
-pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool tilix \
-    gedit nautilus libnautilus-extension caffeine-ng gnome-disk-utility
+# nautilus libnautilus-extension - Файловый менеджер,
+# xdg-user-dirs - Поддержка каталогов пользователя (Видео, Документы, Загрузки, Музыка и т.д.).
+pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool caffeine-ng \
+    tilix gedit nautilus libnautilus-extension xdg-user-dirs
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable gdm.service
 # cheese - Удаляем приложение для веб-камеры.
 pacman --noconfirm -R cheese
-# Небольшая настройка Tilix для правильного разделения панели
+# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
+LC_ALL=C xdg-user-dirs-update --force
+# Небольшая настройка Tilix для правильного разделения терминала
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.bashrc /root/.bashrc
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
+
+# ***
+
 fi
 
 #-----------------------------------------------------------------
@@ -325,19 +349,10 @@ alias pup="sudo pacman -Syu"
 alias згз="sudo pacman -Syu"
 
 # Пинг делает только 5 запросов.
-alias ping="ping -c 5"' | tee -a /home/$username/.bashrc /root/.bashrc
+alias ping="ping -c 5"' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
-# Создаем каталоги пользователя в домашней папке на английском языке:
-pacman --noconfirm -S xdg-user-dirs
-LC_ALL=C xdg-user-dirs-update --force
-# Если существуют каталоги на русском, то удаляем их:
-if [ -d /home/$username/Видео ]; then
-    cd /home/$username
-    rm -R 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
-fi
-
-# Установим более низкий уровень использования файла подкачки
-echo 'vm.swappiness=60' | tee /etc/sysctl.d/99-swappiness.conf
+# Установим уровень использования файла подкачки
+echo 'vm.swappiness=60' > /etc/sysctl.d/99-swappiness.conf
 
 # Уменьшим время ожидания "зависших" приложений с 90 до 10 секунд
 sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
