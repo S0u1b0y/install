@@ -356,5 +356,3 @@ sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/s
 
 # Зададим максимальный размер systemd-журнала
 sed -i 's/^#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
-
-echo '>>>> Install complete successfully. Reboot to continue <<<<'
