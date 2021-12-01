@@ -22,18 +22,18 @@ btrfshook='HOOKS=(base systemd autodetect modconf block btrfs filesystems keyboa
 
 ## Определение оборудования, оси и др. ##
 
-# Определение операционной системы из которой идёт установка:
+# Определение операционной системы из которой идёт установка (env - Environment (Окружение)):
 if [[ $(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"') == 'Manjaro Linux' ]]; then
-    os=Manjaro
+    env=manjaro
 else
-    os=Archlinux
+    env=archlinux
 fi
 
 # Определяем по видеокарте виртуальная машина или реальный компьютер:
 if [[ $(LC_ALL=C lspci | grep -i '.* VGA .*') == *' VMware '* ]]; then
-    computer=Virtual
+    computer=virtual
 else
-    computer=Real
+    computer=real
 fi
 
 #-----------------------------------------------------------------
@@ -87,10 +87,10 @@ mount /dev/sda1 /mnt/.snap -o subvol=@snap,noatime,nodiratime,compress=zstd:2,sp
 # grub - загрузчик оси,
 # intel-ucode - Микрокод для интела,
 # zsh - Продвинутая командная оболочка.
-if [ $os = Manjaro ]; then # Установка из Manjaro
+if [ $env = manjaro ]; then # Установка из Manjaro
     basestrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode zsh
     # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
-    if [ $computer = Real ]; then
+    if [ $computer = real ]; then
         basestrap /mnt linux-firmware
     fi
     # Генерируем fstab по UUID:
@@ -98,7 +98,7 @@ if [ $os = Manjaro ]; then # Установка из Manjaro
 else # Установка из Arch-подобных дистрибутивов (Archlinux, EndeavourOS и др.)
     pacstrap /mnt base base-devel $kernel $kernel\-headers nano grub intel-ucode zsh
     # На реальный компьютер ставим пакет драйверов linux-firmware, на виртуальном он не нужен.
-    if [ $computer = Real ]; then
+    if [ $computer = real ]; then
         pacstrap /mnt linux-firmware
     fi
     # Генерируем fstab по UUID:
@@ -111,7 +111,7 @@ fi
 
 # btrfs-progs - Утилиты для btrfs,
 # grub-btrfs - Загрузка в grub со снимков(снапшотов) btrfs,
-if [ $os = Manjaro ]; then
+if [ $env = manjaro ]; then
     # Для Manjaro:
     basestrap /mnt btrfs-progs grub-btrfs
 else
@@ -153,7 +153,7 @@ sed -i "s/^$defaulthook/$btrfshook/" /mnt/etc/mkinitcpio.conf
 # Скопируем второй установочный скрипт в каталог /mnt, чтобы он был доступен из под chroot:
 cp /arch-bios /mnt/arch-bios
 # Продолжаем установку в chroot и отправляем туда второй скрипт:
-if [ $os = Manjaro ]; then
+if [ $env = manjaro ]; then
     # Если ставим из Manjaro
     manjaro-chroot /mnt sh /arch-bios $kernel $username $hostname $deskenv
 else
