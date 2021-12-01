@@ -197,7 +197,7 @@ pacman --noconfirm -S git curl wget mc htop
 #-----------------------------------------------------------------
 
 # Если устанавливаем DE, то ставим драйвера, утилиты для DE и шрифты.
-if [ $deskenv = xfce ] || [ $deskenv = plasma ] || [ $deskenv = gnome ]; then
+if [ $deskenv = xfce ] || [ $deskenv = plasma ] || [ $deskenv = gnome ] || [ $deskenv = mate ]; then
     
     ## Драйвера ##
 
