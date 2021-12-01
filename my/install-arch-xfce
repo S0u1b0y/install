@@ -41,7 +41,7 @@ sh /pacman-prepare manjaro
 #      ядро для Manjaro (linux515 - стандартное ядро, linux510 - LTS-ядро),
 # 3й - имя пользователя
 # 4й - имя компьютера в сети
-# 5й - Устанавливаемое окружение рабочего стола (Возможные варианты: xfce, plasma, gnome), если оставить пустым или ввести неправильное значение, то установиться только консоль.
+# 5й - Устанавливаемое окружение рабочего стола. Возможные варианты: xfce, plasma, gnome, mate, если оставить пустым или ввести неправильное значение, то установиться только консоль.
 
 # VirtualBox
 sh /arch-btrfs 2G linux user virt xfce
@@ -60,7 +60,7 @@ sh /arch-btrfs 8G linux soulboy main xfce
 # 4й - Режим установки: normal - обычная установка с удалением всего содержимого диска, safe - установка с сохранением домашнего раздела.
 # 5й - имя пользователя
 # 6й - имя компьютера в сети
-# 7й - Устанавливаемое окружение рабочего стола (Возможные варианты: xfce, plasma, gnome), если оставить пустым или ввести неправильное значение, то установиться только консоль.
+# 7й - Устанавливаемое окружение рабочего стола. Возможные варианты: xfce, plasma, gnome, mate, если оставить пустым или ввести неправильное значение, то установиться только консоль.
 
 # VirtualBox
 sh /arch-ext4 20G 2G linux normal user virt xfce
@@ -82,7 +82,7 @@ hwclock --systohc --utc && date
 reboot
 
 #-----------------------------------------------------------------
-                #### После перезагрузки ####
+###################### После перезагрузки ########################
 #-----------------------------------------------------------------
 
 # Настройку Zsh см. в файле https://raw.githubusercontent.com/S0u1b0y/install/in/arch-zsh
@@ -112,14 +112,24 @@ autoremove
 
 ## Программы ##
 
+# Дополнительный софт:
+yay --noconfirm -S xarchiver galculator xviewer xviewer-plugins xreader foliate deadbeef mpv \
+    mediainfo mkvtoolnix-gui cherrytree
+
+# Утилиты для контроля за использованием памяти:
+yay --noconfirm -S ananicy nohang
+sudo systemctl enable --now ananicy nohang
+
 # Браузеры:
 yay --noconfirm -S firefox firefox-i18n-ru librewolf-bin chromium
 
 # Torrent:
 sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
 
-# Code OSS (free Visual Studio Code):
+# Code OSS (free VSCode):
 yay --noconfirm -S code
+# Сменить язык на русский:
+# Ctrl+Shift+P -> вводим - Configure Display Language -> Меняем на Русский
 # Настроки:
 echo -e '{
     "workbench.colorTheme": "Default Dark+",
@@ -133,20 +143,12 @@ echo -e '{
     "editor.dragAndDrop": false,
     "editor.renderLineHighlight": "none"
     "editor.guides.indentation": false
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "terminal.integrated.fontSize": 12
 }' > ~/.config/Code - OSS/User/settings.json
-# Сменить язык на русский
-Ctrl+Shift+P -> вводим: Configure Display Language -> Меняем на Русский
-
-# Дополнительный софт:
-yay --noconfirm -S xarchiver galculator xviewer xviewer-plugins xreader foliate deadbeef mpv \
-    mediainfo mkvtoolnix-gui cherrytree
-
-# Утилиты для контроля за использованием памяти:
-yay --noconfirm -S ananicy nohang
-sudo systemctl enable --now ananicy nohang
 
 # Plank:
-# Что бы убрать невидимую полосу - Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
+# Что бы убрать невидимую полосу: Меню->Настройки->Диспетчер окон (дополнительно)->{Вкладка}Эффекты->Отображать тени под сворачивающимися окнами->Снять галочку.
 sudo pacman --noconfirm -S plank
 
 # Yandex Disk:
@@ -157,6 +159,14 @@ sudo pacman --noconfirm -S gnome-disk-utility
 
 # gnome-system-monitor - Мониторинг системы.
 sudo pacman --noconfirm -S gnome-system-monitor
+
+# Если нужна поддержка принтера, то ставим:
+pacman --noconfirm -S cups cups-pdf system-config-printer
+sudo systemctl enable --now cups.service
+
+# Bluetooth (опционально):
+sudo pacman --noconfirm -S blueman
+sudo systemctl enable --now bluetooth
 
 # Мониторинг и разгон для nVidia карт Green With Envy:
 yay --noconfirm -S gwe
