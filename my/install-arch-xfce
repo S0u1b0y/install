@@ -103,8 +103,8 @@ echo -e "[base]\nautologin=${USER}" | sudo tee -a /etc/lxdm/lxdm.conf
 #-----------------------------------------------------------------
 
 # Программы для VirualBox:
-yay --noconfirm -S ananicy nohang librewolf-bin xarchiver galculator \
-    xviewer xviewer-plugins xreader foliate
+yay --noconfirm -S ananicy nohang librewolf-bin xarchiver galculator foliate \
+    xviewer xviewer-plugins xreader
 sudo systemctl enable --now ananicy nohang
 autoremove
 
