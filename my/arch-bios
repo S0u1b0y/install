@@ -334,7 +334,7 @@ pacman --noconfirm -S xdg-user-dirs
 # Удаляем каталоги пользователя на русском языке:
 rm -rf /home/$username/{'Рабочий стол',Загрузки,Шаблоны,Общедоступные,Документы,Музыка,Изображения,Видео}
 # Создаем каталоги пользователя в домашней папке:
-mkdir -p /home/$username/{desktop,downloads,templates,public,documents,music,pictures,videos}
+mkdir -p /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
 echo -e 'XDG_DESKTOP_DIR="$HOME/desktop"
 XDG_DOWNLOAD_DIR="$HOME/downloads"
 XDG_TEMPLATES_DIR="$HOME/templates"
@@ -347,7 +347,7 @@ XDG_VIDEOS_DIR="$HOME/videos"' > /home/$username/.config/user-dirs.dirs
 # ***
 
 # Небольшая настройка Tilix для правильного разделения терминала
-if [ $deskenv != xfce ] || [ $deskenv = gnome ] || [ $deskenv = mate ]; then
+if [ $deskenv = xfce ] || [ $deskenv = gnome ] || [ $deskenv = mate ]; then
 echo -e '\n#Для терминала Tilix
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
