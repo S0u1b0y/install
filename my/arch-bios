@@ -246,34 +246,26 @@ fi
 ## Установка окружения рабочего стола (DE) ##
 
 if [ $deskenv = xfce ]; then
+# https://archlinux.org/groups/x86_64/xfce4/
+# https://archlinux.org/groups/x86_64/xfce4-goodies/
 # xorg-server - Иксы,
-# xfce4 - XFCE,
+# garcon exo xfdesktop xfwm4 xfconf xfce4-panel xfce4-power-manager xfce4-session xfce4-settings - Установка XFCE,
 # lxdm - Загрузчик,
-# pavucontrol - Панель управления звуком Pulseaudio,
-# xed - Простой текстовый редактор,
-# tilix - Тайлинговый эмулятор терминала,
-# thunar-archive-plugin - Работа с архивами,
 # xfce4-xkb-plugin - Плагин раскладки клавиатуры,
 # xfce4-pulseaudio-plugin - Плагин управления звуком,
 # xfce4-clipman-plugin - Плагин расширенного буфера обмена,
 # xfce4-whiskermenu-plugin - Современное меню,
-# xfce4-weather-plugin - Плагин погоды.
-pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin \
-    xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin \
-    xfce4-weather-plugin
+# xfce4-weather-plugin - Плагин погоды,
+# pavucontrol - Панель управления звуком Pulseaudio,
+# xed - Простой текстовый редактор,
+# tilix - Тайлинговый эмулятор терминала,
+# thunar thunar-volman thunar-archive-plugin - Файловый менержер Thunar.
+#pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin
+pacman --noconfirm -S garcon exo tumbler xfdesktop xfwm4 xfconf xfce4-panel xfce4-power-manager xfce4-session xfce4-settings xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin pavucontrol xed tilix thunar thunar-volman thunar-archive-plugin
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lxdm.service
-# xfce4-terminal - удаляем встроенный терминал.
-pacman --noconfirm -Rns xfce4-terminal
-# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # No_Beep (Отключение, раздражающего звука, pc-спикера):
 echo 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
-# Небольшие настройки Tilix для правильного разделения терминала
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
@@ -291,10 +283,6 @@ pacman --noconfirm -S sddm plasma-desktop kscreen powerdevil plasma-pa kde-gtk-c
     konsole kwrite dolphin dolphin-plugins
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable sddm.service
-# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# Удаляем каталоги пользователя на русском языке:
-cd /home/$username && rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
 
 # ***
 
@@ -313,37 +301,23 @@ pacman --noconfirm -S gnome-shell gdm gnome-control-center gnome-tweak-tool caff
 systemctl enable gdm.service
 # cheese - Удаляем приложение для веб-камеры.
 pacman --noconfirm -Rns cheese
-# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# Небольшая настройка Tilix для правильного разделения терминала
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
 elif [ $deskenv = mate ]; then
+# https://archlinux.org/groups/x86_64/mate/
+# https://archlinux.org/groups/x86_64/mate-extra/
 # xorg-server - Иксы,
-# mate - Mate,
+# mate-desktop mate-panel mate-menus mate-power-manager mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center - Установка Mate,
 # lightdm lightdm-gtk-greeter - Загрузчик,
 # mozo - Редактор меню,
 # mate-media - Управление звуком,
 # tilix - Тайлинговый эмулятор терминала,
 # pluma - Простой текстовый редактор,
 #pacman --noconfirm -S xorg-server mate lightdm lightdm-gtk-greeter mate-power-manager mozo mate-media tilix pluma
-pacman --noconfirm -S xorg-server mate-desktop mate-panel mate-menus mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center mate-media marco lightdm lightdm-gtk-greeter mate-power-manager mozo tilix pluma
+pacman --noconfirm -S xorg-server mate-desktop mate-panel mate-menus mate-power-manager mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center mate-media marco lightdm lightdm-gtk-greeter mozo tilix pluma
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lightdm.service
-# Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
-pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
-# Удаляем каталоги пользователя на русском языке:
-cd /home/$username && rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
-# Небольшая настройка Tilix для правильного разделения терминала
-echo -e '\n#Для терминала Tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
@@ -352,6 +326,35 @@ fi
 #-----------------------------------------------------------------
 
 ## Настройки ##
+
+# ***
+
+## Каталоги пользователя на английском языке:
+pacman --noconfirm -S xdg-user-dirs
+# Удаляем каталоги пользователя на русском языке:
+rm -rf /home/$username/{'Рабочий стол',Загрузки,Шаблоны,Общедоступные,Документы,Музыка,Изображения,Видео}
+# Создаем каталоги пользователя в домашней папке:
+mkdir -p /home/$username/{desktop,downloads,templates,public,documents,music,pictures,videos}
+echo -e 'XDG_DESKTOP_DIR="$HOME/desktop"
+XDG_DOWNLOAD_DIR="$HOME/downloads"
+XDG_TEMPLATES_DIR="$HOME/templates"
+XDG_PUBLICSHARE_DIR="$HOME/public"
+XDG_DOCUMENTS_DIR="$HOME/documents"
+XDG_MUSIC_DIR="$HOME/music"
+XDG_PICTURES_DIR="$HOME/pictures"
+XDG_VIDEOS_DIR="$HOME/videos"' > /home/$username/.config/user-dirs.dirs
+
+# ***
+
+# Небольшая настройка Tilix для правильного разделения терминала
+if [ $deskenv != xfce ] || [ $deskenv = gnome ] || [ $deskenv = mate ]; then
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
+fi
+
+# ***
 
 # Добавим алиасы в баш для пользователя и рута:
 echo -e '\n#### Aliases ####
@@ -378,3 +381,5 @@ sed -i 's/^#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' /etc/systemd/s
 
 # Зададим максимальный размер systemd-журнала
 sed -i 's/^#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf
+
+# ***
