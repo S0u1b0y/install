@@ -294,7 +294,7 @@ systemctl enable sddm.service
 # Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
 pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
 # Удаляем каталоги пользователя на русском языке:
-rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
+cd /home/$username && rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
 
 # ***
 
@@ -327,11 +327,23 @@ elif [ $deskenv = mate ]; then
 # xorg-server - Иксы,
 # mate - Mate,
 # lightdm lightdm-gtk-greeter - Загрузчик,
-pacman --noconfirm -S xorg-server mate lightdm lightdm-gtk-greeter
+# mozo - Редактор меню,
+# mate-media - Управление звуком,
+# tilix - Тайлинговый эмулятор терминала,
+# pluma - Простой текстовый редактор,
+#pacman --noconfirm -S xorg-server mate lightdm lightdm-gtk-greeter mate-power-manager mozo mate-media tilix pluma
+pacman --noconfirm -S xorg-server mate-desktop mate-panel mate-menus mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center mate-media marco lightdm lightdm-gtk-greeter mate-power-manager mozo tilix pluma
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lightdm.service
 # Создаем каталоги пользователя в домашней папке на английском языке (LC_ALL=C):
 pacman --noconfirm -S xdg-user-dirs && LC_ALL=C xdg-user-dirs-update --force
+# Удаляем каталоги пользователя на русском языке:
+cd /home/$username && rm -rf 'Рабочий стол' Видео Документы Загрузки Музыка Общедоступные Шаблоны Изображения
+# Небольшая настройка Tilix для правильного разделения терминала
+echo -e '\n#Для терминала Tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi' | tee -a /home/$username/.bashrc /root/.bashrc > /dev/null
 
 # ***
 
