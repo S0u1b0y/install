@@ -261,7 +261,7 @@ if [ $deskenv = xfce ]; then
 # tilix - Тайлинговый эмулятор терминала,
 # thunar thunar-volman thunar-archive-plugin - Файловый менержер Thunar.
 #pacman --noconfirm -S xorg-server xfce4 lxdm pavucontrol xed tilix thunar-archive-plugin xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin
-pacman --noconfirm -S exo garcon tumbler xfce4-panel xfce4-power-manager xfce4-session xfce4-settings xfconf xfdesktop xfwm4 lxdm xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin pavucontrol xed tilix thunar thunar-volman thunar-archive-plugin
+pacman --noconfirm -S exo garcon tumbler xfce4-panel xfce4-power-manager xfce4-session xfce4-settings xfconf xfdesktop xfwm4 lxdm xfce4-xkb-plugin xfce4-pulseaudio-plugin xfce4-clipman-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin pavucontrol xed tilix
 # Включаем загрузчик в автостарт при запуске системы.
 systemctl enable lxdm.service
 # No_Beep (Отключение, раздражающего звука, pc-спикера):
@@ -331,11 +331,12 @@ fi
 
 ## Каталоги пользователя на английском языке:
 pacman --noconfirm -S xdg-user-dirs
-# Удаляем каталоги пользователя на русском языке:
+# Удаляем каталоги пользователя на русском языке
 rm -rf /home/$username/{'Рабочий стол',Загрузки,Шаблоны,Общедоступные,Документы,Музыка,Изображения,Видео}
-# Создаем каталоги пользователя в домашней папке:
-mkdir -p /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
-export XDG_CONFIG_DIRS=/etc/xdg
+# Создаем каталоги пользователя в домашней папке
+# Так как каталоги создаются из-под рута, то меняем владельца на пользователя (sudo -u username) и устанавливаем права доступа 755.
+sudo -u $username mkdir -pm=755 /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
+#chown -R $username:users /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
 echo -e 'XDG_DESKTOP_DIR="$HOME/desktop"
 XDG_DOWNLOAD_DIR="$HOME/downloads"
 XDG_TEMPLATES_DIR="$HOME/templates"
