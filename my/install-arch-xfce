@@ -132,6 +132,7 @@ sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
 
 # MPV
 sudo pacman --noconfirm -S mpv
+# Настроки MPV:
 cp -n /usr/share/doc/mpv/mpv.conf ~/.config/mpv/mpv.conf
 cp -n /usr/share/doc/mpv/input.conf ~/.config/mpv/input.conf
 echo -e "\n#### My Settings ####\n
@@ -159,7 +160,7 @@ DOWN       add volume -5
 sudo pacman --noconfirm -S code
 # Сменить язык на русский:
 # Ctrl+Shift+P -> вводим - Configure Display Language -> Меняем на Русский
-# Настроки:
+# Настроки Code OSS:
 echo -e '{
     "workbench.colorTheme": "Default Dark+",
     "window.menuBarVisibility": "compact",
