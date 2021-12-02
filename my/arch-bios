@@ -337,7 +337,7 @@ rm -rf /home/$username/{'Рабочий стол',Загрузки,Шаблон�
 # Так как каталоги создаются из-под рута,
 # то меняем владельца на пользователя (sudo -u username)
 # и устанавливаем соответствующие права доступа (m=755).
-sudo -u $username mkdir -pm=755 /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
+sudo -u $username mkdir -p /home/$username/{.config,desktop,downloads,templates,public,documents,music,pictures,videos}
 echo -e 'XDG_DESKTOP_DIR="$HOME/desktop"
 XDG_DOWNLOAD_DIR="$HOME/downloads"
 XDG_TEMPLATES_DIR="$HOME/templates"
