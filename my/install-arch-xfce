@@ -137,7 +137,10 @@ mkdir ~/.config/mpv
 cp -n /usr/share/doc/mpv/mpv.conf ~/.config/mpv/mpv.conf
 cp -n /usr/share/doc/mpv/input.conf ~/.config/mpv/input.conf
 echo -e "\n#### My Settings ####\n
-volume=40
+save-position-on-quit
+no-border
+\nvolume=40
+geometry=60%
 \n#-----------------------------------------------------------------
 \n$(cat ${HOME}/.config/mpv/mpv.conf)" > ~/.config/mpv/mpv.conf
 echo -e "\n#### Mouse ####
@@ -146,7 +149,7 @@ MBTN_LEFT_DBL cycle fullscreen
 MBTN_RIGHT    cycle pause
 MBTN_BACK     playlist-prev
 MBTN_FORWARD  playlist-next
-MBTN_MID      cycle mute
+MBTN_MID      cycle ontop
 WHEEL_UP      add volume 5
 WHEEL_DOWN    add volume -5
 \n#### Keyboard ####
