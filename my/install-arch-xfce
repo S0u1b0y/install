@@ -139,7 +139,7 @@ cp -n /usr/share/doc/mpv/input.conf ~/.config/mpv/input.conf
 echo -e "\n#### My Settings ####\n
 volume=40
 \n#-----------------------------------------------------------------
-\n$(cat /home/${USER}/.config/mpv/mpv.conf)" > ~/.config/mpv/mpv.conf
+\n$(cat ${HOME}/.config/mpv/mpv.conf)" > ~/.config/mpv/mpv.conf
 echo -e "\n#### Mouse ####
 MBTN_LEFT     ignore
 MBTN_LEFT_DBL cycle fullscreen
@@ -155,7 +155,7 @@ LEFT          seek -5
 UP            add volume 5
 DOWN          add volume -5
 \n#-----------------------------------------------------------------
-\n$(cat /home/${USER}/.config/mpv/input.conf)" > ~/.config/mpv/input.conf
+\n$(cat ${HOME}/.config/mpv/input.conf)" > ~/.config/mpv/input.conf
 
 # Code OSS (free VSCode):
 sudo pacman --noconfirm -S code
