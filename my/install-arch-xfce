@@ -140,7 +140,7 @@ echo -e "\n#### My Settings ####\n
 save-position-on-quit
 no-border
 \nvolume=40
-geometry=60%
+geometry=40%
 \n#-----------------------------------------------------------------
 \n$(cat ${HOME}/.config/mpv/mpv.conf)" > ~/.config/mpv/mpv.conf
 echo -e "\n#### Mouse ####
