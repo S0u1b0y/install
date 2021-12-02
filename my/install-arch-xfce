@@ -97,7 +97,7 @@ yay --noconfirm -S pamac-aur menulibre papirus-icon-theme qogir-icon-theme \
 yay --noconfirm -S qt5ct qt6-base adwaita-qt
 echo 'export QT_QPA_PLATFORMTHEME=qt5ct' | sudo tee -a /etc/profile > /dev/null
 
-# Настройка показа времени (%d-%m-%Y  <b>%H:%M</b>)
+# Настройка показа времени " %d-%m-%Y  <b>%H:%M</b>"
 
 #-----------------------------------------------------------------
 
@@ -133,6 +133,7 @@ sudo pacman --noconfirm -S transmission-remote-gtk qbittorrent
 # MPV
 sudo pacman --noconfirm -S mpv
 # Настроки MPV:
+mkdir ~/.config/mpv
 cp -n /usr/share/doc/mpv/mpv.conf ~/.config/mpv/mpv.conf
 cp -n /usr/share/doc/mpv/input.conf ~/.config/mpv/input.conf
 echo -e "\n#### My Settings ####\n
@@ -149,10 +150,10 @@ MBTN_MID      cycle mute
 WHEEL_UP      add volume 5
 WHEEL_DOWN    add volume -5
 \n#### Keyboard ####
-RIGHT      seek  5
-LEFT       seek -5
-UP         add volume 5
-DOWN       add volume -5
+RIGHT         seek  5
+LEFT          seek -5
+UP            add volume 5
+DOWN          add volume -5
 \n#-----------------------------------------------------------------
 \n$(cat /home/${USER}/.config/mpv/input.conf)" > ~/.config/mpv/input.conf
 
@@ -161,6 +162,7 @@ sudo pacman --noconfirm -S code
 # Сменить язык на русский:
 # Ctrl+Shift+P -> вводим - Configure Display Language -> Меняем на Русский
 # Настроки Code OSS:
+mkdir -p ~/.config/Code - OSS/User
 echo -e '{
     "workbench.colorTheme": "Default Dark+",
     "window.menuBarVisibility": "compact",
