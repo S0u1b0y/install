@@ -5,20 +5,27 @@ os=$1
 
 #-----------------------------------------------------------------
 
+## Определение оборудования, оси и др. ##
+
+# Определение операционной системы из которой идёт установка (env - Environment (Окружение)):
+if [[ $(cat /etc/*-release | grep -w NAME | cut -d= -f2 | tr -d '"') == 'Manjaro Linux' ]]; then
+    env=manjaro
+else
+    env=archlinux
+fi
+
+#-----------------------------------------------------------------
+
 # Сделаем резевные копии на всякий случай.
 cp -n /etc/pacman.conf /etc/pacman.conf.bak
 cp -n /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 
 #-----------------------------------------------------------------
 
-# Прописываем конфиги Pacman в зависимости от устанавливаемой оси:
-
 ## Archlinux ##
 
 if [ $os = archlinux ]; then
-# Пропишем репозитории Archlinux и русские зеркала:
-# Для других стран можно сгенерировать тут: https://archlinux.org/mirrorlist/
-# Автоматически сгенерировать зеркала можно командой - pacman-mirrors -f
+# Пропишем репозитории Archlinux и зеркала:
 echo -e '[options]
 HoldPkg = pacman glibc
 Architecture = auto
@@ -46,19 +53,12 @@ Server = https://ftp.acc.umu.se/mirror/archlinux/$repo/os/$arch
 Server = https://mirrors.ims.nksc.lt/archlinux/$repo/os/$arch
 Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
-# Установка зеркал по скорости по странам: RU, FI, LV, LT, SE, DE, DK:
-# curl -s 'https://archlinux.org/mirrorlist/?country=RU&country=FI&country=LV&country=LT&country=SE&country=DE&country=DK&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
-
-# Установка зеркал по всем странам по скорости:
-# curl -s 'https://archlinux.org/mirrorlist/?country=all&protocol=https&ip_version=4&use_mirror_status=on' | sed -e 's/^#Server/Server/g' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
-
 #-----------------------------------------------------------------
 
 ## Manjaro ##
 
-elif [ $os = manjaro ]; then
-# Пропишем репозитории Manjaro и русские зеркала:
-# Автоматически сгенерировать зеркала можно командой - pacman-mirrors -f
+elif [ $os = manjaro ] && [ $env = manjaro ]; then
+# Пропишем репозитории Manjaro и зеркала:
 echo -e '[options]
 CacheDir = /var/cache/pacman/pkg/
 HoldPkg      = pacman glibc manjaro-system
@@ -91,8 +91,12 @@ Server = https://manjaro.lucassymons.net/stable/$repo/$arch
 Server = https://manjaro.mirrors.lavatech.top/stable/$repo/$arch
 Server = https://mirror.init7.net/manjaro/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
 
-# Установка зеркал по скорости по всем странам:
-# pacman-mirrors --fasttrack
+#-----------------------------------------------------------------
+
+elif [ $os = manjaro ] && [ $env = archlinux ]; then
+    echo '>>>> Wrong Environment <<<<'
 fi
+
+#-----------------------------------------------------------------
 
 pacman --noconfirm -Syy
