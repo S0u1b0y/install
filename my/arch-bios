@@ -216,10 +216,12 @@ if [ $deskenv = xfce ] || [ $deskenv = plasma ] || [ $deskenv = gnome ] || [ $de
     # cifs-utils - Поддержка подключения к Samba,
     # davfs2 - Поддержка WebDAV (например для Yandex Disk),
     # gvfs gvfs-smb gvfs-nfs nfs-utils - Поддержка сетевых дисков и отображение их в файловых менеджерах,
+    # gvfs-mtp - Virtual filesystem implementation for GIO (MTP backend; Android, media player),
+    # gvfs-google - Virtual filesystem implementation for GIO (Google Drive backend),
     # xdg-utils - Консольные инструменты, которые помогают приложениям решать различные задачи интеграции,
     # neofetch - Информация о системе в консоли.
-    pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs nfs-utils \
-        xdg-utils neofetch
+    pacman --noconfirm -S p7zip unrar unace lrzip cifs-utils davfs2 gvfs gvfs-smb gvfs-nfs gvfs-mtp \
+        gvfs-google nfs-utils xdg-utils neofetch
 
     # ***
 
@@ -261,7 +263,27 @@ echo 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
 
 # ***
 
+elif [ $deskenv = mate ]; then
+# https://archlinux.org/groups/x86_64/mate/
+# https://archlinux.org/groups/x86_64/mate-extra/
+# xorg-server - Иксы,
+# mate-desktop mate-panel mate-menus mate-power-manager mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center marco - Установка Mate,
+# mate-media - Управление звуком,
+# lightdm lightdm-gtk-greeter - Загрузчик,
+# mozo - Редактор меню,
+# tilix - Тайлинговый эмулятор терминала,
+# pluma - Простой текстовый редактор.
+pacman --noconfirm -S xorg-server mate-desktop mate-panel mate-menus mate-power-manager \
+    mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit \
+    mate-control-center marco mate-media lightdm lightdm-gtk-greeter mozo tilix pluma
+# Включаем загрузчик в автостарт при запуске системы.
+systemctl enable lightdm.service
+
+# ***
+
 elif [ $deskenv = plasma ]; then
+# https://archlinux.org/groups/x86_64/plasma/
+# https://archlinux.org/groups/x86_64/kde-applications/
 # plasma-desktop - Минимальная установка Plasma,
 # kscreen - Утилита управления мониторами,
 # powerdevil - Утилита управления питанием,
@@ -279,6 +301,8 @@ systemctl enable sddm.service
 # ***
 
 elif [ $deskenv = gnome ]; then
+# https://archlinux.org/groups/x86_64/gnome/
+# https://archlinux.org/groups/x86_64/gnome-extra/
 # gnome-shell - Минимальная установка Gnome,
 # gnome-control-center - Панель настроек Gnome,
 # gnome-tweak-tool - Дополнительные настройки Gnome,
@@ -289,28 +313,10 @@ elif [ $deskenv = gnome ]; then
 # nautilus libnautilus-extension - Файловый менеджер.
 pacman --noconfirm -S gnome-shell gnome-control-center gnome-tweak-tool gdm caffeine-ng \
     tilix gedit nautilus libnautilus-extension
-# Включаем загрузчик в автостарт при запуске системы.
-systemctl enable gdm.service
 # cheese - Удаляем приложение для веб-камеры.
 pacman --noconfirm -Rns cheese
-
-# ***
-
-elif [ $deskenv = mate ]; then
-# https://archlinux.org/groups/x86_64/mate/
-# https://archlinux.org/groups/x86_64/mate-extra/
-# xorg-server - Иксы,
-# mate-desktop mate-panel mate-menus mate-power-manager mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit mate-control-center marco - Установка Mate,
-# mate-media - Управление звуком,
-# lightdm lightdm-gtk-greeter - Загрузчик,
-# mozo - Редактор меню,
-# tilix - Тайлинговый эмулятор терминала,
-# pluma - Простой текстовый редактор.
-pacman --noconfirm -S xorg-server mate-desktop mate-panel mate-menus mate-power-manager \
-    mate-session-manager mate-settings-daemon mate-notification-daemon mate-polkit \
-    mate-control-center marco mate-media lightdm lightdm-gtk-greeter mozo tilix pluma
 # Включаем загрузчик в автостарт при запуске системы.
-systemctl enable lightdm.service
+systemctl enable gdm.service
 
 # ***
 
