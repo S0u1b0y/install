@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# И наконец, завершив отладку сценария, вы можете поместить его в каталог /usr/local/bin, чтобы сделать его доступным для себя и других пользователей системы. После этого сценарий можно вызвать, просто напечатав название файла в командной строке и нажав клавишу [ENTER]
+
+# Проверка: echo $(detectinitsys)
+if [ -f /lib/systemd/systemd ]; then  echo 'systemd'; fi
+if [ -f /bin/dinit ]; then echo 'dinit'; fi
+if [ -f /bin/runit ]; then echo 'runit'; fi
+if [ -f /bin/openrc ]; then echo 'openrc'; fi
+if [ -f /bin/s6-rc ]; then echo 's6'; fi

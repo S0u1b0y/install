@@ -1,0 +1,1181 @@
+#!/bin/bash
+
+### Подготовка ###
+# Скачиваем образ EndeavourOS - https://endeavouros.com/latest-release/
+# Или SystemRescue - https://www.system-rescue.org/Download/
+# Записываем образ на флешку
+# Загружаемся с записанного образа
+# Запускаем эмулятор терминала
+
+#------------------------------------------------------------------------------
+
+# Подключение Home Shares
+MOUNTOPTS='rw,async,_netdev,nofail,iocharset=utf8,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,username=soulboy,password=c7iQPZ2vc' && mkdir -m=777 /tmp/{server,router}
+sudo mount //192.168.0.1/share /tmp/server -o $MOUNTOPTS,vers=3.0
+sudo mount //192.168.0.100/files/share /tmp/router -o $MOUNTOPTS,vers=1.0
+
+#------------------------------------------------------------------------------
+
+# Для VirtualBox чтобы, на некоторых дистрибутивах, работал общий буфер обмена:
+sudo pacman -Sy virtualbox-guest-utils # Если нужно подтвердить удаление nox-версии.
+sudo VBoxClient-all
+
+#------------------------------------------------------------------------------
+
+# Переходим в учётную запись рута:
+sudo -s
+
+###############################################################################
+######################### Параметры установки системы #########################
+###############################################################################
+
+# Синхронизация времени с NTP сервером:
+if [ -f /lib/systemd/systemd ]; then timedatectl set-ntp true; echo ">>>> $(date) <<<<"; fi
+if [ -f /bin/dinit ]; then dinitctl start ntpd; echo ">>>> $(date) <<<<"; fi
+if [ -f /bin/runit ]; then sv up ntpd; echo ">>>> $(date) <<<<"; fi
+if [ -f /bin/openrc ]; then rc-service ntpd start; echo ">>>> $(date) <<<<"; fi
+if [ -f /bin/s6-rc ]; then s6-rc -u change ntpd; echo ">>>> $(date) <<<<"; fi
+
+# ВНИМАНИЕ!!! Обязательно выберите устанавливаемую систему и DE:
+INSTALLSYS=artix # Варианты: arch, artix, manjaro
+INSTALLDE=xfce # Варианты: plasma, xfce, gnome, cinnamon, mate, lxqt-kwin, lxqt-ob (with openbox)
+
+# Выбор системы инициализации для Artix:
+if [[ $INSTSYSTEM == artix ]]; then
+    INITINST='-dinit' && INITPACK='dinit elogind-dinit'
+    # INITINST='-runit' && INITPACK='runit elogind-runit rsm'
+    # INITINST='-openrc' && INITPACK='openrc elogind-openrc'
+    # INITINST='-s6' && INITPACK='s6-base elogind-s6'
+fi
+
+# Параметры установки:
+DISK=/dev/sda # lsblk -o name
+TIMESTD=utc # Варианты: utc, local
+TIMEZONE='Europe/Moscow'
+HOSTNAME=main; [[ $(lspci | grep VGA) == *VMware* ]] && HOSTNAME=virt
+USERNAME=soulboy; [[ $(lspci | grep VGA) == *VMware* ]] && USERNAME=user
+PASSWORD=123
+
+###############################################################################
+############ Настройка Pacman и репозиториев для установки системы ############
+###############################################################################
+
+# Arch:
+if [[ $INSTALLSYS == arch ]]; then
+echo -e '[options]\nHoldPkg = pacman glibc\nArchitecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+SigLevel = Never\nLocalFileSigLevel = Never
+[core]\nInclude = /etc/pacman.d/mirrorlist
+[extra]\nInclude = /etc/pacman.d/mirrorlist
+[community]\nInclude = /etc/pacman.d/mirrorlist
+[multilib]\nInclude = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+echo -e '## Russia\nServer = https://mirror.yal.sl-chat.ru/archlinux/$repo/os/$arch
+Server = https://mirror.kamtv.ru/archlinux/$repo/os/$arch
+Server = https://mirror.yandex.ru/archlinux/$repo/os/$arch
+Server = https://mirror.truenetwork.ru/archlinux/$repo/os/$arch
+Server = https://mirror.rol.ru/archlinux/$repo/os/$arch
+Server = https://mirror.nw-sys.ru/archlinux/$repo/os/$arch
+Server = https://mirror.lebedinets.ru/archlinux/$repo/os/$arch
+\n\n## Worldwide\nServer = https://geo.mirror.pkgbuild.com/$repo/os/$arch
+Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+pacman --noconfirm -Syy; fi
+
+# Artix:
+if [[ $INSTALLSYS == artix ]]; then
+echo -e '[options]\nHoldPkg = pacman glibc\nArchitecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+SigLevel = Never\nLocalFileSigLevel = Never
+[system]\nInclude = /etc/pacman.d/mirrorlist
+[world]\nInclude = /etc/pacman.d/mirrorlist
+[galaxy]\nInclude = /etc/pacman.d/mirrorlist
+[lib32]\nInclude = /etc/pacman.d/mirrorlist
+[universe]\nServer = https://universe.artixlinux.org/$arch
+Server = https://mirror1.artixlinux.org/universe/$arch
+Server = https://mirror.pascalpuffke.de/artix-universe/$arch' > /etc/pacman.conf
+echo -e '## Europe ##\nServer = https://mirror.one.com/artix/$repo/os/$arch
+Server = https://mirrors.dotsrc.org/artix-linux/repos/$repo/os/$arch
+Server = https://eu-mirror.artixlinux.org/repos/$repo/os/$arch
+Server = https://artix.kurdy.org/$repo/os/$arch
+Server = https://mirror.netcologne.de/artix-linux/$repo/os/$arch
+Server = https://artix.unixpeople.org/repos/$repo/os/$arch
+Server = https://mirror.pascalpuffke.de/artix-linux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+pacman --noconfirm -Syy; fi
+
+# Artix:
+if [[ $INSTALLSYS == manjaro ]]; then
+echo -e '[options]
+CacheDir = /var/cache/pacman/pkg/
+HoldPkg = pacman glibc manjaro-system
+SyncFirst = manjaro-system archlinux-keyring manjaro-keyring
+Architecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+\nSigLevel = Never\nLocalFileSigLevel = Never
+\n[core]\nInclude = /etc/pacman.d/mirrorlist
+\n[extra]\nInclude = /etc/pacman.d/mirrorlist
+\n[community]\nInclude = /etc/pacman.d/mirrorlist
+\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+echo -e '## Russia ##\nServer = https://mirror.truenetwork.ru/manjaro/stable/$repo/$arch
+Server = https://mirror.kamtv.ru/manjaro/stable/$repo/$arch
+Server = https://mirror.yandex.ru/mirrors/manjaro/stable/$repo/$arch
+\n## Europe ##\nServer = https://manjaro.kyberorg.fi/stable/$repo/$arch
+Server = https://mirrors.xtom.ee/manjaro/stable/$repo/$arch' > /etc/pacman.d/mirrorlist
+pacman --noconfirm -Syy; fi
+
+###############################################################################
+################ Разметка, форматирование и монтирование диска ################
+###############################################################################
+
+# Два раздела Root(по умолчанию 40Gb) и Home(всё остальное):
+# swapoff -a; umount -fR /mnt; sfdisk --delete $DISK; ROOTMO=''; HOMEMO=''; FIRMWARE=''
+ROOTFS=ext4; HOMEFS=ext4 # Варианты - ext4, btrfs, xfs, f2fs, jfs, nilfs2
+DISK=/dev/sda; ROOTPART=43G; UEFIBOOT=512M # ROOTPART можно указать в процентах - 30%
+if [[ $DISK == *nvme* ]]; then PART=$DISK\p; else PART=$DISK; fi
+if [ -d /sys/firmware/efi ]; then
+    parted -s $DISK -- mktable gpt \
+        mkpart Root $ROOTFS 1M $ROOTPART \
+        mkpart Home $HOMEFS $ROOTPART \-$UEFIBOOT \
+        mkpart EFI fat32 \-$UEFIBOOT 100% \
+    set 3 esp on
+else
+    parted -s $DISK -- mktable msdos \
+        mkpart primary $ROOTFS 1M $ROOTPART \
+        mkpart primary $HOMEFS $ROOTPART 100% \
+    set 1 boot on; fi
+case $ROOTFS in
+    ext4 )   mkfs.ext4 -FL Root $PART\1; FSUTILS="e2fsprogs"
+             ROOTMO='-o rw,noatime,nobarrier,commit=60' ;;
+    btrfs )  mkfs.btrfs -fL Root $PART\1; FSUTILS="btrfs-progs"
+             ROOTMO='-o rw,noatime,space_cache=v2,discard=async,compress-force=zstd:2' ;;
+    xfs )    mkfs.xfs -fL Root $PART\1; FSUTILS="xfsprogs"; ROOTMO='' ;;
+    f2fs )   mkfs.f2fs -fl Root $PART\1; FSUTILS="f2fs-tools"; ROOTMO='' ;;
+    jfs )    mkfs.jfs -qL Root $PART\1; FSUTILS="jfsutils"; ROOTMO='' ;;
+    nilfs2 ) mkfs.nilfs2 -fL Root $PART\1; FSUTILS="nilfs-utils"; ROOTMO='' ;;
+esac
+case $HOMEFS in
+    ext4 )   mkfs.ext4 -FL Home $PART\2; FSUTILS="$FSUTILS e2fsprogs"
+             HOMEMO='-o rw,noatime,nobarrier,commit=60' ;;
+    btrfs )  mkfs.btrfs -fL Home $PART\2; FSUTILS="$FSUTILS btrfs-progs"
+             HOMEMO='-o rw,noatime,space_cache=v2,discard=async,compress-force=zstd:2' ;;
+    xfs )    mkfs.xfs -fL Home $PART\2; FSUTILS="$FSUTILS xfsprogs"; HOMEMO='' ;;
+    f2fs )   mkfs.f2fs -fl Home $PART\2; FSUTILS="$FSUTILS f2fs-tools"; HOMEMO='' ;;
+    jfs )    mkfs.jfs -qL Home $PART\2; FSUTILS="$FSUTILS jfsutils"; HOMEMO='' ;;
+    nilfs2 ) mkfs.nilfs2 -fL Home $PART\2; FSUTILS="$FSUTILS nilfs-utils"; HOMEMO='' ;;
+esac
+mount $PART\1 /mnt $ROOTMO
+mount --mkdir $PART\2 /mnt/home $HOMEMO
+if [ -d /sys/firmware/efi ]; then
+    mkfs.fat -F32 -n ESP $PART\3
+    mount --mkdir $PART\3 /mnt/boot/efi; fi
+lsblk -o name,fstype,mountpoint,size,uuid $DISK # Проверяем...
+
+#==============================================================================
+
+# Один раздел:
+# swapoff -a; umount -fR /mnt; sfdisk --delete $DISK; MOUNTOPTS=''; FIRMWARE=''
+ROOTFS=btrfsws # Варианты - btrfsws(BTRFS With Subvolumes), btrfs, ext4, xfs, f2fs, jfs, nilfs2
+DISK=/dev/sda; UEFIBOOT=512M
+if [[ $DISK == *nvme* ]]; then PART=$DISK\p; else PART=$DISK; fi
+if [ -d /sys/firmware/efi ]; then
+    parted -s $DISK -- mktable gpt \
+        mkpart System btrfs 1M \-$UEFIBOOT \
+        mkpart EFI fat32 \-$UEFIBOOT 100% \
+    set 2 esp on
+else
+    parted -s $DISK -- mktable msdos \
+        mkpart primary btrfs 1M 100% \
+    set 1 boot on; fi
+case $ROOTFS in
+    btrfsws) mkfs.btrfs -fL System $PART\1; FSUTILS="btrfs-progs"
+             MOUNTOPS='-o rw,noatime,space_cache=v2,discard=async,compress-force=zstd:2'
+             mount $PART\1 /mnt
+                 btrfs subvolume create /mnt/@root
+                 btrfs subvolume create /mnt/@home
+                 btrfs subvolume create /mnt/@snap
+             umount $PART\1
+             mount $PART\1 /mnt $MOUNTOPS,compress-force=zstd:2,subvol=@root
+             mount --mkdir $PART\1 /mnt/home $MOUNTOPS,compress-force=zstd:2,subvol=@home
+             mount --mkdir $PART\1 /mnt/.snap $MOUNTOPS,subvol=@snap ;;
+    btrfs )  mkfs.btrfs -fL Root $PART\1; FSUTILS="btrfs-progs"
+             MOUNTOPS='-o rw,noatime,space_cache=v2,discard=async,compress-force=zstd:2' ;;
+    ext4 )   mkfs.ext4 -FL Root $PART\1; FSUTILS="e2fsprogs"
+             MOUNTOPS='-o rw,noatime,nobarrier,commit=60' ;;
+    xfs )    mkfs.xfs -fL Root $PART\1; FSUTILS="xfsprogs"; MOUNTOPS='' ;;
+    f2fs )   mkfs.f2fs -fl Root $PART\1; FSUTILS="f2fs-tools"; MOUNTOPS='' ;;
+    jfs )    mkfs.jfs -qL Root $PART\1; FSUTILS="jfsutils"; MOUNTOPS='' ;;
+    nilfs2 ) mkfs.nilfs2 -fL Root $PART\1; FSUTILS="nilfs-utils"; MOUNTOPS='' ;;
+esac
+if [[ $ROOTFS != btrfsws ]]; then mount $PART\1 /mnt $MOUNTOPS; fi
+if [ -d /sys/firmware/efi ]; then
+    mkfs.fat -F32 -n ESP $PART\2
+    mount --mkdir $PART\2 /mnt/boot/efi; fi
+lsblk $DISK # Проверяем...
+
+###############################################################################
+######################### Установка базовой системы ###########################
+###############################################################################
+
+# Унификация команд для установки системы из разных дистибутивов:
+[ -f /bin/manjaro-chroot ] && STRAP=basestrap; GFSTAB=fstabgen; CHROOT=manjaro-chroot
+[ -f /bin/artix-chroot ] && STRAP=basestrap; GFSTAB=fstabgen;  CHROOT=artix-chroot
+[ -f /bin/arch-chroot ] && STRAP=pacstrap; GFSTAB=genfstab;  CHROOT=arch-chroot
+echo $STRAP $GFSTAB $CHROOT
+
+# Установка базовой системы:
+# [Manjaro] Список доступных ядер: pacman -Ssy linux* | grep "kernel and modules"
+KERNEL='linux-lts'; [[ $INSTALLSYS == manjaro ]] && KERNEL='linux61'
+UCODE='intel-ucode'; [[ $(lscpu | grep ID) == *AMD* ]] && UCODE='amd-ucode'
+FIRMWARE="linux-firmware"; [[ $(lspci | grep VGA) == *VMware* ]] && FIRMWARE="base-devel $KERNEL-headers virtualbox-guest-utils"
+$STRAP /mnt base $KERNEL $INITPACK $FSUTILS $FIRMWARE $UCODE
+
+# Генерация Fstab:
+$GFSTAB -U /mnt >> /mnt/etc/fstab
+cat /mnt/etc/fstab # Проверяем...
+
+# Переходим в устанавливаемую систему и передаем ей некоторые параметры:
+DISK=$DISK HOSTNAME=$HOSTNAME USERNAME=$USERNAME PASSWORD=$PASSWORD INITINST=$INITINST TIMEZONE=$TIMEZONE TIMESTD=$TIMESTD INSTSYSTEM=$INSTSYSTEM $CHROOT /mnt
+
+###############################################################################
+####################### Продолжение установки в chroot ########################
+###############################################################################
+
+# Определение установленной системы инициализации:
+function detectinitsys {
+    if [ -f /lib/systemd/systemd ]; then echo 'systemd'; fi
+    if [ -f /bin/dinit ]; then echo 'dinit'; fi
+    if [ -f /bin/runit ]; then echo 'runit'; fi
+    if [ -f /bin/openrc ]; then echo 'openrc'; fi
+    if [ -f /bin/s6-rc ]; then echo 's6'; fi
+} # Проверка: echo $(detectinitsys)
+
+# Функция для добавления сервисов на разных системах инициализации:
+function addsrv {
+    INITSYS=$(detectinitsys)
+    for SERVICE in $@; do
+        case $INITSYS in
+            systemd ) systemctl enable $SERVICE ;;
+            dinit )   ln -s ../$SERVICE /etc/dinit.d/boot.d/ ;;
+            runit )   ln -s /etc/runit/sv/$SERVICE /etc/runit/runsvdir/default ;;
+            openrc )  rc-update add $SERVICE default ;;
+            s6 )      touch /etc/s6/adminsv/default/contents.d/$SERVICE ;;
+        esac
+    done
+    if [ $INITSYS = s6 ]; then s6-db-reload; fi
+}
+
+#------------------------------------------------------------------------------
+
+# Artix:
+if [[ $INSTALLSYS == artix ]]; then
+cp -n /etc/pacman.conf /etc/pacman.conf.bak
+echo -e '[options]\nHoldPkg = pacman glibc\nArchitecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+\nSigLevel = Never\nLocalFileSigLevel = Never
+\n[system]\nInclude = /etc/pacman.d/mirrorlist
+\n[world]\nInclude = /etc/pacman.d/mirrorlist
+\n[galaxy]\nInclude = /etc/pacman.d/mirrorlist
+\n[lib32]\nInclude = /etc/pacman.d/mirrorlist
+\n[universe]\nServer = https://universe.artixlinux.org/$arch
+Server = https://mirror1.artixlinux.org/universe/$arch
+Server = https://mirror.pascalpuffke.de/artix-universe/$arch' > /etc/pacman.conf
+pacman --noconfirm -Syy; fi
+
+# Arch:
+if [[ $INSTALLSYS == arch ]]; then
+echo -e '[options]\nHoldPkg = pacman glibc\nArchitecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+SigLevel = Never\nLocalFileSigLevel = Never
+[core]\nInclude = /etc/pacman.d/mirrorlist
+[extra]\nInclude = /etc/pacman.d/mirrorlist
+[community]\nInclude = /etc/pacman.d/mirrorlist
+[multilib]\nInclude = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+pacman --noconfirm -Syy; fi
+
+# Manjaro:
+if [[ $INSTALLSYS == manjaro ]]; then
+cp -n /etc/pacman.conf /etc/pacman.conf.bak
+echo -e '[options]
+CacheDir = /var/cache/pacman/pkg/
+HoldPkg = pacman glibc manjaro-system
+SyncFirst = manjaro-system archlinux-keyring manjaro-keyring
+Architecture = auto
+Color\nCheckSpace\nDisableDownloadTimeout\nParallelDownloads = 10
+\nSigLevel = Never\nLocalFileSigLevel = Never
+\n[core]\nInclude = /etc/pacman.d/mirrorlist
+\n[extra]\nInclude = /etc/pacman.d/mirrorlist
+\n[community]\nInclude = /etc/pacman.d/mirrorlist
+\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' > /etc/pacman.conf
+pacman --noconfirm -Syy; fi
+
+# Chaotic-aur:
+echo -e '\n[chaotic-aur]\nInclude = /etc/pacman.d/mirrorlist-chaoticaur' >> /etc/pacman.conf
+echo -e 'Server = https://cdn-mirror.chaotic.cx/$repo/$arch
+Server = https://de-mirror.chaotic.cx/$repo/$arch
+Server = https://bg-mirror.chaotic.cx/$repo/$arch' > /etc/pacman.d/mirrorlist-chaoticaur
+pacman-key --keyserver keyserver.ubuntu.com --recv-key FBA220DFC880C036
+pacman-key --lsign-key FBA220DFC880C036
+pacman --noconfirm -Syy
+pacman --noconfirm -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+
+#------------------------------------------------------------------------------
+
+# Установка загрузчика:
+if [ -d /sys/firmware/efi ]; then
+    pacman --noconfirm -S grub efibootmgr
+    grub-install --target=x86_64-efi --bootloader-id=grub --efi-directory=/boot/efi
+else
+    pacman --noconfirm -S grub
+    grub-install --target=i386-pc $DISK
+fi
+sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="net.ifnames=0"/' /etc/default/grub # eth0
+sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' /etc/default/grub
+sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=0/' /etc/default/grub
+sed -i 's/^GRUB_SAVEDEFAULT=.*/#GRUB_SAVEDEFAULT=true/' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Установка и настройка sudo:
+if [ ! -f /bin/sudo ]; then pacman --noconfirm -S sudo; fi
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+# Настройки сетевых имён:
+echo "$HOSTNAME" > /etc/hostname
+echo -e "127.0.0.1\tlocalhost\n::1\t\tlocalhost
+127.0.1.1\t$HOSTNAME.localdomain $HOSTNAME" > /etc/hosts
+
+# Локализация системы и консоли:
+sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
+sed -i 's/^#ru_RU.UTF-8/ru_RU.UTF-8/' /etc/locale.gen
+echo 'LANG=ru_RU.UTF-8' > /etc/locale.conf
+echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
+locale-gen
+
+# Создание пользователя и пароль рута:
+useradd -mg users -G video,audio,games,lp,optical,power,storage,wheel $USERNAME
+if [ -f /bin/zsh ]; then chsh -s /bin/zsh $USERNAME && chsh -s /bin/zsh root; fi
+echo "$USERNAME:$PASSWORD" | chpasswd
+echo "root:$PASSWORD" | chpasswd
+
+# Создание каталогов пользователя (на английском с маленькой буквы):
+pacman --noconfirm -S xdg-user-dirs
+sudo -u $USERNAME mkdir -pm=755 /home/$USERNAME/{desktop,downloads,templates,public,documents,music,pictures,video,.config,.local/share}
+echo -e 'XDG_DESKTOP_DIR="$HOME/desktop"\nXDG_DOWNLOAD_DIR="$HOME/downloads"
+XDG_TEMPLATES_DIR="$HOME/templates"\nXDG_PUBLICSHARE_DIR="$HOME/public"
+XDG_DOCUMENTS_DIR="$HOME/documents"\nXDG_MUSIC_DIR="$HOME/music"
+XDG_PICTURES_DIR="$HOME/pictures"\nXDG_VIDEOS_DIR="$HOME/video"' > /home/$USERNAME/.config/user-dirs.dirs
+
+# Видеодрайвера:
+if [[ $(lspci | grep -E '(VGA|3D)') == *NVIDIA*  ]]; then
+    pacman --noconfirm --needed -S nvidia nvidia-utils nvidia-settings opencl-nvidia; fi
+if [[ $(lspci | grep -E '(VGA|3D)') == *Intel*  ]]; then
+    pacman --noconfirm --needed -S mesa mesa-vdpau opencl-mesa vulkan-intel; fi
+if [[ $(lspci | grep -E '(VGA|3D)') == *AMD*  ]]; then
+    pacman --noconfirm --needed -S mesa mesa-vdpau opencl-mesa vulkan-radeon; fi
+
+# Аудиодрайвер (Pipewire):
+pacman --noconfirm -S pipewire pipewire-pulse gst-plugin-pipewire wireplumber
+if [[ $INSTALLSYS == artix ]]; then
+    echo -e '#!/bin/sh\n\n/usr/bin/pipewire &\n/usr/bin/pipewire-pulse &\n/usr/bin/wireplumber\n' > /opt/pipewire.sh && chmod 755 /opt/pipewire.sh
+    echo -e '[Desktop Entry]\nName=Pipewire\nComment=Low-level Multimedia Framework\nExec=/opt/pipewire.sh\nIcon=audio-volume-high\nTerminal=False\nType=Application\nX-KDE-AutostartScript=true' > /etc/xdg/autostart/pipewire.desktop; fi
+
+# Консольные приложения, утилиты и шрифты:
+pacman --noconfirm -S cifs-utils nfs-utils fuse sshfs ntfs-3g p7zip unrar lrzip ttf-ubuntu-font-family ttf-meslo-nerd-font-powerlevel10k wget git nano mc htop
+
+# Установка поддержки ssh, ntp и служб для оптимизации работы системы:
+pacman --noconfirm -S openssh ntp$INITINST && addsrv ntpd
+if [[ $(lspci | grep VGA) != *VMware* ]]; then
+    if [ -f /lib/systemd/systemd ];
+        then pacman --noconfirm -S ananicy-cpp ananicy-rules nohang dbus-broker && addsrv ananicy-cpp nohang dbus-broker
+        else pacman --noconfirm -S ananicy$INITINST dbus-broker && addsrv ananicy; fi; fi
+
+# Для Artix добавляем логотип в систему:
+if [[ $INSTALLSYS == artix ]]; then
+    wget https://gitea.artixlinux.org/artix/artwork/raw/branch/master/resize/logo-64x64.png
+    mv logo-64x64.png /usr/share/pixmaps/artix-logo-64x64.png; fi
+
+# Установка часового пояса и времени:
+ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+if [[ $TIMESTD == utc ]]; then hwclock --systohc --utc; echo '>>>> Set UTC time <<<<'; date; fi
+if [[ $TIMESTD == local ]]; then hwclock --systohc --local; echo '>>>> Set local time <<<<'; date; fi
+
+# Проверяем...
+ls --color -lA /home/$USERNAME
+if [[ $INSTALLSYS == artix ]]; then
+    ls --color -lA /opt/pipewire.sh /etc/xdg/autostart/pipewire.desktop
+    ls --color -lA /usr/share/pixmaps/artix-logo-64x64.png; fi
+
+###############################################################################
+################################### Plasma ####################################
+###############################################################################
+
+if [[ $INSTALLDE == plasma ]]; then 
+    # Минимальная установка:
+    pacman --noconfirm -S plasma-desktop kscreen kcron plasma-pa konsole kwrite dolphin dolphin-plugins
+
+    # GUI-менеджер пакетов от Manjaro:
+    # if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk pamac-tray-icon-plasma manjaro-settings-manager-kcm; fi
+    # if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk pamac-tray-icon-plasma; fi
+    # if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur pamac-tray-icon-plasma; fi
+
+    # Оформление:
+    pacman --noconfirm -S kde-gtk-config breeze-gtk kvantum
+
+    # Установка и настройка SDDM:
+    pacman --noconfirm -S sddm$INITINST sddm-kcm && addsrv sddm
+    echo -e "LANG=ru_RU.UTF-8\nexport LANG" | sudo tee /etc/conf.d/sddm
+
+    # Автологин SDDM (Доступные сессии: ls /usr/share/xsessions/):
+    mkdir -p /etc/sddm.conf.d && touch /etc/sddm.conf.d/autologin.conf
+    echo -e "[Autologin]\nUser=$USERNAME\nSession=plasma.desktop" > /etc/sddm.conf.d/autologin.conf
+fi
+
+###############################################################################
+#################################### XFCE #####################################
+###############################################################################
+
+if [[ $INSTALLDE == xfce ]]; then 
+    # Минимальная установка:
+    pacman --noconfirm -S exo garcon thunar-volman thunar-archive-plugin thunar-media-tags-plugin tumbler ffmpegthumbnailer xfce4-panel xfce4-power-manager xfce4-session xfce4-settings xfconf xfdesktop xfwm4 xfce4-pulseaudio-plugin xfce4-xkb-plugin gvfs xfce4-appfinder pavucontrol xfce4-terminal mousepad
+
+    # GUI-менеджер пакетов от Manjaro:
+    if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk manjaro-settings-manager; fi
+    if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk; fi
+    if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur; fi
+
+    # Оформление:
+    pacman --noconfirm -S papirus-icon-theme matcha-gtk-theme qogir-icon-theme qt5ct qt5-base kvantum
+    echo -e '\nexport QT_QPA_PLATFORMTHEME=qt5ct' >> /etc/profile
+
+    # Настройка системы:
+    echo -e 'blacklist pcspkr' > /etc/modprobe.d/nobeep.conf
+
+    # Установка LXDM:
+    pacman --noconfirm -S lxdm$INITINST && addsrv lxdm
+
+    # Автологин LXDM (Доступные сессии: ls /usr/share/xsessions/):
+    sudo sed -i "s/^# autologin=.*/autologin=$USERNAME/" /etc/lxdm/lxdm.conf
+    echo -e "[base]\nlast_session=/usr/share/xsessions/xfce.desktop\nlast_lang=" > /var/lib/lxdm/lxdm.conf
+fi
+
+###############################################################################
+#################################### Gnome ####################################
+###############################################################################
+
+if [[ $INSTALLDE == gnome ]]; then 
+    # Минимальная установка:
+    pacman --noconfirm -S gnome-shell gvfs gvfs-smb gvfs-nfs gvfs-mtp nautilus libnautilus-extension gnome-control-center gnome-tweak-tool gnome-text-editor gnome-terminal gnome-browser-connector epiphany
+
+    # GUI-менеджер пакетов от Manjaro:
+    if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk pamac-gnome-integration manjaro-settings-manager; fi
+    if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk pamac-gnome-integration; fi
+    if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur pamac-gnome-integration; fi
+
+    # Оформление:
+    pacman --noconfirm -S gradience papirus-icon-theme qogir-icon-theme qt5ct qt5-base kvantum
+    echo -e '\nexport QT_QPA_PLATFORMTHEME=qt5ct' >> /etc/profile
+
+    # Установка GDM:
+    pacman --noconfirm -S gdm$INITINST && addsrv gdm
+
+    # Автологин GDM (Доступные сессии: ls /usr/share/xsessions/):
+    echo -e "[daemon]\nAutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" >> /etc/gdm/custom.conf
+    sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm/custom.conf # Wayland off
+fi
+
+###############################################################################
+################################## Cinnamon ###################################
+###############################################################################
+
+if [[ $INSTALLDE == cinnamon ]]; then 
+    # Минимальная установка:
+    # https://github.com/linuxmint/flags/tree/master/usr/share/iso-flag-png
+    pacman --noconfirm -S cinnamon cinnamon-translations iso-flag-png tilix xed
+
+    # GUI-менеджер пакетов от Manjaro:
+    if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk manjaro-settings-manager; fi
+    if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk; fi
+    if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur; fi
+
+    # Оформление:
+    pacman --noconfirm -S mint-themes mint-x-icons mint-y-icons qogir-icon-theme qt5ct qt5-base kvantum
+    echo -e '\nexport QT_QPA_PLATFORMTHEME=qt5ct' >> /etc/profile
+
+    # Установка LXDM:
+    pacman --noconfirm -S lxdm$INITINST && addsrv lxdm
+
+    # Автологин LXDM (Доступные сессии: ls /usr/share/xsessions/):
+    sudo sed -i "s/^# autologin=.*/autologin=$USERNAME/" /etc/lxdm/lxdm.conf
+    echo -e "[base]\nlast_session=/usr/share/xsessions/cinnamon.desktop\nlast_lang=" > /var/lib/lxdm/lxdm.conf
+fi
+
+###############################################################################
+#################################### Mate #####################################
+###############################################################################
+
+if [[ $INSTALLDE == mate ]]; then 
+    # Минимальная установка:
+    pacman --noconfirm -S mate-desktop mate-panel mate-menus mate-polkit marco mate-control-center mate-session-manager mate-power-manager mate-settings-daemon mate-system-monitor mate-notification-daemon mate-tweak mozo caja mate-terminal pluma
+
+    # GUI-менеджер пакетов от Manjaro:
+    if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk manjaro-settings-manager; fi
+    if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk; fi
+    if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur; fi
+
+    # Оформление:
+    pacman --noconfirm -S matcha-gtk-theme papirus-icon-theme qogir-icon-theme qt5ct qt5-base kvantum
+    echo 'export QT_QPA_PLATFORMTHEME=qt5ct' >> /etc/profile
+
+    # Установка LXDM:
+    pacman --noconfirm -S lxdm$INITINST && addsrv lxdm
+
+    # Автологин LXDM (Доступные сессии: ls /usr/share/xsessions/):
+    sudo sed -i "s/^# autologin=.*/autologin=$USERNAME/" /etc/lxdm/lxdm.conf
+    echo -e "[base]\nlast_session=/usr/share/xsessions/mate.desktop\nlast_lang=" > /var/lib/lxdm/lxdm.conf
+fi
+
+###############################################################################
+#################################### LXQT #####################################
+###############################################################################
+
+if [[ $INSTALLDE == lxqt* ]]; then
+    if [[ $INSTALLDE == lxqt-ob ]]; then # LXQT-openbox
+        pacman --noconfirm -S openbox obconf-qt lxqt-session lxqt-qtplugin lxqt-admin lxqt-config lxqt-globalkeys lxqt-openssh-askpass lxqt-panel lxqt-policykit lxqt-powermanagement lxqt-sudo pavucontrol-qt lxqt-runner lxqt-notificationd pcmanfm-qt qterminal
+    fi
+    if [[ $INSTALLDE == lxqt-kwin ]]; then # LXQT-kwin
+        pacman --noconfirm -S kwin lxqt-session lxqt-qtplugin lxqt-admin lxqt-config lxqt-globalkeys lxqt-openssh-askpass lxqt-panel lxqt-policykit lxqt-powermanagement lxqt-sudo pavucontrol-qt lxqt-runner lxqt-notificationd pcmanfm-qt qterminal
+    fi
+
+    if [[ $INSTALLSYS == manjaro ]]; then pacman --noconfirm -S pamac-gtk manjaro-settings-manager; fi
+    if [[ $INSTALLSYS == artix ]]; then pacman --noconfirm -S pamac-gtk; fi
+    if [[ $INSTALLSYS == arch ]]; then pacman --noconfirm -S pamac-aur; fi
+
+    # Оформление:
+    pacman --noconfirm -S lxqt-themes breeze-icons kvantum
+
+    # Установка и настройка SDDM:
+    pacman --noconfirm -S sddm$INITINST && addsrv sddm
+    echo -e "LANG=ru_RU.UTF-8\nexport LANG" | sudo tee /etc/conf.d/sddm
+
+    # Автологин SDDM (Доступные сессии: ls -lA /usr/share/xsessions/):
+    mkdir -p /etc/sddm.conf.d && touch /etc/sddm.conf.d/autologin.conf
+    echo -e "[Autologin]\nUser=$USERNAME\nSession=lxqt.desktop" > /etc/sddm.conf.d/autologin.conf
+fi
+
+###############################################################################
+############################### Общие настройки ###############################
+###############################################################################
+
+# Настройки системы (cat /proc/sys/vm/swappiness):
+mkdir -p /etc/sysctl.d && echo 'vm.swappiness=10' > /etc/sysctl.d/99-sysctl.conf
+# Отключаем Avani:
+sed -i 's/^use-ipv4=yes/use-ipv4=no/' /etc/avahi/avahi-daemon.conf
+sed -i 's/^use-ipv6=yes/use-ipv6=no/' /etc/avahi/avahi-daemon.conf
+systemctl disable avahi-daemon && systemctl mask avahi-daemon
+
+# Настройки SystemD (nano /etc/systemd/journald.conf):
+if [ -f /lib/systemd/systemd ]; then 
+    sed -i 's/^#DefaultTimeoutStartSec=.*/DefaultTimeoutStartSec=5s/' /etc/systemd/system.conf
+    sed -i 's/^#DefaultTimeoutStopSec=.*/DefaultTimeoutStopSec=10s/' /etc/systemd/system.conf
+    sed -i 's/^#SystemMaxUse=.*/SystemMaxUse=50M/' /etc/systemd/journald.conf
+    sed -i 's/^#SystemMaxFileSize=.*/SystemMaxFileSize=10M/' /etc/systemd/journald.conf
+    sed -i 's/^#SystemMaxFiles=.*/SystemMaxFiles=4/' /etc/systemd/journald.conf
+fi
+
+# Включение GPG:
+sed -i "s/^SigLevel =.*/SigLevel = Required DatabaseOptional/" /etc/pacman.conf
+sed -i "s/^LocalFileSigLevel =.*/LocalFileSigLevel = Optional/" /etc/pacman.conf
+pacman --noconfirm -Syy
+
+# Выход из chroot:
+exit
+
+###############################################################################
+############################ Завершение установки #############################
+###############################################################################
+
+# Отключаем своп, отмонтируем разделы и перезагружаемся:
+swapoff -a
+umount -R /mnt
+reboot
+
+###############################################################################
+################# Настройка zram, сети и шар через rc.local ###################
+###############################################################################
+
+# Для systemd создаем службу и файл rc.local:
+if [ -f /lib/systemd/systemd ]; then echo -e '[Unit]\nDescription=rc.local compatibility
+ConditionPathExists=/etc/rc.local\n\n[Service]\nType=forking\nExecStart=/etc/rc.local start
+TimeoutSec=0\nStandardOutput=tty\nRemainAfterExit=yes\nSysVStartPriority=99
+\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/rc-local.service
+echo -e '#!/bin/sh -e' > /etc/rc.local && chmod +x /etc/rc.local
+systemctl enable --now rc-local.service; fi
+
+# Для openrc создаем службу и файл rc.local:
+if [ -f /bin/openrc ]; then echo -e ":\n# /etc/local.d/rc.local.start\n[ -e /etc/rc.local ] && /etc/rc.local" > /etc/local.d/rc.local.start && chmod +x /etc/local.d/rc.local.start
+touch /etc/rc.local && chmod +x /etc/rc.local; fi
+
+# Для dinit создаем ссылку на /etc/rc.local:
+if [ -f /bin/dinit ]; then ln -sf /etc/dinit.d/config/rc.local /etc/rc.local; fi
+
+# Для S6 создаем ссылку на /etc/rc.local (ВНИМАНИЕ: почему-то, не запускает сеть???):
+if [ -f /bin/s6-rc ]; then ln -sf /etc/s6/rc.local /etc/rc.local; fi
+
+#------------------------------------------------------------------------------
+
+# Руссификация консоли:
+echo -e "\n## Russian console ##\nsetfont cyr-sun16\nloadkeys ru" >> /etc/rc.local
+
+# Настройка zRam:
+ZRAMSIZE='4G'; [[ $(lspci | grep VGA) == *VMware* ]] && ZRAMSIZE='1G'
+echo -e "\n## zRam ##\nmodprobe zram
+echo lz4 > /sys/block/zram0/comp_algorithm
+echo $ZRAMSIZE > /sys/block/zram0/disksize
+mkswap --label zram0 /dev/zram0
+swapon --priority 100 /dev/zram0" >> /etc/rc.local
+
+# Установка поддержки сети со статическим IP через iproute2:
+IPADDR='192.168.0.10'; [[ $(lspci | grep VGA) == *VMware* ]] && IPADDR='192.168.0.50'
+if [ ! -f /bin/s6-rc ]; then
+    echo -e "\n## Network Configuration ##\nip link set dev eth0 up\nip addr add $IPADDR/24 brd + dev eth0\nip route add default via 192.168.0.100" >> /etc/rc.local
+    sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts
+    echo 'nameserver 192.168.0.100' > /etc/resolv.conf; fi
+# Для S6 временно!!! Установка поддержки сети со статическим IP через dhcpcd:
+if [ -f /bin/s6-rc ]; then
+    pacman --noconfirm -S dhcpcd-s6
+    echo -e "interface eth0\nstatic ip_address=$IPADDR/24\nstatic routers=192.168.0.100\nstatic domain_name_servers=192.168.0.100" > /etc/dhcpcd.conf; sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts
+    touch /etc/s6/adminsv/default/contents.d/dhcpcd; s6-rc -u change dhcpcd; s6-db-reload; fi
+
+# Samba Shares (rc.local):
+echo -e "username=soulboy\npassword=c7iQPZ2vc\ndomain=WORKGROUP" > /root/smbuser
+chown root:root /root/smbuser && chmod 600 /root/smbuser
+MOUNTOPTS="-o rw,async,_netdev,nofail,iocharset=utf8,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,credentials=/root/smbuser"
+mkdir -m=777 /mnt/{router,server} 2> /dev/null
+echo -e "\n## Samba Shares ##" >> /etc/rc.local
+echo -e "mount -t cifs //192.168.0.100/files/share /mnt/router $MOUNTOPTS,vers=1.0
+mount -t cifs //192.168.0.1/share /mnt/server $MOUNTOPTS,vers=3.0" >> /etc/rc.local
+
+# Обязательная концовка файла для systemd:
+if [ -f /lib/systemd/systemd ]; then echo -e '\nexit 0' >> /etc/rc.local; fi
+
+# Проверка:
+clear; cat /etc/rc.local
+
+###############################################################################
+############################### Настройка BASH ################################
+###############################################################################
+
+# [Arch,Manjaro] Меняем структуру общего bashrc и делаем её как в Artix:
+OSTYPE=$(grep '^ID=' /etc/*release | sed 's/.*ID=//')
+if [[ $OSTYPE == arch || $OSTYPE == manjaro ]]; then
+    # Создаём новый путь для размещения bashrc:
+    mkdir -p /etc/bash/bashrc.d
+    # Перемещаем файлы настроек в новое место:
+    mv /etc/bash.bashrc /etc/bash/bashrc
+    mv /etc/bash.bash_logout /etc/bash/bash_logout
+    # Делаем резерную копию основного файла настроек:
+    # Восстановление: sudo cp -r /etc/bash/bashrc.bak /etc/bash/bashrc
+    cp -n /etc/bash/bashrc{,.bak}
+    # Для совместимости, создаём ссылки на старое местоположение файлов:
+    ln -sf /etc/bash/bashrc /etc/bash.bashrc
+    ln -sf /etc/bash/bash_logout /etc/bash.bash_logout
+    # Прописываем в основной файл bashrc отслеживание файлов в каталоге bashrc.d:
+    echo -e '\nfor sh in /etc/bash/bashrc.d/*.bashrc; do\n    if [[ -r ${sh} ]]; then\n        . "${sh}"\n    fi\ndone\n' | sudo tee -a /etc/bash/bashrc > /dev/null
+fi
+
+# [All] Устанавливаем дополнительные пакеты:
+pacman --noconfirm -S bash-completion
+if [[ $(grep '^ID=' /etc/*release | sed 's/.*ID=//') != artix ]]
+    then pacman --noconfirm -S bash-preexec
+    else mkdir -p /usr/share/bash-preexec && curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o /usr/share/bash-preexec/bash-preexec.sh && echo -e '\n[[ -f /usr/share/bash-preexec/bash-preexec.sh ]] && source /usr/share/bash-preexec/bash-preexec.sh' >> /etc/bash/bashrc && chmod +x /usr/share/bash-preexec/bash-preexec.sh    
+fi
+
+#------------------------------------------------------------------------------
+
+# [All] Алиасы для shell (grep ^/bin /etc/shells):
+echo -e "alias paci='sudo pacman --noconfirm --needed -S' # install
+alias pacr='sudo pacman --noconfirm -Rns' # remove
+alias pacu='sudo pacman --noconfirm -Syu' # update
+alias pacq='sudo pacman --noconfirm -Q' # search
+alias pacs='sudo pacman --noconfirm -Ss' # search
+alias pacn='sudo pacman --noconfirm -Si' # info
+alias pacc='sudo pacman -Scc' # clean cache
+alias pacro='sudo pacman --noconfirm -Qtdq | sudo pacman --noconfirm -Rns - 2> /dev/null' # remove orphan
+alias nano='nano -w'
+alias ls='ls --color=auto'
+alias ll='ls --color=auto -alF'
+alias lsa='ls --color=auto -la'
+alias lsA='ls --color=auto -lA'
+alias dir='dir --color=auto'
+alias diff='diff --color=auto'
+alias grep='grep --colour=auto'
+alias ping='ping -c5'
+" | sudo tee /etc/bash/bashrc.d/aliases.bashrc > /dev/null
+
+# [All] Оформление оболочки bash как в Artix:
+[[ $(grep '^ID=' /etc/*release | sed 's/.*ID=//') != artix ]] && echo $'use_color=true
+\nsafe_term=${TERM//[^[:alnum:]]/?} # sanitize TERM
+match_lhs=""
+[[ -f ~/.dir_colors   ]] && match_lhs="${match_lhs}$(<~/.dir_colors)"
+[[ -f /etc/DIR_COLORS ]] && match_lhs="${match_lhs}$(</etc/DIR_COLORS)"
+[[ -z ${match_lhs}    ]] && type -P dircolors >/dev/null && match_lhs=$(dircolors --print-database)
+[[ $\'\\n\'${match_lhs} == *$\'\\n\'"TERM "${safe_term}* ]] && use_color=true
+\nif ${use_color}; then
+    # Enable colors for ls, etc. Prefer ~/.dir_colors #64489
+    if type -P dircolors > /dev/null; then
+        if [[ -f ~/.dir_colors ]]; then
+            eval $(dircolors -b ~/.dir_colors)
+        elif [[ -f /etc/DIR_COLORS ]]; then
+            eval $(dircolors -b /etc/DIR_COLORS)
+        fi
+    fi
+    if [[ ${EUID} == 0 ]]
+        then PS1=\'\[\\033[01;31m\][\h\[\\033[01;36m\] \W\[\\033[01;31m\]]\$\[\\033[00m\] \'
+        else PS1=\'\[\\033[01;36m\][\u@\h\[\\033[01;37m\] \W\[\\033[01;36m\]]\$\[\\033[00m\] \'
+    fi
+else
+    if [[ ${EUID} == 0 ]] # show root@ when we don\'t have colors
+        then PS1=\'\u@\h \W \$ \'
+        else PS1=\'\u@\h \w \$ \'
+    fi
+fi
+\nunset use_color safe_term match_lhs sh
+' | sudo tee /etc/bash/bashrc.d/artix.bashrc > /dev/null
+# Original Artix bashrc file:
+# sudo cp -r /mnt/router/OS/linux/bash/artix/bashrc.d/artix.bashrc /etc/bash/bashrc.d/
+
+###############################################################################
+##################### Установка дополнений для VirtualBox #####################
+###############################################################################
+
+# [All] Необходимо подключить диск дополнений гостевой ОС:
+sudo mount --mkdir /dev/sr0 /tmp/cdrom 2> /dev/null
+sudo sh /tmp/cdrom/VBoxLinuxAdditions.run
+sudo umount /tmp/cdrom
+
+###############################################################################
+########################## Файл подкачки (swapfile) ###########################
+###############################################################################
+
+## Создание файла подкачки ##
+
+# Задаём размер файла подкачки для реального компьютера и виртуальной машины:
+SWAPSIZE='8G'; [[ $(lspci | grep VGA) == *VMware* ]] && SWAPSIZE='2G'
+# Задаём путь и имя файла подкачки:
+SWAPFILE="/.swap/swapfile"
+# Определяем корневой раздел и тип его файловой системы:
+ROOTPART=$(df | sed '/\/$/!d;s/ .*//')
+ROOTFSTYPE=$(blkid -s TYPE -o value $ROOTPART)
+# В зависимости от типа файловой системы создаем файл подкачки:
+case $ROOTFSTYPE in
+    btrfs ) # btrfs
+        btrfs subvolume create $(dirname $SWAPFILE)
+        btrfs filesystem mkswapfile --size $SWAPSIZE $SWAPFILE ;;
+    * ) # Остальные файловые системы
+        mkdir -p $(dirname $SWAPFILE)
+        fallocate -l $SWAPSIZE $SWAPFILE
+        chmod 0600 $SWAPFILE
+        mkswap -U clear $SWAPFILE ;;
+esac
+# Включаем файл подкачки:
+swapon $SWAPFILE
+# Прописываем файл подкачки в fstab:
+echo -e "$SWAPFILE none swap defaults 0 0" >> /etc/fstab
+# Проверяем результат:
+swapon --show; cat /etc/fstab
+
+#==============================================================================
+
+## Удаление файла подкачки ##
+
+# Определяем путь и имя файла подкачки:
+SWAPFILE=$(sed '/ swap /!d;s/ .*//' /etc/fstab)
+# Отключаем swapfile:
+swapoff $SWAPFILE
+# Удаляем файл подкачки:
+btrfs subvolume delete $(dirname $SWAPFILE) 2> /dev/null # btrfs
+rm -rf $(dirname $SWAPFILE) 2> /dev/null # Остальные файловые системы
+# Убираем запись из fstab:
+sed -i '/ swap /d' /etc/fstab
+# Проверяем результат:
+swapon --show; cat /etc/fstab
+
+###############################################################################
+############################## Настройка системы ##############################
+###############################################################################
+
+## Artix ##
+
+# Wallpapers:
+sudo mkdir -p /usr/share/backgrounds/artix
+sudo cp -r /mnt/router/OS/linux/artix/wallpapers/* /usr/share/backgrounds/artix/
+
+# Добавление скрипта srvctl и detectinitsys:
+# sudo cp -r /mnt/router/OS/linux/bash/{detectinitsys,srvctl} /usr/local/bin/
+# sudo chmod +x /usr/local/bin/{detectinitsys,srvctl}
+wget https://drive.google.com/file/d/1J8z0lX9D5aqDlTXXSpBJb9u3BoD6_8j8/view?usp=sharing
+wget https://drive.google.com/file/d/1NkAYhK1A-Q_gsXrViLm0RAqt88wz6qsu/view?usp=sharing
+sudo mv -r ./{detectinitsys,srvctl} /usr/local/bin/
+sudo chmod +x /usr/local/bin/{detectinitsys,srvctl}
+
+#------------------------------------------------------------------------------
+
+## Arch ##
+
+# Wallpapers:
+sudo mkdir -p /usr/share/backgrounds/arch
+sudo cp -r /mnt/router/OS/linux/arch/wallpapers/* /usr/share/backgrounds/arch/
+
+#------------------------------------------------------------------------------
+
+## Manjaro ##
+
+# Wallpapers:
+sudo mkdir -p /usr/share/backgrounds/manjaro
+sudo cp -r /mnt/router/OS/linux/manjaro/wallpapers/* /usr/share/backgrounds/manjaro/
+
+###############################################################################
+##################### Настройка окружения рабочего стола ######################
+###############################################################################
+
+#### Plasma ####
+
+# Меню Artix:
+cp -r /mnt/router/OS/linux/artix/plasma/micro/applications ~/.local/share/
+
+# Меню Arch:
+cp -r /mnt/router/OS/linux/arch/plasma/applications ~/.local/share
+
+###############################################################################
+
+#### XFCE ####
+
+# [All] Настройка показа даты на панели - %d.%m.%Y
+# [All] Настройка показа времени в Thunar - %d.%m.%y - %H:%M
+
+# [All] Убираем галочку с сохранения сеанса в меню выхода:
+xfconf-query -c xfce4-session --create -p /general/SaveOnExit -n -t bool -s false
+
+# [Arch, Manjaro] Чтобы сохранялись настройки приложений под root:
+sudo pacman -S dbus-x11 # подтвердить замену
+
+# [All] Меню:
+cp -r /mnt/router/OS/linux/desktop/xfce/applications ~/.local/share
+cp -r /mnt/router/OS/linux/desktop/xfce/menus ~/.config
+
+# [All] Настройка особых действий в Thunar:
+echo -e '<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Открыть терминал</name>
+	<submenu></submenu>
+	<unique-id>1687161604446528-1</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description>Открыть терминал в текущем каталоге</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>com.github.liferooter.textpieces</icon>
+	<name>Открыть как root</name>
+	<submenu></submenu>
+	<unique-id>1687786268105832-1</unique-id>
+	<command>pkexec thunar %f</command>
+	<description>Открыть каталог с правами root</description>
+	<range>*</range>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>accessories-text-editor</icon>
+	<name>Открыть как root</name>
+	<submenu></submenu>
+	<unique-id>1687787038575703-2</unique-id>
+	<command>pkexec mousepad %f</command>
+	<description>Открыть файл с правами root</description>
+	<range>*</range>
+	<patterns>*</patterns>
+	<text-files/>
+</action>
+</actions>' > ~/.config/Thunar/uca.xml
+
+###############################################################################
+
+#### Gnome ####
+
+# Меню Artix:
+cp -r /mnt/router/OS/linux/artix/gnome/applications ~/.local/share
+cp -r /mnt/router/OS/linux/artix/gnome/menus ~/.config
+
+# Меню Arch:
+cp -r /mnt/router/OS/linux/arch/gnome/applications ~/.local/share
+cp -r /mnt/router/OS/linux/arch/gnome/config/* ~/.config
+
+###############################################################################
+
+#### Cinnamon ####
+
+# [Arch, Manjaro] Чтобы сохранялись настройки приложений под root:
+sudo pacman -S dbus-x11 # подтвердить замену
+
+# Удаление NMApplet:
+sudo rm -rf /usr/share/cinnamon/applets/network@cinnamon.org
+
+###############################################################################
+
+#### Mate ####
+
+# Меню Artix:
+cp -r /mnt/router/OS/linux/artix/mate/micro/applications ~/.local/share
+# cp -r /mnt/router/OS/linux/artix/mate/micro/config/* ~/.config
+
+# Меню Arch:
+# cp -r /mnt/router/OS/linux/arch/mate/micro/applications ~/.local/share
+# cp -r /mnt/router/OS/linux/arch/mate/micro/config/* ~/.config
+
+###############################################################################
+############################ Дополнительные пакеты ############################
+###############################################################################
+
+## Общие ##
+
+# AUR:
+sudo pacman --noconfirm -S pikaur #yay
+
+# Code OSS:
+sudo pacman --noconfirm -S code
+# Сменить язык на русский: Ctrl+Shift+P -> вводим: Configure Display Language -> Русский
+# Настроки Code OSS:
+mkdir -p ~/.config/'Code - OSS'/User
+echo -e '{
+    "telemetry.telemetryLevel": "off",
+    "workbench.colorTheme": "Default Dark+",
+    "window.menuBarVisibility": "compact",
+    "workbench.activityBar.visible": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.mouseWheelScrollSensitivity": 2,
+    "editor.renderWhitespace": "none",
+    "editor.wordWrap": "on",
+    "editor.fontSize": 13,
+    "editor.dragAndDrop": false,
+    "editor.renderLineHighlight": "none",
+    "editor.guides.indentation": false,
+    "editor.inlineSuggest.enabled": false,
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "terminal.integrated.fontSize": 12
+}' > ~/.config/'Code - OSS'/User/settings.json
+echo -e '[\n\t{\n\t\t"key": "ctrl+3",
+\t\t"command": "editor.action.commentLine",
+\t\t"when": "editorTextFocus && !editorReadonly"
+\t}\n]' > ~/.config/'Code - OSS'/User/keybindings.json
+
+# PyCharm (Python):
+sudo pacman --noconfirm -S community/pycharm-community-edition
+
+# VirtualBox LTS или ZEN-ядро :
+sudo pacman --noconfirm -S virtualbox virtualbox-ext-vnc virtualbox-host-dkms
+sudo gpasswd -a $(whoami) vboxusers
+
+# Chrome Browser:
+# Dark Reader, Bitwarden, uBlock, Обход блокировок Рунета, ImTranslator, Google Переводчик
+sudo pacman --noconfirm -S google-chrome # sudo pacman --noconfirm -S chromium
+
+# Firefox Browser:
+# Dark Reader, Bitwarden, uBlock, Обход блокировок Рунета, ImTranslator, Translator Web Pages
+sudo pacman --noconfirm -S firefox firefox-i18n-ru
+
+# Torrent:
+sudo pacman --noconfirm -S qbittorrent
+
+# Видеоплеер MPV + youtube:
+sudo pacman --noconfirm -S mpv youtube-dl
+
+# Работа с видеофайлами:
+sudo pacman --noconfirm -S mediainfo mkvtoolnix-gui
+
+# LibreOffice:
+sudo pacman -S libreoffice-fresh libreoffice-fresh-ru
+
+# Дополнительные шрифты:
+pacman --noconfirm --needed -S gnu-free-fonts ttf-liberation ttf-dejavu ttf-droid ttf-hack ttf-roboto ttf-roboto-mono noto-fonts powerline-fonts ttf-fira-sans ttf-fira-mono ttf-fira-code
+
+#==============================================================================
+
+## Plasma ##
+# https://apps.kde.org/ru/ - Приложения KDE.
+
+# Минимальный набор программ:
+sudo pacman --noconfirm -S kwalletmanager kcalc ark gwenview kimageformats qt5-imageformats okular poppler-data foliate kolourpaint flameshot falkon
+
+# Дополнительный набор программ:
+sudo pacman --noconfirm -S kcolorchooser kbackup kdeconnect kinfocenter kcharselect ksysguard plasma-systemmonitor kmousetool smb4k jamesdsp pamac-gtk pamac-tray-icon-plasma libsoup3
+
+# Установка firewall (ufw):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S ufw plasma-firewall && sudo ufw --enable && sudo systemctl enable ufw && sudo systemctl start ufw; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S ufw plasma-firewall && sudo ufw --enable && sudo dinitctl enable ufw && sudo dinitctl start ufw; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S ufw plasma-firewall && sudo ufw --enable && sudo ln -s ../../sv/ufw /run/runit/service && sudo sv start ufw; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S ufw plasma-firewall && sudo ufw --enable && sudo rc-update add ufw default && sudo rc-service ufw start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S ufw plasma-firewall && sudo ufw --enable && sudo touch /etc/s6/adminsv/default/contents.d/ufw && sudo s6-rc -u change ufw && sudo s6-db-reload; fi
+
+# Поддержка принтера (cups):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S cups cups-pdf print-manager; sudo systemctl enable cups; sudo systemctl start cups; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S cups-dinit cups-pdf print-manager; sudo dinitctl enable cups; sudo dinitctl start cups; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S cups-runit cups-pdf print-manager; sudo ln -s ../../sv/cups /run/runit/service; sudo sv start cups; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S cups-openrc cups-pdf print-manager; sudo rc-update add cups default; sudo rc-service cups start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S cups-s6 cups-pdf print-manager; sudo touch /etc/s6/adminsv/default/contents.d/cups; sudo s6-rc -u change cups; sudo s6-db-reload; fi
+
+#==============================================================================
+
+## XFCE ##
+# https://docs.xfce.org/apps/start - Приложения XFCE.
+
+# Tilix (GTK Terminal):
+sudo pacman -S tilix
+echo -e '\n# Для терминала Tilix\nif [[ $TILIX_ID ]]; then\n\tsource /etc/profile.d/vte.sh\nfi' | sudo tee -a /home/$(whoami)/.bashrc /root/.bashrc > /dev/null
+
+# Минимальный набор программ:
+sudo pacman --noconfirm -S galculator engrampa foliate flameshot gcolor3 xreader xviewer xviewer-plugins xed #gvfs-smb gvfs-nfs gvfs-mtp
+
+# Дополнительный набор программ:
+sudo pacman --noconfirm -S xfce4-taskmanager xfce4-clipman-plugin xfce4-weather-plugin catfish seahorse jamesdsp gnome-disk-utility drawing
+
+# Свистоперделки:
+sudo pacman --noconfirm -S compiz emerald-gtk3
+
+# Установка firewall (ufw):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo systemctl enable ufw && sudo systemctl start ufw; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo dinitctl enable ufw && sudo dinitctl start ufw; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo ln -s ../../sv/ufw /run/runit/service && sudo sv start ufw; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo rc-update add ufw default && sudo rc-service ufw start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo touch /etc/s6/adminsv/default/contents.d/ufw && sudo s6-rc -u change ufw && sudo s6-db-reload; fi
+
+# Поддержка принтера (cups):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S cups cups-pdf system-config-printer && sudo systemctl enable cups && sudo systemctl start cups; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S cups-dinit cups-pdf system-config-printer && sudo dinitctl enable cups && sudo dinitctl start cups; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S cups-runit cups-pdf system-config-printer && sudo ln -s ../../sv/cups /run/runit/service && sudo sv start cups; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S cups-openrc cups-pdf system-config-printer && sudo rc-update add cups default && sudo rc-service cups start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S cups-s6 cups-pdf system-config-printer && sudo touch /etc/s6/adminsv/default/contents.d/cups && sudo s6-rc -u change cups && sudo s6-db-reload; fi
+
+#==============================================================================
+
+## Gnome ##
+# Расширения Gnome - https://extensions.gnome.org/ (espresso, dash-to-dock)
+
+# Tilix (GTK Terminal):
+sudo pacman -S tilix
+echo -e '\n# Для терминала Tilix\nif [[ $TILIX_ID ]]; then\n\tsource /etc/profile.d/vte.sh\nfi' | sudo tee -a /home/$(whoami)/.bashrc /root/.bashrc > /dev/null
+
+# Минимальный набор программ:
+sudo pacman --noconfirm -S gnome-calculator file-roller eog evince foliate easyeffects
+
+# Дополнительный набор программ:
+sudo pacman --noconfirm -S gnome-calendar gnome-photos gnome-font-viewer seahorse gnome-system-monitor gnome-disk-utility
+
+# Установка firewall (ufw):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo systemctl enable ufw && sudo systemctl start ufw; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo dinitctl enable ufw && sudo dinitctl start ufw; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo ln -s ../../sv/ufw /run/runit/service && sudo sv start ufw; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo rc-update add ufw default && sudo rc-service ufw start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S ufw gufw && sudo ufw --enable && sudo touch /etc/s6/adminsv/default/contents.d/ufw && sudo s6-rc -u change ufw && sudo s6-db-reload; fi
+
+# Поддержка принтера (cups):
+if [ -f /lib/systemd/systemd ]; then sudo pacman --noconfirm -S cups cups-pdf system-config-printer && sudo systemctl enable cups && sudo systemctl start cups; fi
+if [ -f /bin/dinit ]; then sudo pacman --noconfirm -S cups-dinit cups-pdf system-config-printer && sudo dinitctl enable cups && sudo dinitctl start cups; fi
+if [ -f /bin/runit ]; then sudo pacman --noconfirm -S cups-runit cups-pdf system-config-printer && sudo ln -s ../../sv/cups /run/runit/service && sudo sv start cups; fi
+if [ -f /bin/openrc ]; then sudo pacman --noconfirm -S cups-openrc cups-pdf system-config-printer && sudo rc-update add cups default && sudo rc-service cups start; fi
+if [ -f /bin/s6-rc ]; then sudo pacman --noconfirm -S cups-s6 cups-pdf system-config-printer && sudo touch /etc/s6/adminsv/default/contents.d/cups && sudo s6-rc -u change cups && sudo s6-db-reload; fi
+
+###############################################################################
+############################# Дополнительные Ядра #############################
+###############################################################################
+
+# [Arch, Artix] Обычное:
+pacman --noconfirm -S linux && mkinitcpio -p linux
+sed -i 's/^GRUB_TIMEOUT=0/GRUB_TIMEOUT=5/' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# [Manjaro] Обычное:
+# Список доступных ядер: pacman -Ssy linux* | grep "kernel and modules"
+pacman --noconfirm -S linux63 && mkinitcpio -p linux63
+sed -i 's/^GRUB_TIMEOUT=0/GRUB_TIMEOUT=5/' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+#------------------------------------------------------------------------------
+
+# [Arch, Artix] ZEN-ядро:
+pacman --noconfirm -S linux-zen && mkinitcpio -p linux-zen
+sed -i 's/^GRUB_TIMEOUT=0/GRUB_TIMEOUT=5/' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+#------------------------------------------------------------------------------
+
+# [All] Liquorix:
+echo -e '\n[liquorix]\nServer = https://liquorix.net/archlinux/$repo/$arch' >> /etc/pacman.conf
+pacman --noconfirm -Syy linux-lqx && mkinitcpio -p linux-lqx
+sed -i 's/^GRUB_TIMEOUT=0/GRUB_TIMEOUT=5/' /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+###############################################################################
+################################# Репозитории #################################
+###############################################################################
+
+## Artix ##
+
+pacman --noconfirm -S pacman-contrib
+curl -s "https://gitea.artixlinux.org/packages/artix-mirrorlist/raw/branch/master/trunk/mirrorlist" | sed '/^#/d' | rankmirrors -vn 10 - > /etc/pacman.d/mirrorlist
+pacman --noconfirm -Syy
+
+#------------------------------------------------------------------------------
+
+## Arch ##
+
+# pacman --noconfirm -S pacman-contrib
+# curl -s "https://archlinux.org/mirrorlist/?country=RU&country=FI&country=EE&country=DE&country=NL&protocol=https&use_mirror_status=on" | sed 's/^#Server/Server/;/^#/d' | rankmirrors -vn 10 - > /etc/pacman.d/mirrorlist
+pacman --noconfirm -S reflector
+reflector --country Russia,Finland,Estonia,Germany,Netherlands --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+pacman --noconfirm -Syy
+
+#------------------------------------------------------------------------------
+
+## Manjaro ##
+
+pacman-mirrors --country Russia,Finland,Estonia,Germany,Netherlands
+pacman --noconfirm -Syy
+
+###############################################################################
+############################ Справочная информация ############################
+###############################################################################
+
+# [Manjaro] Переключение на другие ветки репозитория:
+sudo pacman-mirrors --get-branch # Узнать ветку
+sudo pacman-mirrors --api --set testing # Ветка - Testing
+sudo pacman-mirrors --api --set unstable # Ветка - Unstable
+
+# Обновление ключей безопасности pacman GPG
+sudo pacman-key --init 
+sudo pacman-key --populate
+sudo pacman-key --refresh-keys --keyserver keys.gnupg.net 
+sudo pacman --noconfirm -Syy
+
+# Отключение GPG:
+sed -i "s/^SigLevel =.*/SigLevel = Never/" /etc/pacman.conf
+sed -i "s/^LocalFileSigLevel =.*/LocalFileSigLevel = Never/" /etc/pacman.conf
+pacman --noconfirm -Syy
+
+# Включаем root-доступ по ssh
+sudo sed -i 's|^#PermitRootLogin prohibit-password|PermitRootLogin yes|' /etc/ssh/sshd_config
+cat /etc/ssh/sshd_config | grep '^PermitRootLogin'
+
+# Шрифты Microsoft
+cd /tmp; INSTPACK=ttf-ms-fonts
+git clone https://aur.archlinux.org/$INSTPACK.git
+cd $INSTPACK; makepkg -sric; cd
+
+# Отключение автоподключения в NetworkManager
+nmcli con mod 'iNet' con.autoconnect no
+
+#==============================================================================
+
+# Исправление ошибки с kded5 в управлении службами
+#sudo pacman --noconfirm -S tracker3
+#sudo pacman --noconfirm -S kded

@@ -1,0 +1,270 @@
+#!/bin/bash
+
+# И наконец, завершив отладку сценария, вы можете поместить его в каталог /usr/local/bin, чтобы сделать его доступным для себя и других пользователей системы. После этого сценарий можно вызвать, просто напечатав название файла в командной строке и нажав клавишу [ENTER]
+
+###############################################################################
+########################### Определение переменных ############################
+###############################################################################
+
+PACKAGE_VERSION='0.1.2'
+INITSYS=$(detectinitsys)
+RUNITSERVICES='/run/runit/service' # VoidLinux: /var/service
+RUNITSV='/etc/runit/sv' #RUNITSV='../../sv' # VoidLinux: /etc/sv
+S6PATH="/etc/s6/adminsv/default/contents.d"
+HELPNOTE="Для получения справки используйте: srvctl -h или srvctl --help"
+ERRCOMBOKEY="Ошибка: Недопустимое сочетание ключей"
+ERRNOKEY="Ошибка: Не задан ключ"
+ERRUNDEFKEY="Ошибка: Неопознанный ключ"
+
+###############################################################################
+########################### Вспомогательные функции ###########################
+###############################################################################
+
+# Справочная информация:
+function usage
+{
+    echo
+    echo "Управление сервисами (службами, демонами) для разных систем инициализации."
+    echo "На данный момент поддерживаются: runit, openrc, s6, dinit"
+    echo
+    echo "Синтаксис:"
+    echo "    srvctl [ключ] сервис_1 сервис_2 сервис_3 сервис_N"
+    echo "    srvctl сервис_1 сервис_2 сервис_3 сервис_N [ключ]"
+    echo
+    echo "Ключи:"
+    echo "    -h, --help                          Помощь"
+    echo "    -v, --version                       Версия скрипта"
+    echo "    -a, --add, --enable                 Добавление сервисов"
+    echo "    -u, --up, --start                   Запуск сервисов"
+    echo "    -e, --execute, -au, -ua, --addup    Добавление и запуск сервисов"
+    echo "    -r, --restart                       Рестарт сервисов"
+    echo "    -d, --down, --stop                  Остановка сервисов"
+    echo "    -p, --purge, --delete, --disable    Удаление сервисов"
+    echo "    -k, --kill, -dp, -pd, --stopdel     Остановка и удаление сервисов"
+    echo "    -i, --info                          Информация о сервисе"
+    echo "    -l, --list                          Список активных сервисов"
+    echo
+    exit 0
+}
+
+function version
+{
+    echo
+	echo "srvctl (service_control) $PACKAGE_VERSION"
+	echo "Copyright (c) 2023 Denis Kruglov."
+	echo
+	echo "This is free software, see the source for copying conditions."
+	echo "There is NO WARRANTY, to the extent permitted by law."
+    echo
+	exit 0
+}
+
+###############################################################################
+############################## Разбор аргументов ##############################
+###############################################################################
+
+# Разбор аргументов переданных скрипту:
+iKEY=0; iSRV=0; KEYS=(); SRVS=()
+for ARG in $@; do
+    if [[ $ARG == -* || $ARG == --* ]]
+        then KEYS[$iKEY]=$ARG && ((iKEY++)) # Если ключ, записываем в массив KEYS
+        else SRVS[$iSRV]=$ARG && ((iSRV++)) # Если служба, записываем в массив SRVC
+    fi
+    SERVICES=${SRVS[*]}
+    KEY=${KEYS[*]}
+done
+
+###############################################################################
+######################### Обработка отладочных ключей #########################
+###############################################################################
+
+# С ключом -x (--echo) не выполнять, а вывести список выполняемых команд:
+if [[ ${KEYS[*]} == *-x* || ${KEYS[*]} == *--echo* ]]; then
+    echo -e "\nАргументы переданные в скрипт:"
+    echo -e "Ключи (${#KEYS[*]} шт.): ${KEYS[*]}" # Переданные ключи
+    echo -e "Список сервисов: $SERVICES\n" # Переданные сервисы
+    echo -e "Выполняемые команды:"
+    ECHOKEY='echo'
+    # Проверка команд на разных системах инициализации:
+    if [[ ${KEYS[*]} == *:dinit* ]]; then INITSYS=dinit; fi
+    if [[ ${KEYS[*]} == *:runit* ]]; then INITSYS=runit; fi
+    if [[ ${KEYS[*]} == *:openrc* ]]; then INITSYS=openrc; fi
+    if [[ ${KEYS[*]} == *:s6* ]]; then INITSYS=s6; fi
+    # Очищаем массив KEYS от отладочных ключей:
+    KEYS=(${KEYS[*]/'-x'}); KEYS=(${KEYS[*]/'--echo'})
+    KEYS=(${KEYS[*]/':dinit'}); KEYS=(${KEYS[*]/':runit'})
+    KEYS=(${KEYS[*]/':openrc'}); KEYS=(${KEYS[*]/':s6'})
+    # Массив в переменную:
+    KEY=${KEYS[*]}
+fi
+
+# Пример проверки...
+# srvctl --addup cupsd sshd ntpd ufw --echo:runit
+# srvctl --kill cupsd sshd ntpd ufw --echo:openrc
+
+###############################################################################
+######################### Проверка количества ключей ##########################
+###############################################################################
+
+# Если ключей больше одного -> ОШИБКА:
+if [[ ${#KEYS[*]} > 1 ]]; then echo -e "$ERRCOMBOKEY\n$HELPNOTE" && exit 1; fi
+# Если нет ключей -> ОШИБКА:
+if [[ ${#KEYS[*]} = 0 ]]; then echo -e "$ERRNOKEY\n$HELPNOTE" && exit 1; fi
+
+###############################################################################
+############################## Обработка ключей ###############################
+###############################################################################
+
+case $KEY in
+
+    # Выводим справочную информацию...
+    -h|--help ) usage ;;
+
+    # Выводим информацию о версии скрипта...
+    -v|--version ) version ;;
+
+    # Добавление сервисов для автозапуска при старте системы:
+    -a|--add|--enable )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )   $ECHOKEY dinitctl enable $SERVICE ;;
+                runit )   $ECHOKEY ln -s $RUNITSV/$SERVICE $RUNITSERVICES ;;
+                openrc )  $ECHOKEY rc-update add $SERVICE default ;;
+                s6 )      $ECHOKEY touch $S6PATH/$SERVICE ;;
+            esac
+        done
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Запуск сервисов:
+    -u|--up|--start )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )   $ECHOKEY dinitctl start $SERVICE ;;
+                runit )   $ECHOKEY sv start $SERVICE ;;
+                openrc )  $ECHOKEY rc-service $SERVICE start ;;
+                s6 )      $ECHOKEY s6-rc -u change $SERVICE ;;
+            esac
+        done
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Добавление и запуск сервисов:
+    -e|--execute|-au|-ua|--addup )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )
+                    $ECHOKEY dinitctl enable $SERVICE
+                    $ECHOKEY dinitctl start $SERVICE ;;
+                runit )
+                    $ECHOKEY ln -s $RUNITSV/$SERVICE $RUNITSERVICES
+                    $ECHOKEY sv start $SERVICE ;;
+                openrc )
+                    $ECHOKEY rc-update add $SERVICE default
+                    $ECHOKEY rc-service $SERVICE start ;;
+                s6 )
+                    $ECHOKEY touch $S6PATH/$SERVICE
+                    $ECHOKEY s6-rc -u change $SERVICE ;;
+            esac
+        done
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Рестарт сервисов:
+    -r|--restart )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )   $ECHOKEY dinitctl restart $SERVICE ;;
+                runit )   $ECHOKEY sv restart $SERVICE ;;
+                openrc )  $ECHOKEY rc-service $SERVICE restart ;;
+                s6 )      $ECHOKEY s6-svc -r /run/service/$SERVICE ;;
+            esac
+        done
+    ;;
+
+    # Остановка сервисов:
+    -d|--down|--stop|--disable )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )   $ECHOKEY dinitctl stop $SERVICE ;;
+                runit )   $ECHOKEY sv stop $SERVICE ;;
+                openrc )  $ECHOKEY rc-service $SERVICE stop ;;
+                s6 )      $ECHOKEY s6-rc -d change $SERVICE ;;
+            esac
+        done
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Удаление сервисов:
+    -p|--purge|--delete|--disable )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )   $ECHOKEY dinitctl disable $SERVICE ;;
+                runit )   $ECHOKEY unlink $RUNITSERVICES/$SERVICE ;;
+                openrc )  $ECHOKEY rc-update del $SERVICE ;;
+                s6 )      $ECHOKEY rm -rf $S6PATH/$SERVICE ;;
+            esac
+        done
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Остановка и удаление сервисов:
+    -k|--kill|-dp|-pd|--stopdel )
+        for SERVICE in $SERVICES; do
+            case $INITSYS in
+                dinit )
+                    $ECHOKEY dinitctl stop $SERVICE
+                    $ECHOKEY dinitctl disable $SERVICE ;;
+                runit )
+                    $ECHOKEY sv stop $SERVICE
+                    $ECHOKEY unlink $RUNITSERVICES/$SERVICE ;;
+                openrc )
+                    $ECHOKEY rc-service $SERVICE stop
+                    $ECHOKEY rc-update del $SERVICE ;;
+                s6 )
+                    $ECHOKEY s6-rc -d change $SERVICE
+                    $ECHOKEY rm -rf $S6PATH/$SERVICE ;;
+            esac
+        done        
+        if [ $INITSYS = s6 ]; then $ECHOKEY s6-db-reload; fi
+    ;;
+
+    # Информация о сервисе:
+    -i|--info )
+        case $INITSYS in
+            dinit )   $ECHOKEY dinitctl status ${SRVS[0]} ;;
+            runit )   $ECHOKEY sv status ${SRVS[0]} ;;
+            openrc )  $ECHOKEY rc-service ${SRVS[0]} status ;;
+            s6 )      $ECHOKEY s6-svstat /run/service/${SRVS[0]} ;;
+        esac
+    ;;
+
+    # Список активных сервисов:
+    -l|--list )
+        case $INITSYS in
+            dinit )   $ECHOKEY dinitctl list ;;
+            runit )   $ECHOKEY ls --color -lA $RUNITSERVICES/* ;;
+            openrc )  $ECHOKEY rc-update show -v ;;
+            s6 )      $ECHOKEY s6-rc -a list ;;
+        esac
+    ;;
+
+    # Если неправильный ключ -> ОШИБКА
+    * ) echo -e "$ERRUNDEFKEY\n$HELPNOTE" && exit 1 ;;
+
+esac
+
+###############################################################################
+############################## Окончание отладки ##############################
+###############################################################################
+
+if [ $ECHOKEY = 'echo' ]; then
+    echo -e "\nАргументы на выходе из скрипта:"
+    echo -e "Ключи (${#KEYS[*]} шт.): ${KEYS[*]}\n" # Обработанные ключи
+fi
+
+###############################################################################
+#################################### Выход ####################################
+###############################################################################
+
+exit 0
