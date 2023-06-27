@@ -41,7 +41,7 @@ INSTALLSYS=artix # Варианты: arch, artix, manjaro
 INSTALLDE=xfce # Варианты: plasma, xfce, gnome, cinnamon, mate, lxqt-kwin, lxqt-ob (with openbox)
 
 # Выбор системы инициализации для Artix:
-if [[ $INSTSYSTEM == artix ]]; then
+if [[ $INSTALLSYS == artix ]]; then
     INITINST='-dinit' && INITPACK='dinit elogind-dinit'
     # INITINST='-runit' && INITPACK='runit elogind-runit rsm'
     # INITINST='-openrc' && INITPACK='openrc elogind-openrc'
@@ -101,7 +101,7 @@ Server = https://artix.unixpeople.org/repos/$repo/os/$arch
 Server = https://mirror.pascalpuffke.de/artix-linux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 pacman --noconfirm -Syy; fi
 
-# Artix:
+# Manjaro:
 if [[ $INSTALLSYS == manjaro ]]; then
 echo -e '[options]
 CacheDir = /var/cache/pacman/pkg/
@@ -636,12 +636,12 @@ IPADDR='192.168.0.10'; [[ $(lspci | grep VGA) == *VMware* ]] && IPADDR='192.168.
 if [ ! -f /bin/s6-rc ]; then
     echo -e "\n## Network Configuration ##\nip link set dev eth0 up\nip addr add $IPADDR/24 brd + dev eth0\nip route add default via 192.168.0.100" >> /etc/rc.local
     sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts
-    echo 'nameserver 192.168.0.100' > /etc/resolv.conf; fi
-# Для S6 временно!!! Установка поддержки сети со статическим IP через dhcpcd:
-if [ -f /bin/s6-rc ]; then
+    echo 'nameserver 192.168.0.100' > /etc/resolv.conf
+else # Для S6 временно!!! Установка поддержки сети со статическим IP через dhcpcd:
     pacman --noconfirm -S dhcpcd-s6
     echo -e "interface eth0\nstatic ip_address=$IPADDR/24\nstatic routers=192.168.0.100\nstatic domain_name_servers=192.168.0.100" > /etc/dhcpcd.conf; sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts
-    touch /etc/s6/adminsv/default/contents.d/dhcpcd; s6-rc -u change dhcpcd; s6-db-reload; fi
+    touch /etc/s6/adminsv/default/contents.d/dhcpcd; s6-rc -u change dhcpcd; s6-db-reload
+fi
 
 # Samba Shares (rc.local):
 echo -e "username=soulboy\npassword=c7iQPZ2vc\ndomain=WORKGROUP" > /root/smbuser
@@ -706,8 +706,7 @@ alias lsA='ls --color=auto -lA'
 alias dir='dir --color=auto'
 alias diff='diff --color=auto'
 alias grep='grep --colour=auto'
-alias ping='ping -c5'
-" | sudo tee /etc/bash/bashrc.d/aliases.bashrc > /dev/null
+alias ping='ping -c5'" | sudo tee /etc/bash/bashrc.d/aliases.bashrc > /dev/null
 
 # [All] Оформление оболочки bash как в Artix:
 [[ $(grep '^ID=' /etc/*release | sed 's/.*ID=//') != artix ]] && echo $'use_color=true
@@ -857,45 +856,6 @@ sudo pacman -S dbus-x11 # подтвердить замену
 # [All] Меню:
 cp -r /mnt/router/OS/linux/desktop/xfce/applications ~/.local/share
 cp -r /mnt/router/OS/linux/desktop/xfce/menus ~/.config
-
-# [All] Настройка особых действий в Thunar:
-echo -e '<?xml version="1.0" encoding="UTF-8"?>
-<actions>
-<action>
-	<icon>utilities-terminal</icon>
-	<name>Открыть терминал</name>
-	<submenu></submenu>
-	<unique-id>1687161604446528-1</unique-id>
-	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
-	<description>Открыть терминал в текущем каталоге</description>
-	<range></range>
-	<patterns>*</patterns>
-	<startup-notify/>
-	<directories/>
-</action>
-<action>
-	<icon>com.github.liferooter.textpieces</icon>
-	<name>Открыть как root</name>
-	<submenu></submenu>
-	<unique-id>1687786268105832-1</unique-id>
-	<command>pkexec thunar %f</command>
-	<description>Открыть каталог с правами root</description>
-	<range>*</range>
-	<patterns>*</patterns>
-	<directories/>
-</action>
-<action>
-	<icon>accessories-text-editor</icon>
-	<name>Открыть как root</name>
-	<submenu></submenu>
-	<unique-id>1687787038575703-2</unique-id>
-	<command>pkexec mousepad %f</command>
-	<description>Открыть файл с правами root</description>
-	<range>*</range>
-	<patterns>*</patterns>
-	<text-files/>
-</action>
-</actions>' > ~/.config/Thunar/uca.xml
 
 ###############################################################################
 
