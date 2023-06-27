@@ -808,10 +808,8 @@ sudo mkdir -p /usr/share/backgrounds/artix
 sudo cp -r /mnt/router/OS/linux/artix/wallpapers/* /usr/share/backgrounds/artix/
 
 # Добавление скрипта srvctl и detectinitsys:
-# sudo cp -r /mnt/router/OS/linux/bash/{detectinitsys,srvctl} /usr/local/bin/
-# sudo chmod +x /usr/local/bin/{detectinitsys,srvctl}
-wget https://drive.google.com/file/d/1J8z0lX9D5aqDlTXXSpBJb9u3BoD6_8j8/view?usp=sharing
-wget https://drive.google.com/file/d/1NkAYhK1A-Q_gsXrViLm0RAqt88wz6qsu/view?usp=sharing
+wget https://raw.githubusercontent.com/S0u1b0y/script/misc/detectinitsys
+wget https://raw.githubusercontent.com/S0u1b0y/script/misc/srvctl
 sudo mv -r ./{detectinitsys,srvctl} /usr/local/bin/
 sudo chmod +x /usr/local/bin/{detectinitsys,srvctl}
 
