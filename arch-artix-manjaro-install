@@ -810,7 +810,7 @@ sudo cp -r /mnt/router/OS/linux/artix/wallpapers/* /usr/share/backgrounds/artix/
 # Добавление скрипта srvctl и detectinitsys:
 wget https://raw.githubusercontent.com/S0u1b0y/script/misc/detectinitsys
 wget https://raw.githubusercontent.com/S0u1b0y/script/misc/srvctl
-sudo mv -r ./{detectinitsys,srvctl} /usr/local/bin/
+sudo mv ./{detectinitsys,srvctl} /usr/local/bin/
 sudo chmod +x /usr/local/bin/{detectinitsys,srvctl}
 
 #------------------------------------------------------------------------------
