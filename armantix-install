@@ -606,15 +606,6 @@ IPADDR='192.168.0.10'; [[ $(lspci | grep VGA) == *VMware* ]] && IPADDR='192.168.
 sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts && echo -e "\n## Network Configuration ##\nip link set dev eth0 up\nip addr add $IPADDR/24 brd + dev eth0\nip route add default via 192.168.0.100\necho 'nameserver 192.168.0.100' > /etc/resolv.conf" >> /etc/rc.local
 # echo 'nameserver 192.168.0.100' > /etc/resolv.conf
 
-# Samba Shares (rc.local):
-echo -e "username=soulboy\npassword=c7iQPZ2vc\ndomain=WORKGROUP" > /root/smbuser
-chown root:root /root/smbuser && chmod 600 /root/smbuser
-MOUNTOPTS="-o rw,async,_netdev,nofail,iocharset=utf8,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,credentials=/root/smbuser"
-mkdir -m=777 /mnt/{router,server} 2> /dev/null
-echo -e "\n## Samba Shares ##" >> /etc/rc.local
-echo -e "mount -t cifs //192.168.0.100/files/share /mnt/router $MOUNTOPTS,vers=1.0
-mount -t cifs //192.168.0.1/share /mnt/server $MOUNTOPTS,vers=3.0" >> /etc/rc.local
-
 # Обязательная концовка файла для systemd:
 if [ -f /lib/systemd/systemd ]; then echo -e '\nexit 0' >> /etc/rc.local; fi
 
@@ -745,13 +736,6 @@ sed -i "s/127.0.1.1/$IPADDR/" /etc/hosts
 touch /etc/s6/adminsv/default/contents.d/dhcpcd && s6-rc -u change dhcpcd && s6-db-reload
 # Отключение dhcpcd:
 # s6-rc -d change dhcpcd && s6-db-reload && rm -rf /etc/s6/adminsv/default/contents.d/dhcpcd 
-
-# Samba Shares (fstab) (sudo mount -a):
-echo -e "username=soulboy\npassword=c7iQPZ2vc\ndomain=WORKGROUP" > /root/smbuser
-chown root:root /root/smbuser && chmod 600 /root/smbuser
-MOUNTOPTS="rw,async,_netdev,nofail,iocharset=utf8,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,credentials=/root/smbuser" && echo -e "\n## Samba Shares ##
-//192.168.0.1/share /mnt/server cifs $MOUNTOPTS,vers=3.0 0 0
-//192.168.0.100/files/share /mnt/router cifs $MOUNTOPTS,vers=1.0 0 0" >> /etc/fstab
 
 ###############################################################################
 ##################### Установка дополнений для VirtualBox #####################
