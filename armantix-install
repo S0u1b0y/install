@@ -9,13 +9,6 @@
 
 #------------------------------------------------------------------------------
 
-# Подключение Home Shares
-MOUNTOPTS='rw,async,_netdev,nofail,iocharset=utf8,gid=1000,uid=1000,file_mode=0777,dir_mode=0777,username=soulboy,password=c7iQPZ2vc' && mkdir -m=777 /tmp/{server,router}
-sudo mount //192.168.0.1/share /tmp/server -o $MOUNTOPTS,vers=3.0
-sudo mount //192.168.0.100/files/share /tmp/router -o $MOUNTOPTS,vers=1.0
-
-#------------------------------------------------------------------------------
-
 # Для VirtualBox чтобы, на некоторых дистрибутивах, работал общий буфер обмена:
 sudo pacman -Sy virtualbox-guest-utils # Если нужно подтвердить удаление nox-версии.
 sudo VBoxClient-all
